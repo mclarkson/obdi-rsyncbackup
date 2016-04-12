@@ -1,0 +1,114 @@
+<!--
+ Obdi - a REST interface and GUI for deploying software
+ Copyright (C) 2014  Mark Clarkson
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- tool_content -->
+
+<!-- A modal dialog box -->
+
+<script type="text/ng-template" id="helloModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Hello World! Runscript</h3>
+    </div>
+    <div class="modal-body">
+      Hello {{name}}
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="cancel()">Ok</button>
+    </div>
+</script>
+
+<style>.modal-body table tr td {padding: 4px;}</style>
+
+<div ng-controller="helloWorldRunscript">
+
+  <div class="row">
+    <div class="col-lg-12">
+      <h3 class="page-header">Hello World! Runscript
+
+        <button class="btn btn-sm btn-success pull-right" type="button"
+        ng-if="mainview && envchosen" ng-click="Restart()"
+        style="margin-top: -5px;">
+          <i class="fa fa-refresh"> </i> Restart</button>
+
+      </h3>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+
+      <div class="alert alert-danger alert-dismissable" ng-show="message">
+        <button type="button" class="close" data-dismiss="alert"
+          aria-hidden="true">&times;</button>
+        {{message}}
+      </div>
+      <div class="alert alert-success alert-dismissable" ng-show="okmessage">
+        <button type="button" class="close" data-dismiss="alert"
+          aria-hidden="true">&times;</button>
+        {{okmessage}}
+      </div>
+
+    </div>
+  </div>
+
+  This page demonstrates running a script on a worker. Choose an environment.
+
+  <div ng-if="mainview">
+
+  <div class="row" ng-if="!showkeybtnblockhidden">
+    <div class="col-sm-12" style="margin-top: 20px">
+      <div class="vbtn" style="margin-bottom: 8px;">
+        <div style="margin-left: 8px" class="btn-group"
+        uib-dropdown is-open="status.isopen">
+          <button type="button" class="btn btn-primary" uib-dropdown-toggle
+          ng-disabled="btnenvlistdisabled">
+            Choose Environment <span class="caret"></span>
+          </button>
+          <ul uib-dropdown-menu role="menu">
+            <li ng-repeat="choice in environments">
+            <a href ng-click="envChoice(choice, $event)">
+              {{choice.DcSysName}} {{choice.SysName}}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="vbtn">
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary" uib-dropdown-toggle
+          style="margin-left: 8px;" 
+          ng-click="RunHelloScript()" ng-disabled="btnsayhellodisabled">
+            Run Hello Script
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" ng-if="envchosen">
+    <div class="col-sm-12">
+      <h4 class="page-header">{{env.DcDispName}} - {{env.DispName}}</h4>
+      <p ng-if="!page_result">Press the Run Hello Script button when you're ready.</p>
+      <div ng-if="page_result">
+        <p>Showing output from &lsquo;helloworld-runscript.sh&rsquo;.</p>
+
+        <pre>{{scriptlines}}</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
