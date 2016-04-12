@@ -18,13 +18,13 @@
 // AngularJS Controller
 // ------------------------------------------------------------------------
 
-mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
+mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $timeout,baseUrl,$rootScope) {
 
   // Data
   $scope.environments = [];
   $scope.env = {};
-  $scope.items = "";
+  $scope.tasks = "";
   $scope.newitem = {};
   $scope.newitem.Text = "";
 
@@ -41,6 +41,7 @@ mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
   $scope.btnsayhellodisabled = true;
   $scope.btnsayhellopressed = false;
   $scope.btnenvlistdisabled = false;
+  $scope.showkeybtnblockhidden = false;
   $scope.page_result = false;
   $scope.envchosen = false;
   $scope.status = {};
@@ -84,6 +85,7 @@ mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
     clearMessages();
     $scope.btnsayhellodisabled = true;
     $scope.btnenvlistdisabled = false;
+    $scope.showkeybtnblockhidden = false;
     $scope.page_result = false;
     $scope.envchosen = false;
     $scope.spacing = 20;
@@ -150,23 +152,23 @@ mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
   // REST functions
 
   // ----------------------------------------------------------------------
-  $scope.ShowItems = function( ) {
+  $scope.ShowTasks = function( ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
     //$scope.page_result = false;
-    //$scope.items = "";
+    //$scope.tasks = "";
 
     $http({
       method: 'GET',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/helloworld-localdb/helloworld-localdb?env_id="
+           + "/rsyncbackup/tasks?env_id="
            + $scope.env.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
       try {
-        $scope.items = $.parseJSON(data.Text);
+        $scope.tasks = $.parseJSON(data.Text);
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
@@ -175,6 +177,7 @@ mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
 
       $scope.spacing = 0;
       $scope.page_result = true;
+      $scope.showkeybtnblockhidden = true;
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -203,15 +206,15 @@ mgrApp.controller("helloWorldLocaldb", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.AddItem = function( ) {
+  $scope.AddTaskRest = function( ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
     $http({
       method: 'POST',
-      data: {Id:0,Text:$scope.newitem.Text},
+      data: {Id:0,TaskDesc:$scope.newitem.Text,CapTag:$scope.newitem.CapTag},
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/helloworld-localdb/helloworld-localdb?env_id="
+           + "/rsyncbackup/tasks?env_id="
            + $scope.env.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
