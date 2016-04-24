@@ -27,20 +27,25 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id   int64
-	Text string
+	Id       int64
+	TaskDesc string
+	CapTag   string
 }
+
+// Name of the sqlite3 database file
+const DBFILE = "rsyncbackup.db"
 
 // ***************************************************************************
 // DATABASE FUNCS
 // ***************************************************************************
 
-// The 'items' table
-type Item struct {
-	Id   int64
-	Text string
-	Dc   string // Data centre name
-	Env  string // Environment name
+// The 'tasks' table
+type Task struct {
+	Id       int64
+	TaskDesc string
+	CapTag   string
+	Dc       string // Data centre name
+	Env      string // Environment name
 }
 
 // Create tables and indexes in InitDB
@@ -48,14 +53,14 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 
 	db := gormInst.db // shortcut
 
-	// Create the Item table
-	if err := db.AutoMigrate(Item{}).Error; err != nil {
-		txt := fmt.Sprintf("AutoMigrate Item table failed: %s", err)
+	// Create the Task table
+	if err := db.AutoMigrate(Task{}).Error; err != nil {
+		txt := fmt.Sprintf("AutoMigrate Task table failed: %s", err)
 		return ApiError{txt}
 	}
 
 	// Add any indexes
-	db.Model(Item{}).AddIndex("idx_hello_text", "text")
+	//db.Model(Task{}).AddIndex("idx_hello_text", "text")
 
 	return nil
 }
@@ -93,19 +98,19 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	// Setup/Open the local database
 
 	var gormdb *GormDB
-	if gormdb, err = NewDB(args, "hello.db"); err != nil {
-		txt := "NewDB open error for '" + config.DBPath() + "hello.db'. " +
+	if gormdb, err = NewDB(args, DBFILE); err != nil {
+		txt := "NewDB open error for '" + config.DBPath() + DBFILE + "'. " +
 			err.Error()
 		ReturnError(txt, response)
 		return nil
 	}
 
-	// Get all items for this dc and env
+	// Get all tasks for this dc and env
 
 	db := gormdb.DB() // for convenience
-	items := []Item{}
+	tasks := []Task{}
 	Lock()
-	if err = db.Find(&items, "dc = ? and env = ?", dc, env).Error; err != nil {
+	if err = db.Find(&tasks, "dc = ? and env = ?", dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
@@ -114,13 +119,14 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	// Create a map of the query result
 
-	u := make([]map[string]interface{}, len(items))
-	for i := range items {
+	u := make([]map[string]interface{}, len(tasks))
+	for i := range tasks {
 		u[i] = make(map[string]interface{})
-		u[i]["Id"] = items[i].Id
-		u[i]["Text"] = items[i].Text
-		u[i]["Dc"] = items[i].Dc
-		u[i]["Env"] = items[i].Env
+		u[i]["Id"] = tasks[i].Id
+		u[i]["TaskDesc"] = tasks[i].TaskDesc
+		u[i]["CapTag"] = tasks[i].CapTag
+		u[i]["Dc"] = tasks[i].Dc
+		u[i]["Env"] = tasks[i].Env
 	}
 
 	// JSONify the query result
@@ -182,8 +188,8 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// Setup/Open the local database
 
 	var gormdb *GormDB
-	if gormdb, err = NewDB(args, "hello.db"); err != nil {
-		txt := "NewDB open error for '" + config.DBPath() + "hello.db'. " +
+	if gormdb, err = NewDB(args, DBFILE); err != nil {
+		txt := "NewDB open error for '" + config.DBPath() + DBFILE + "'. " +
 			err.Error()
 		ReturnError(txt, response)
 		return nil
@@ -202,28 +208,29 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// The following Item will be written to the db
+	// The following Task will be written to the db
 
-	item := Item{
-		Id:   0,
-		Text: postdata.Text,
-		Dc:   dc,
-		Env:  env,
+	task := Task{
+		Id:       0,
+		TaskDesc: postdata.TaskDesc,
+		CapTag:   postdata.CapTag,
+		Dc:       dc,
+		Env:      env,
 	}
 
-	// Add the Item entry
+	// Add the Task entry
 
 	Lock()
-	if err := db.Save(&item).Error; err != nil {
+	if err := db.Save(&task).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	// JSONify the item
+	// JSONify the task
 
-	TempJsonData, err := json.Marshal(item)
+	TempJsonData, err := json.Marshal(task)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -280,8 +287,8 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 	// Setup/Open the local database
 
 	var gormdb *GormDB
-	if gormdb, err = NewDB(args, "hello.db"); err != nil {
-		txt := "NewDB open error for '" + config.DBPath() + "hello.db'. " +
+	if gormdb, err = NewDB(args, DBFILE); err != nil {
+		txt := "NewDB open error for '" + config.DBPath() + DBFILE + "'. " +
 			err.Error()
 		ReturnError(txt, response)
 		return nil
@@ -300,11 +307,11 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// Search the items table for the item id
+	// Search the tasks table for the task id
 
-	items := []Item{}
+	tasks := []Task{}
 	Lock()
-	if err := db.Find(&items, "id = ? and dc = ? and env = ?", postdata.Id,
+	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", postdata.Id,
 		dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
@@ -312,24 +319,25 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 	}
 	Unlock()
 
-	if len(items) == 0 {
+	if len(tasks) == 0 {
 		id := strconv.FormatInt(postdata.Id, 10)
-		ReturnError("Item '"+id+"' not found. Can't update.", response)
+		ReturnError("Task '"+id+"' not found. Can't update.", response)
 		return nil
 	}
 
-	// The following Item will be written to the db
-	item := Item{
-		Id:   postdata.Id,
-		Text: postdata.Text,
-		Dc:   dc,
-		Env:  env,
+	// The following Task will be written to the db
+	task := Task{
+		Id:       postdata.Id,
+		TaskDesc: postdata.TaskDesc,
+		CapTag:   postdata.CapTag,
+		Dc:       dc,
+		Env:      env,
 	}
 
-	// Update the Item entry
+	// Update the Task entry
 
 	Lock()
-	if err := db.Save(&item).Error; err != nil {
+	if err := db.Save(&task).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -338,7 +346,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(item)
+	TempJsonData, err := json.Marshal(task)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -383,8 +391,8 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 	// Setup/Open the local database
 
 	var gormdb *GormDB
-	if gormdb, err = NewDB(args, "hello.db"); err != nil {
-		txt := "NewDB open error for '" + config.DBPath() + "hello.db'. " +
+	if gormdb, err = NewDB(args, DBFILE); err != nil {
+		txt := "NewDB open error for '" + config.DBPath() + DBFILE + "'. " +
 			err.Error()
 		ReturnError(txt, response)
 		return nil
@@ -395,11 +403,11 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 	id_str := args.PathParams["id"]
 	id_int, _ := strconv.ParseInt(args.PathParams["id"], 10, 64)
 
-	// Search the items table for the item id
+	// Search the tasks table for the task id
 
-	items := []Item{}
+	tasks := []Task{}
 	Lock()
-	if err := db.Find(&items, "id = ? and dc = ? and env = ?", id_str,
+	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", id_str,
 		dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
@@ -407,23 +415,24 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 	}
 	Unlock()
 
-	if len(items) == 0 {
-		ReturnError("Item '"+id_str+"' not found. Can't delete.", response)
+	if len(tasks) == 0 {
+		ReturnError("Task '"+id_str+"' not found. Can't delete.", response)
 		return nil
 	}
 
-	// Set up an Item with the id to be deleted
-	item := Item{
-		Id:   id_int,
-		Text: "",
-		Dc:   dc,
-		Env:  env,
+	// Set up an Task with the id to be deleted
+	task := Task{
+		Id:       id_int,
+		TaskDesc: "",
+		CapTag:   "",
+		Dc:       dc,
+		Env:      env,
 	}
 
-	// Delete the Item entry from the DB
+	// Delete the Task entry from the DB
 
 	Lock()
-	if err := db.Delete(&item).Error; err != nil {
+	if err := db.Delete(&task).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -432,7 +441,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(item)
+	TempJsonData, err := json.Marshal(task)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil

@@ -44,6 +44,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.showkeybtnblockhidden = false;
   $scope.page_result = false;
   $scope.envchosen = false;
+  $scope.backuptasks = true;
+  $scope.settings = false;
   $scope.status = {};
 
   // Fixes
@@ -103,6 +105,23 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.btnsayhellodisabled = false;
     $scope.status.isopen = !$scope.status.isopen; //close the dropdown
   };
+
+  // ----------------------------------------------------------------------
+  $scope.ConfigureIncludes = function(index) {
+  // ----------------------------------------------------------------------
+
+    $scope.curtask = $scope.tasks[index];
+
+    $scope.backuptasks = false;
+    $scope.settings = true;
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.Back = function() {
+  // ----------------------------------------------------------------------
+    $scope.backuptasks = true;
+    $scope.settings = false;
+  }
 
   // ----------------------------------------------------------------------
   $scope.FillEnvironmentsTable = function() {
@@ -206,24 +225,65 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.AddTaskRest = function( ) {
+  $scope.DeleteItem = function( TaskDesc, Id ) {
+  // ----------------------------------------------------------------------
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'DeleteTask.html',
+      controller: $scope.ModalDeleteInstanceCtrl,
+      size: 'sm',
+      resolve: {
+        // the loginname variable is passed to the ModalInstanceCtrl
+        TaskDesc: function () {
+          return TaskDesc;
+        },
+        Id: function () {
+          return Id;
+        }
+      }
+    });
+
+    modalInstance.result.then(function () {
+      $scope.DeleteItemRest(Id);
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  }
+
+  // --------------------------------------------------------------------
+  $scope.ModalDeleteInstanceCtrl = function ($scope, $uibModalInstance,
+      TaskDesc, Id) {
+  // --------------------------------------------------------------------
+
+    // So the template can access 'loginname' in this new scope
+    $scope.TaskDesc = TaskDesc;
+    $scope.Id = Id;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.DeleteItemRest = function( id ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
     $http({
-      method: 'POST',
-      data: {Id:0,TaskDesc:$scope.newitem.Text,CapTag:$scope.newitem.CapTag},
+      method: 'DELETE',
+      data: {Id:0,Text:$scope.newitem.Text},
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/rsyncbackup/tasks?env_id="
-           + $scope.env.Id
+           + "/rsyncbackup/tasks/" + id
+           + "?env_id=" + $scope.env.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       // Clear the text entry box
-       $scope.newitem.Text = "";
-
        // Refresh the table
-       $scope.ShowItems();
+       $scope.ShowTasks();
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -252,28 +312,20 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.DeleteItem = function( text, id ) {
+  $scope.AddTaskRest = function( newitem ) {
   // ----------------------------------------------------------------------
-
-    $scope.DeleteItemRest(id);
-  }
-
-  // ----------------------------------------------------------------------
-  $scope.DeleteItemRest = function( id ) {
-  // ----------------------------------------------------------------------
-  // Runs the helloworld-runscript.sh script on the worker.
 
     $http({
-      method: 'DELETE',
-      data: {Id:0,Text:$scope.newitem.Text},
+      method: 'POST',
+      data: {Id:0,TaskDesc:newitem.TaskDesc,CapTag:newitem.CapTag},
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/helloworld-localdb/helloworld-localdb/" + id
-           + "?env_id=" + $scope.env.Id
+           + "/rsyncbackup/tasks?env_id="
+           + $scope.env.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
        // Refresh the table
-       $scope.ShowItems();
+       $scope.ShowTasks();
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -299,6 +351,61 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       }
     });
+  };
+
+  // --------------------------------------------------------------------
+  $scope.AddTask = function () {
+  // --------------------------------------------------------------------
+
+    $scope.TaskDesc = "";
+    $scope.CapTag = "RSYNCBACKUP_WORKER_1";
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'NewBackupTask.html',
+      controller: $scope.Add_TaskModalCtrl,
+      size: 'md',
+      resolve: {
+	// these variables are passed to the ModalInstanceCtrl
+	TaskDesc: function () {
+	  return $scope.TaskDesc;
+	},
+	CapTag: function () {
+	  return $scope.CapTag;
+	}
+      }
+    });
+
+    modalInstance.result.then(function (result) {
+
+      var newitem = {};
+      newitem.TaskDesc = result.TaskDesc;
+      newitem.CapTag = result.CapTag;
+
+      return $scope.AddTaskRest(newitem);
+    });
+
+  };
+
+  // --------------------------------------------------------------------
+  $scope.Add_TaskModalCtrl = function ($scope, $uibModalInstance,
+                                TaskDesc, CapTag) {
+  // --------------------------------------------------------------------
+
+    // So the template can access 'loginname' in this new scope
+    $scope.TaskDesc = TaskDesc;
+    $scope.CapTag = CapTag;
+
+    $scope.ok = function () {
+      result = {};
+      result.TaskDesc = $scope.TaskDesc;
+      result.CapTag = $scope.CapTag;
+
+      $uibModalInstance.close(result);
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
   };
 
 });
