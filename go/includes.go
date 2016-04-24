@@ -28,8 +28,9 @@ import (
 // The format of the json sent by the client in a POST request
 type PostedData struct {
 	Id       int64
-	TaskDesc string
-	CapTag   string
+	Host   string
+        Base   string
+        ExcludeId int64
 }
 
 // Name of the sqlite3 database file
@@ -39,13 +40,20 @@ const DBFILE = "rsyncbackup.db"
 // DATABASE FUNCS
 // ***************************************************************************
 
-// The 'tasks' table
-type Task struct {
+// The 'includes' table
+type Include struct {
 	Id       int64
-	TaskDesc string
-	CapTag   string
-	Dc       string // Data centre name
-	Env      string // Environment name
+	TaskId   int64
+	Host     string
+	Base     string // Data centre name
+	ExcludeId int64 // Environment name
+}
+
+// The 'excludes' table
+type Exclude struct {
+	Id       int64
+	IncludeId   int64
+	Path     string
 }
 
 // Create tables and indexes in InitDB
@@ -53,14 +61,20 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 
 	db := gormInst.db // shortcut
 
-	// Create the Task table
-	if err := db.AutoMigrate(Task{}).Error; err != nil {
-		txt := fmt.Sprintf("AutoMigrate Task table failed: %s", err)
+	// Create the Include table
+	if err := db.AutoMigrate(Include{}).Error; err != nil {
+		txt := fmt.Sprintf("AutoMigrate Include table failed: %s", err)
+		return ApiError{txt}
+	}
+
+	// Create the Exclude table
+	if err := db.AutoMigrate(Exclude{}).Error; err != nil {
+		txt := fmt.Sprintf("AutoMigrate Exclude table failed: %s", err)
 		return ApiError{txt}
 	}
 
 	// Add any indexes
-	//db.Model(Task{}).AddIndex("idx_hello_text", "text")
+	db.Model(Exclude{}).AddIndex("idx_include_id", "include_id")
 
 	return nil
 }
@@ -82,18 +96,21 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	env_id_str := args.QueryString["env_id"][0]
 
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'env_id' must be set", response)
+		return nil
+	}
+
+	task_id_str := args.QueryString["task_id"][0]
+
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -105,12 +122,12 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// Get all tasks for this dc and env
+	// Get all includes for this task
 
 	db := gormdb.DB() // for convenience
-	tasks := []Task{}
+	includes := []Include{}
 	Lock()
-	if err = db.Find(&tasks, "dc = ? and env = ?", dc, env).Error; err != nil {
+	if err = db.Find(&includes, "task_id = ?", task_id_str).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
@@ -119,14 +136,14 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	// Create a map of the query result
 
-	u := make([]map[string]interface{}, len(tasks))
-	for i := range tasks {
+	u := make([]map[string]interface{}, len(includes))
+	for i := range includes {
 		u[i] = make(map[string]interface{})
-		u[i]["Id"] = tasks[i].Id
-		u[i]["TaskDesc"] = tasks[i].TaskDesc
-		u[i]["CapTag"] = tasks[i].CapTag
-		u[i]["Dc"] = tasks[i].Dc
-		u[i]["Env"] = tasks[i].Env
+		u[i]["Id"] = includes[i].Id
+		u[i]["TaskId"] = includes[i].TaskId
+		u[i]["Host"] = includes[i].Host
+		u[i]["Base"] = includes[i].Base
+		u[i]["ExcludeId"] = includes[i].ExcludeId
 	}
 
 	// JSONify the query result
@@ -172,18 +189,21 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	env_id_str := args.QueryString["env_id"][0]
 
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'env_id' must be set", response)
+		return nil
+	}
+
+        task_id,_ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
+
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -208,29 +228,28 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// The following Task will be written to the db
+	// The following Include will be written to the db
 
-	task := Task{
+	include := Include{
 		Id:       0,
-		TaskDesc: postdata.TaskDesc,
-		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+		TaskId: task_id,
+		Host:   postdata.Host,
+		Base:   postdata.Base,
 	}
 
-	// Add the Task entry
+	// Add the Include entry
 
 	Lock()
-	if err := db.Save(&task).Error; err != nil {
+	if err := db.Save(&include).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	// JSONify the task
+	// JSONify the include
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(include)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -271,18 +290,21 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	env_id_str := args.QueryString["env_id"][0]
 
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'env_id' must be set", response)
+		return nil
+	}
+
+        task_id,_ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
+
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -307,37 +329,35 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// Search the tasks table for the task id
+	// Search the includes table for the include id
 
-	tasks := []Task{}
+	includes := []Include{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", postdata.Id,
-		dc, env).Error; err != nil {
+	if err := db.Find(&includes, "id = ?", postdata.Id).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	if len(tasks) == 0 {
+	if len(includes) == 0 {
 		id := strconv.FormatInt(postdata.Id, 10)
-		ReturnError("Task '"+id+"' not found. Can't update.", response)
+		ReturnError("Include '"+id+"' not found. Can't update.", response)
 		return nil
 	}
 
-	// The following Task will be written to the db
-	task := Task{
+	// The following Include will be written to the db
+	include := Include{
 		Id:       postdata.Id,
-		TaskDesc: postdata.TaskDesc,
-		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+		TaskId: task_id,
+		Host:   postdata.Host,
+		Base:   postdata.Base,
 	}
 
-	// Update the Task entry
+	// Update the Include entry
 
 	Lock()
-	if err := db.Save(&task).Error; err != nil {
+	if err := db.Save(&include).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -346,7 +366,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(include)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -377,16 +397,14 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
+	// We got this far so access is allowed.
 
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	id_int, _ := strconv.ParseInt(args.PathParams["id"], 10, 64)
 
 	// Setup/Open the local database
 
@@ -400,39 +418,35 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	db := gormdb.DB() // for convenience
 
-	id_str := args.PathParams["id"]
-	id_int, _ := strconv.ParseInt(args.PathParams["id"], 10, 64)
+	// Search the includes table for the include id
 
-	// Search the tasks table for the task id
-
-	tasks := []Task{}
+	includes := []Include{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", id_str,
-		dc, env).Error; err != nil {
+	if err := db.Find(&includes, "id = ?", id_int).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	if len(tasks) == 0 {
-		ReturnError("Task '"+id_str+"' not found. Can't delete.", response)
+	if len(includes) == 0 {
+		id_str := args.PathParams["id"]
+		ReturnError("Include '"+id_str+"' not found. Can't delete.", response)
 		return nil
 	}
 
-	// Set up an Task with the id to be deleted
-	task := Task{
+	// Set up a Include with the id to be deleted
+	include := Include{
 		Id:       id_int,
-		TaskDesc: "",
-		CapTag:   "",
-		Dc:       dc,
-		Env:      env,
+		TaskId: 0,
+		Host:   "",
+		Base:   "",
 	}
 
-	// Delete the Task entry from the DB
+	// Delete the Include entry from the DB
 
 	Lock()
-	if err := db.Delete(&task).Error; err != nil {
+	if err := db.Delete(&include).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -441,7 +455,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(include)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil

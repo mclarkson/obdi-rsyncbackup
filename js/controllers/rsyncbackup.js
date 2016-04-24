@@ -114,6 +114,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     $scope.backuptasks = false;
     $scope.settings = true;
+
+    FillIncludesTables( $scope.curtask.Id )
   }
 
   // ----------------------------------------------------------------------
@@ -122,6 +124,49 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.backuptasks = true;
     $scope.settings = false;
   }
+
+  // ----------------------------------------------------------------------
+  FillIncludesTables = function( taskid ) {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/includes?env_id=" + $scope.env.Id
+           + "&task_id=" + taskid
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      $scope.includes = data;
+      if( data.length == 0 ) {
+        $scope.serverlist_empty = true;
+        $scope.btnenvlistdisabled = true;
+      }
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.mainmessage = "Server said: " + data['Error'];
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
 
   // ----------------------------------------------------------------------
   $scope.FillEnvironmentsTable = function() {

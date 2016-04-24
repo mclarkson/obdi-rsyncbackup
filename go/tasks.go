@@ -44,8 +44,8 @@ type Task struct {
 	Id       int64
 	TaskDesc string
 	CapTag   string
-	Dc       string // Data centre name
-	Env      string // Environment name
+	DcId     int64 // Data centre name
+	EnvId    int64 // Environment name
 }
 
 // Create tables and indexes in InitDB
@@ -90,10 +90,10 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
+	// We got this far so access is allowed. Get the dc and env
 
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	dc := foundenv.DcId
+	env := foundenv.Id
 
 	// Setup/Open the local database
 
@@ -110,7 +110,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	db := gormdb.DB() // for convenience
 	tasks := []Task{}
 	Lock()
-	if err = db.Find(&tasks, "dc = ? and env = ?", dc, env).Error; err != nil {
+	if err = db.Find(&tasks, "dc_id = ? and env_id = ?", dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
@@ -125,8 +125,8 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["Id"] = tasks[i].Id
 		u[i]["TaskDesc"] = tasks[i].TaskDesc
 		u[i]["CapTag"] = tasks[i].CapTag
-		u[i]["Dc"] = tasks[i].Dc
-		u[i]["Env"] = tasks[i].Env
+		u[i]["DcId"] = tasks[i].DcId
+		u[i]["EnvId"] = tasks[i].EnvId
 	}
 
 	// JSONify the query result
@@ -182,8 +182,8 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	// We got this far so access is allowed. Get the dc and env text values
 
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	dc := foundenv.DcId
+	env := foundenv.Id
 
 	// Setup/Open the local database
 
@@ -214,8 +214,8 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		Id:       0,
 		TaskDesc: postdata.TaskDesc,
 		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+		DcId:       dc,
+		EnvId:      env,
 	}
 
 	// Add the Task entry
@@ -281,8 +281,8 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// We got this far so access is allowed. Get the dc and env text values
 
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	dc := foundenv.DcId
+	env := foundenv.Id
 
 	// Setup/Open the local database
 
@@ -311,7 +311,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	tasks := []Task{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", postdata.Id,
+	if err := db.Find(&tasks, "id = ? and dc_id = ? and env_id = ?", postdata.Id,
 		dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
@@ -330,8 +330,8 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		Id:       postdata.Id,
 		TaskDesc: postdata.TaskDesc,
 		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+		DcId:       dc,
+		EnvId:      env,
 	}
 
 	// Update the Task entry
@@ -385,8 +385,8 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// We got this far so access is allowed. Get the dc and env text values
 
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	dc := foundenv.DcId
+	env := foundenv.Id
 
 	// Setup/Open the local database
 
@@ -407,7 +407,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	tasks := []Task{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", id_str,
+	if err := db.Find(&tasks, "id = ? and dc_id = ? and env_id = ?", id_str,
 		dc, env).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
@@ -425,8 +425,8 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		Id:       id_int,
 		TaskDesc: "",
 		CapTag:   "",
-		Dc:       dc,
-		Env:      env,
+		DcId:       dc,
+		EnvId:      env,
 	}
 
 	// Delete the Task entry from the DB
