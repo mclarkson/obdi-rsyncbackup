@@ -76,5 +76,5 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes/1?env_id=1"
 ```
 
-See [obdi-nettools-repository](https://github.com/mclarkson/obdi-net-repository)
+See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)
 for more information about Net plugins.
