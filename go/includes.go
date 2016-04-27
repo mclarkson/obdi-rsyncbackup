@@ -30,7 +30,6 @@ type PostedData struct {
 	Id       int64
 	Host   string
         Base   string
-        ExcludeId int64
 }
 
 // Name of the sqlite3 database file
@@ -46,7 +45,6 @@ type Include struct {
 	TaskId   int64
 	Host     string
 	Base     string // Data centre name
-	ExcludeId int64 // Environment name
 }
 
 // The 'excludes' table
@@ -143,7 +141,6 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["TaskId"] = includes[i].TaskId
 		u[i]["Host"] = includes[i].Host
 		u[i]["Base"] = includes[i].Base
-		u[i]["ExcludeId"] = includes[i].ExcludeId
 	}
 
 	// JSONify the query result

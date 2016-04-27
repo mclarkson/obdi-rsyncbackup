@@ -33,13 +33,63 @@
     </div>
 </script>
 
-<script type="text/ng-template" id="NewBackupTask.html">
+<script type="text/ng-template" id="DeleteInclude.html">
     <div class="modal-header">
-        <h3 class="modal-title">New Backup Task</h3>
+        <h3 class="modal-title">Delete Include</h3>
+    </div>
+    <div class="modal-body">
+      Are you sure you want to delete include entry,
+      &ldquo;{{Host}} - {{Base}}&rdquo;
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">Yes</button>
+        <button class="btn btn-success" ng-click="cancel()">No</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="NewInclude.html">
+    <div class="modal-header">
+        <h3 class="modal-title">{{Title}}</h3>
     </div>
     <div class="modal-body">
 
-      <p>Enter the details for the new backup task.</p>
+      <p>Enter the details for the host include.</p>
+
+      <!-- Host -->
+
+      <div class="form-group">
+	<label for="host" class="control-label">Host Name</label>
+	<div>
+	  <input class="form-control" id="host" ng-model="Host"
+	  placeholder="Enter the host name." type="text" ng-trim='false' required>
+	</div>
+      </div>
+
+      <!-- Base -->
+
+      <div class="form-group">
+	<label for="base" class="control-label">Base Path</label>
+	<div>
+	  <input class="form-control" id="base" ng-model="Base"
+	  placeholder="Enter the base path or rsync share name." type="text"
+          ng-trim='false' required>
+	</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-click="ok()">Apply and Close</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="NewBackupTask.html">
+    <div class="modal-header">
+        <h3 class="modal-title">{{Title}}</h3>
+    </div>
+    <div class="modal-body">
+
+      <p>Enter the details for the backup task.</p>
 
       <!-- TaskDesc -->
 
@@ -181,7 +231,7 @@
               <td style="white-space: nowrap">
 		<a href="#" ng-click="DeleteItem(item.TaskDesc,item.Id)">
 		  <i class="fa fa-trash-o red" title="Delete Item"></i></a>
-		<a href="#" ng-click="EditTask(item.Id)">
+		<a href="#" ng-click="EditTask(item.TaskDesc,item.CapTag,item.Id)">
 		  <i class="fa fa-edit" title="Edit Item"></i></a>
 		<a href="#" ng-click="ConfigureIncludes($index)">
 		  <i class="fa fa-cog" title="Settings and Includes"></i></a>
@@ -203,28 +253,40 @@
 	ng-click="AddInclude()">
 	<i class="fa fa-plus-circle"> </i> Add Host</button>
 
+      <button class="btn btn-sm btn-success pull-right" type="button"
+	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
+	<i class="fa fa-play"> </i> &nbsp;Run Backup Now</button>
+
       <div class="table-responsive" style="margin-top: 8px;">
 	<table class="table table-striped table-bordered"
 	  style="margin-bottom:4px;">
 	  <thead>
 	  <tr>
+	    <th style="text-align: center;">
+	      <input type="checkbox" ng-click="SelectAllNone()"
+	      ng-model="checkbox_allnone">
+	    </th>
 	    <th>Host</th>
 	    <th>Base Directory</th>
 	    <th>Excludes</th>
+	    <th>Action</th>
 	  </tr>
 	  </thead>
 	  <tbody>
 	    <tr ng-repeat="item in includes | filter:mapfilter">
-	    <td>{{item.Id}}</td>
-	    <td style="width: 100%">{{item.TaskDesc}}</td>
-	    <td>{{item.CapTag}}</td>
+	    <td style="text-align: center;">
+	      <input type="checkbox"
+	      ng-model="item.Selected"
+	      ng-change="Selected($index)">
+	    </td>
+	    <td>{{item.Host}}</td>
+	    <td style="width: 100%">{{item.Base}}</td>
+	    <td>TODO</td>
 	    <td style="white-space: nowrap">
-	      <a href="#" ng-click="DeleteItem(item.TaskDesc,item.Id)">
+	      <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">
 		<i class="fa fa-trash-o red" title="Delete Item"></i></a>
-	      <a href="#" ng-click="EditTask(item.Id)">
+	      <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
 		<i class="fa fa-edit" title="Edit Item"></i></a>
-	      <a href="#" ng-click="ConfigureIncludes($index)">
-		<i class="fa fa-cog" title="Settings and Includes"></i></a>
 	    </td>
 	  </tr>
 	</table>
