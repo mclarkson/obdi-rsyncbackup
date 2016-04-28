@@ -47,13 +47,6 @@ type Include struct {
 	Base     string // Data centre name
 }
 
-// The 'excludes' table
-type Exclude struct {
-	Id       int64
-	IncludeId   int64
-	Path     string
-}
-
 // Create tables and indexes in InitDB
 func (gormInst *GormDB) InitDB(dbname string) error {
 
@@ -65,14 +58,8 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 		return ApiError{txt}
 	}
 
-	// Create the Exclude table
-	if err := db.AutoMigrate(Exclude{}).Error; err != nil {
-		txt := fmt.Sprintf("AutoMigrate Exclude table failed: %s", err)
-		return ApiError{txt}
-	}
-
 	// Add any indexes
-	db.Model(Exclude{}).AddIndex("idx_include_id", "include_id")
+	db.Model(Include{}).AddIndex("idx_task_id", "task_id")
 
 	return nil
 }
@@ -95,7 +82,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	env_id_str := args.QueryString["env_id"][0]
 
 	if len(args.QueryString["task_id"]) == 0 {
-		ReturnError("'env_id' must be set", response)
+		ReturnError("'task_id' must be set", response)
 		return nil
 	}
 
@@ -187,7 +174,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	env_id_str := args.QueryString["env_id"][0]
 
 	if len(args.QueryString["task_id"]) == 0 {
-		ReturnError("'env_id' must be set", response)
+		ReturnError("'task_id' must be set", response)
 		return nil
 	}
 
@@ -288,7 +275,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 	env_id_str := args.QueryString["env_id"][0]
 
 	if len(args.QueryString["task_id"]) == 0 {
-		ReturnError("'env_id' must be set", response)
+		ReturnError("'task_id' must be set", response)
 		return nil
 	}
 

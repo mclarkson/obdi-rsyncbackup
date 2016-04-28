@@ -76,5 +76,35 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes/1?env_id=1"
 ```
 
+Excludes:
+
+```
+# Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{"Path":"/var/log/**"}' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&include_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&include_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"Host":"host2.local"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&include_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes/1?env_id=1"
+```
+
 See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)
 for more information about Net plugins.
