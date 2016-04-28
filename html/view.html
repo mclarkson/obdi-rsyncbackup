@@ -97,6 +97,29 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="NewExclude.html">
+    <div class="modal-header">
+        <h3 class="modal-title">New Exclude</h3>
+    </div>
+    <div class="modal-body">
+
+      <!-- Exclude -->
+
+      <div class="form-group">
+	<label for="path" class="control-label">Path</label>
+	<div>
+	  <input class="form-control" id="path" ng-model="Path"
+	  placeholder="Enter the path to exclude." type="text" ng-trim='false' required>
+	</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-click="ok()">Apply and Close</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="NewBackupTask.html">
     <div class="modal-header">
         <h3 class="modal-title">{{Title}}</h3>
@@ -303,12 +326,13 @@ td p {
 	    <td>{{item.Host}}</td>
 	    <td>{{item.Base}}</td>
 	    <td style="width: 100%">
-	      <div ng-repeat="item in item.Excludes">
-		<p><a href="" ng-click="DeleteExclude(item.Path,item.Id)">
+	      <div ng-repeat="exclitem in item.Excludes">
+		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id)">
                   <i title="Delete Item" class="fa fa-minus red"></i></a>
-		  {{item.Path}}</p>
+		  {{exclitem.Path}}</p>
 	      </div>
-	      <p><a title="Add Exclude" href=""><i class="fa fa-plus green"></i> New</a></p>
+	      <p><a title="Add Exclude" href="" ng-click="NewExclude(item.Id,$index)">
+                 <i class="fa fa-plus green"></i> New</a></p>
 	    </td>
 	    <td style="white-space: nowrap">
 	      <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">

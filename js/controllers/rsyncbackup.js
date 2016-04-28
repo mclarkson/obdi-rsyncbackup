@@ -938,6 +938,157 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // Excludes
 
   // ----------------------------------------------------------------------
+  $scope.GetExclude = function(i) {
+  // ----------------------------------------------------------------------
+  // Just update one
+
+    var excludes = {};
+
+    $http({
+      method: 'GET',
+      params: {
+	       include_id:$scope.includes[i].Id,
+	       env_id:$scope.env.Id,
+	       time:new Date().getTime().toString()
+	      },
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+	   + "/rsyncbackup/excludes"
+    }).success( function(data, status, headers, config) {
+
+      try {
+	excludes = $.parseJSON(data.Text);
+      } catch (e) {
+	clearMessages();
+	$scope.message = "Error: " + e;
+	$scope.message_jobid = id;
+      }
+
+      if( excludes.length != 0 ) {
+	for( var j=0; j<$scope.includes.length; j++ ){
+	  if( $scope.includes[j].Id == excludes[0].IncludeId ) {
+	    $scope.includes[j].Excludes = excludes;
+	    break;
+	  }
+	}
+      }
+
+    }).error( function(data,status) {
+      if (status>=500) {
+	$scope.login.errtext = "Server error.";
+	$scope.login.error = true;
+	$scope.login.pageurl = "login.html";
+      } else if (status==401) {
+	$scope.login.errtext = "Session expired.";
+	$scope.login.error = true;
+	$scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+	clearMessages();
+	$scope.mainmessage = "Server said: " + data['Error'];
+      } else if (status==0) {
+	// This is a guess really
+	$scope.login.errtext = "Could not connect to server.";
+	$scope.login.error = true;
+	$scope.login.pageurl = "login.html";
+      } else {
+	$scope.login.errtext = "Logged out due to an unknown error.";
+	$scope.login.error = true;
+	$scope.login.pageurl = "login.html";
+      }
+    });
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.NewExcludeRest = function( newitem, index ) {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'POST',
+      data: {Id:0,Path:newitem.Path},
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/excludes?env_id=" + $scope.env.Id
+           + "&include_id=" + newitem.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+       // Refresh the row
+       $scope.GetExclude( index );
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.NewExclude = function( Id, index ) {
+  // ----------------------------------------------------------------------
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'NewExclude.html',
+      controller: $scope.ModalNewExclude,
+      size: 'sm',
+      resolve: {
+        // the loginname variable is passed to the ModalInstanceCtrl
+        Id: function () {
+          return Id;
+        }
+      }
+    });
+
+    modalInstance.result.then(function (result) {
+
+      var newitem = {};
+      newitem.Path = result.Path;
+      newitem.Id = Id;
+
+      $scope.NewExcludeRest(newitem,index);
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  };
+
+  // --------------------------------------------------------------------
+  $scope.ModalNewExclude = function ($scope, $uibModalInstance, Id) {
+  // --------------------------------------------------------------------
+
+    // So the template can access 'loginname' in this new scope
+    $scope.Path = "";
+    $scope.Id = Id;
+
+    $scope.ok = function () {
+      result = {};
+      result.Path = $scope.Path;
+      result.Id = Id;
+
+      $uibModalInstance.close(result);
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+  };
+
+  // ----------------------------------------------------------------------
   $scope.DeleteExclude = function( Path, Id ) {
   // ----------------------------------------------------------------------
 
@@ -957,7 +1108,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     });
 
     modalInstance.result.then(function () {
-      $scope.DeleteExcludeRest(Id);
+      $scope.DeleteExcludeRest(Id, index);
     }, function () {
       $log.info('Modal dismissed at: ' + new Date());
     });
@@ -976,8 +1127,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       // Refresh the table
-       $scope.FillIncludesArray( $scope.curtask.Id );
+       // Refresh the row FIXME TODO TODO
+       //var desc = $.grep($scope.includes,
+       //  function(e){ return (e.Id==name && !e.StateFileName); });
+       //$scope.GetExclude( index );
 
     }).error( function(data,status) {
       if (status>=500) {
