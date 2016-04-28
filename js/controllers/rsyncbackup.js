@@ -163,13 +163,13 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
       $http({
 	method: 'GET',
-        params: {include_id:$scope.includes[i].Id,
+        params: {
+                 include_id:$scope.includes[i].Id,
                  env_id:$scope.env.Id,
-                 time:new Date().getTime().toString()},
+                 time:new Date().getTime().toString()
+                },
 	url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-	     + "/rsyncbackup/excludes" //?env_id=" + $scope.env.Id
-	     //+ "&include_id=" + $scope.includes[i].Id
-	     //+ '&time='+new Date().getTime().toString()
+	     + "/rsyncbackup/excludes"
       }).success( function(data, status, headers, config) {
 
 	try {
@@ -181,16 +181,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 	}
 
 	if( excludes.length != 0 ) {
-          //alert(JSON.stringify(excludes));
-	  //var item = $.grep($scope.includes,
-	  //  function(e){ return (e.Id==excludes[0].IncludeId); });
           for( var j=0; j<$scope.includes.length; j++ ){
             if( $scope.includes[j].Id == excludes[0].IncludeId ) {
 	      $scope.includes[j].Excludes = excludes;
               break;
             }
           }
-          //alert(JSON.stringify(item));
 	}
 
       }).error( function(data,status) {
@@ -932,6 +928,94 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       result.Base = $scope.Base;
 
       $uibModalInstance.close(result);
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+  };
+
+  // Excludes
+
+  // ----------------------------------------------------------------------
+  $scope.DeleteExclude = function( Path, Id ) {
+  // ----------------------------------------------------------------------
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'DeleteExclude.html',
+      controller: $scope.ModalDeleteExclude,
+      size: 'sm',
+      resolve: {
+        // the loginname variable is passed to the ModalInstanceCtrl
+        Path: function () {
+          return Path;
+        },
+        Id: function () {
+          return Id;
+        }
+      }
+    });
+
+    modalInstance.result.then(function () {
+      $scope.DeleteExcludeRest(Id);
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.DeleteExcludeRest = function( id ) {
+  // ----------------------------------------------------------------------
+  // Runs the helloworld-runscript.sh script on the worker.
+
+    $http({
+      method: 'DELETE',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/excludes/" + id
+           + "?env_id=" + $scope.env.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+       // Refresh the table
+       $scope.FillIncludesArray( $scope.curtask.Id );
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // --------------------------------------------------------------------
+  $scope.ModalDeleteExclude = function ($scope, $uibModalInstance,
+      Path, Id) {
+  // --------------------------------------------------------------------
+
+    // So the template can access 'loginname' in this new scope
+    $scope.Path = Path;
+    $scope.Id = Id;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
     };
 
     $scope.cancel = function () {

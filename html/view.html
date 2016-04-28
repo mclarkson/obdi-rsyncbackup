@@ -47,6 +47,20 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="DeleteExclude.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Delete Exclude</h3>
+    </div>
+    <div class="modal-body">
+      Are you sure you want to delete exclude entry,
+      &ldquo;{{Path}}&rdquo;
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">Yes</button>
+        <button class="btn btn-success" ng-click="cancel()">No</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="NewInclude.html">
     <div class="modal-header">
         <h3 class="modal-title">{{Title}}</h3>
@@ -289,19 +303,18 @@ td p {
 	    <td>{{item.Host}}</td>
 	    <td>{{item.Base}}</td>
 	    <td style="width: 100%">
-
 	      <div ng-repeat="item in item.Excludes">
-		<p><a href=""><i title="Delete Item" class="fa fa-minus red"></i></a>
+		<p><a href="" ng-click="DeleteExclude(item.Path,item.Id)">
+                  <i title="Delete Item" class="fa fa-minus red"></i></a>
 		  {{item.Path}}</p>
 	      </div>
-	      <p><a title="Add Item" href=""><i class="fa fa-plus green"></i> New</a></p>
-
+	      <p><a title="Add Exclude" href=""><i class="fa fa-plus green"></i> New</a></p>
 	    </td>
 	    <td style="white-space: nowrap">
 	      <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">
-		<i class="fa fa-trash-o red" title="Delete Item"></i></a>
+		<i class="fa fa-trash-o red" title="Delete Include"></i></a>
 	      <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
-		<i class="fa fa-edit" title="Edit Item"></i></a>
+		<i class="fa fa-edit" title="Edit Include"></i></a>
 	    </td>
 	  </tr>
 	</table>
