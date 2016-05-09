@@ -24,7 +24,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // Data
   $scope.environments = [];
   $scope.includes = [];
-  $scope.settings = [];
+  $scope.settings = {};
   $scope.excludes = [];
   $scope.env = {};
   $scope.tasks = "";
@@ -50,7 +50,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.page_result = false;
   $scope.envchosen = false;
   $scope.backuptasks = true;
-  $scope.settings = false;
+  $scope.editincludes = false;
+  $scope.editsettings = false;
   $scope.status = {};
 
   // Fixes
@@ -95,6 +96,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.showkeybtnblockhidden = false;
     $scope.page_result = false;
     $scope.envchosen = false;
+    $scope.editincludes = false;
+    $scope.editsettings = false;
     $scope.spacing = 20;
   };
 
@@ -216,6 +219,28 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
+  $scope.ConfigureSettings = function(index) {
+  // ----------------------------------------------------------------------
+
+    $scope.curtask = $scope.tasks[index];
+    $scope.includes = [];
+
+    $scope.settings = { protocol:"rsyncd",
+                        pre:"create_zfs_snapshot",
+                        rsync_opts:"--sparse",
+                        basedir:"/backup/servers-zfs/",
+                        knownhosts:"",
+                        numperiods:1,
+                        timeout:0 };
+
+    $scope.backuptasks = false;
+    $scope.editsettings = true;
+    $scope.editincludes = false;
+
+    $scope.FillIncludesArray( $scope.curtask.Id )
+  }
+
+  // ----------------------------------------------------------------------
   $scope.ConfigureIncludes = function(index) {
   // ----------------------------------------------------------------------
 
@@ -223,7 +248,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.includes = [];
 
     $scope.backuptasks = false;
-    $scope.settings = true;
+    $scope.editsettings = false;
+    $scope.editincludes = true;
 
     $scope.FillIncludesArray( $scope.curtask.Id )
   }
@@ -232,7 +258,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.Back = function() {
   // ----------------------------------------------------------------------
     $scope.backuptasks = true;
-    $scope.settings = false;
+    $scope.editincludes = false;
+    $scope.editsettings = false;
   }
 
   // ----------------------------------------------------------------------

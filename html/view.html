@@ -169,12 +169,12 @@
           <i class="fa fa-refresh"> </i> Restart</button>
 
         <button class="btn btn-sm btn-default pull-right" type="button"
-        ng-if="mainview && settings" ng-click="Back()"
+        ng-if="mainview && (editincludes || editsettings)" ng-click="Back()"
         style="margin-top: -5px;">
           <i class="fa fa-arrow-left"> </i> Go Back</button>
 
         <!--<button class="btn btn-sm btn-success pull-right" type="button"
-        ng-if="mainview && settings" ng-click="ApplySettings()"
+        ng-if="mainview && editincludes" ng-click="ApplySettings()"
         style="margin-top: -5px; margin-right: 8px;">
           <i class="fa fa-check"> </i> Apply</button>
         -->
@@ -270,8 +270,10 @@
 		  <i class="fa fa-trash-o red" title="Delete Item"></i></a>
 		<a href="#" ng-click="EditTask(item.TaskDesc,item.CapTag,item.Id)">
 		  <i class="fa fa-edit" title="Edit Item"></i></a>
+		<a href="#" ng-click="ConfigureSettings($index)">
+		  <i class="fa fa-cog" title="Settings"></i></a>
 		<a href="#" ng-click="ConfigureIncludes($index)">
-		  <i class="fa fa-cog" title="Settings and Includes"></i></a>
+		  <i class="fa fa-cogs" title="Includes and Excludes"></i></a>
               </td>
             </tr>
           </table>
@@ -279,9 +281,131 @@
       </div>
     </div>
 
-    <!-- Includes & Settings -->
+    <!-- Settings -->
 
-    <div ng-if="settings" class="col-sm-12">
+    <div ng-if="editsettings" class="col-sm-12">
+
+      <h4 class="page-header" style="margin-top: {{spacing}}px">
+        {{curtask.TaskDesc}}</h4>
+
+      <p>Settings for rsync backup can be edited below. Defaults will be used
+         for any fields left empty.</p>
+
+<!--
+      <button class="btn btn-sm btn-default" type="button"
+	ng-click="AddInclude()">
+	<i class="fa fa-plus-circle"> </i> Add Host</button>
+
+      <button class="btn btn-sm btn-success pull-right" type="button"
+	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
+	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
+-->
+
+      <div class="form-horizontal prepend-xs-1" role="form">
+
+	<div class="alert alert-danger" ng-show="message">
+	  {{message}}
+	</div>
+	<div class="alert alert-success" ng-show="okmessage">
+	  {{okmessage}}
+	</div>
+
+	<!-- Protocol -->
+
+	<div class="form-group">
+	  <label class="col-sm-3 control-label">PROTOCOL</label>
+	  <div class="col-sm-7">
+	    <div class="dropdown-close">
+	      <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+	      <select selectpicker required ng-model="settings.protocol">
+		<option value="">Choose a transport protocol</option>
+		<option value="rsyncd">rsyncd</option>
+	      </select>
+	    </div>
+	  </div>
+	</div>
+
+	<!-- PRE -->
+
+	<div class="form-group">
+	  <label class="col-sm-3 control-label">PRE</label>
+	  <div class="col-sm-7">
+	    <div class="dropdown-close">
+	      <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+	      <select selectpicker required ng-model="settings.pre">
+		<option value="">None</option>
+		<option>create_zfs_snapshot</option>
+	      </select>
+	    </div>
+	  </div>
+	</div>
+
+	<!-- RSYNC_OPTS -->
+
+	<div class="form-group">
+	  <label for="rsync_opts" class="col-sm-3 control-label">RSYNC_OPTS</label>
+	  <div class="col-sm-7">
+	    <input class="form-control" id="rsync_opts" ng-model="settings.rsync_opts"
+	    placeholder="Extra rsync options" type="text" ng-trim='false' required>
+	  </div>
+	</div>
+
+	<!-- BASEDIR -->
+
+	<div class="form-group">
+	  <label for="basedir" class="col-sm-3 control-label">
+	      BASEDIR
+	  </label>
+	  <div class="col-sm-7">
+	    <input class="form-control" id="basedir" ng-model="settings.basedir"
+	    placeholder="Path of directory containing backups." type="text">
+	  </div>
+	</div>
+
+	<!-- KNOWNHOSTS -->
+
+	<div class="form-group">
+	  <label for="workerip" class="col-sm-3 control-label">
+	      KNOWNHOSTS
+	  </label>
+	  <div class="col-sm-7">
+	    <input class="form-control" id="workerip" ng-model="settings.knownhosts"
+	    placeholder="Location of the ssh known_hosts file."
+	    ng-trim='false' type="text">
+	  </div>
+	</div>
+
+	<!-- NUMPERIODS -->
+
+	<div class="form-group">
+	  <label for="numperiods" class="col-sm-3 control-label">
+	      NUMPERIODS
+	  </label>
+	  <div class="col-sm-7">
+	    <input class="form-control" id="numperiods" ng-model="settings.numperiods"
+	    placeholder="Number of periods in a day."
+	    ng-trim='false' type="text">
+	  </div>
+	</div>
+
+	<!-- TIMEOUT -->
+
+	<div class="form-group">
+	  <label for="timeout" class="col-sm-3 control-label">
+	      TIMEOUT
+	  </label>
+	  <div class="col-sm-7">
+	    <input class="form-control" id="timeout" ng-model="settings.timeout"
+	    placeholder="Timeout in seconds. 0 or empty to disable timeout."
+	    ng-trim='false' type="text">
+	  </div>
+	</div>
+      </div>
+    </div>
+
+    <!-- Includes & excludes -->
+
+    <div ng-if="editincludes" class="col-sm-12">
 
       <h4 class="page-header" style="margin-top: {{spacing}}px">
         {{curtask.TaskDesc}}</h4>
@@ -294,12 +418,12 @@
 	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
 	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
 
-<style>
-td p {
-    white-space: nowrap;
-    margin-bottom: 2px;
-}
-</style>
+      <style>
+      td p {
+	  white-space: nowrap;
+	  margin-bottom: 2px;
+      }
+      </style>
 
       <div class="table-responsive" style="margin-top: 8px;">
 	<table class="table table-striped table-bordered"
