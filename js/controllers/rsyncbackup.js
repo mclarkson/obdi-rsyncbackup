@@ -228,9 +228,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.settings = { protocol:"rsyncd",
                         pre:"create_zfs_snapshot",
                         rsync_opts:"--sparse",
-                        basedir:"/backup/servers-zfs/",
-                        knownhosts:"",
-                        numperiods:1,
+                        base_dir:"/backup/servers-zfs/",
+                        known_hosts:"",
+                        num_periods:1,
                         timeout:0 };
 
     $scope.backuptasks = false;
