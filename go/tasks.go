@@ -214,8 +214,8 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		Id:       0,
 		TaskDesc: postdata.TaskDesc,
 		CapTag:   postdata.CapTag,
-		DcId:       dc,
-		EnvId:      env,
+		DcId:     dc,
+		EnvId:    env,
 	}
 
 	// Add the Task entry
@@ -330,8 +330,8 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		Id:       postdata.Id,
 		TaskDesc: postdata.TaskDesc,
 		CapTag:   postdata.CapTag,
-		DcId:       dc,
-		EnvId:      env,
+		DcId:     dc,
+		EnvId:    env,
 	}
 
 	// Update the Task entry
@@ -425,8 +425,8 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		Id:       id_int,
 		TaskDesc: "",
 		CapTag:   "",
-		DcId:       dc,
-		EnvId:      env,
+		DcId:     dc,
+		EnvId:    env,
 	}
 
 	// Delete the Task entry from the DB

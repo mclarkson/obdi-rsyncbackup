@@ -27,9 +27,9 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id       int64
-	IncludeId   int64
-        Path   string
+	Id        int64
+	IncludeId int64
+	Path      string
 }
 
 // Name of the sqlite3 database file
@@ -41,9 +41,9 @@ const DBFILE = "rsyncbackup.db"
 
 // The 'excludes' table
 type Exclude struct {
-	Id       int64
-	IncludeId   int64
-	Path     string
+	Id        int64
+	IncludeId int64
+	Path      string
 }
 
 // Create tables and indexes in InitDB
@@ -176,7 +176,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-        include_id,_ := strconv.ParseInt(args.QueryString["include_id"][0], 10, 64)
+	include_id, _ := strconv.ParseInt(args.QueryString["include_id"][0], 10, 64)
 
 	// Check if the user is allowed to access the environment
 	var err error
@@ -213,9 +213,9 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// The following Include will be written to the db
 
 	exclude := Exclude{
-		Id:       0,
+		Id:        0,
 		IncludeId: include_id,
-		Path:   postdata.Path,
+		Path:      postdata.Path,
 	}
 
 	// Add the Include entry
@@ -276,7 +276,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-        include_id,_ := strconv.ParseInt(args.QueryString["include_id"][0], 10, 64)
+	include_id, _ := strconv.ParseInt(args.QueryString["include_id"][0], 10, 64)
 
 	// Check if the user is allowed to access the environment
 	var err error
@@ -329,9 +329,9 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// The following Include will be written to the db
 	exclude := Exclude{
-		Id:       postdata.Id,
+		Id:        postdata.Id,
 		IncludeId: include_id,
-		Path:   postdata.Path,
+		Path:      postdata.Path,
 	}
 
 	// Update the Include entry
@@ -417,9 +417,9 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Set up a Include with the id to be deleted
 	exclude := Exclude{
-		Id:       id_int,
+		Id:        id_int,
 		IncludeId: 0,
-		Path:   "",
+		Path:      "",
 	}
 
 	// Delete the Include entry from the DB

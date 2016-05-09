@@ -27,9 +27,9 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id       int64
-	Host   string
-        Base   string
+	Id   int64
+	Host string
+	Base string
 }
 
 // Name of the sqlite3 database file
@@ -41,10 +41,10 @@ const DBFILE = "rsyncbackup.db"
 
 // The 'includes' table
 type Include struct {
-	Id       int64
-	TaskId   int64
-	Host     string
-	Base     string // Data centre name
+	Id     int64
+	TaskId int64
+	Host   string
+	Base   string // Data centre name
 }
 
 // Create tables and indexes in InitDB
@@ -178,7 +178,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-        task_id,_ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
+	task_id, _ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
 
 	// Check if the user is allowed to access the environment
 	var err error
@@ -215,7 +215,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// The following Include will be written to the db
 
 	include := Include{
-		Id:       0,
+		Id:     0,
 		TaskId: task_id,
 		Host:   postdata.Host,
 		Base:   postdata.Base,
@@ -279,7 +279,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-        task_id,_ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
+	task_id, _ := strconv.ParseInt(args.QueryString["task_id"][0], 10, 64)
 
 	// Check if the user is allowed to access the environment
 	var err error
@@ -332,7 +332,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// The following Include will be written to the db
 	include := Include{
-		Id:       postdata.Id,
+		Id:     postdata.Id,
 		TaskId: task_id,
 		Host:   postdata.Host,
 		Base:   postdata.Base,
@@ -421,7 +421,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Set up a Include with the id to be deleted
 	include := Include{
-		Id:       id_int,
+		Id:     id_int,
 		TaskId: 0,
 		Host:   "",
 		Base:   "",

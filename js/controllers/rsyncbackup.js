@@ -125,7 +125,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       // Select none
       $scope.checkbox_allnone = false;
       for( i=0; i < $scope.includes.length; i=i+1 ) {
-	$scope.includes[i].Selected = false;
+        $scope.includes[i].Selected = false;
       }
     }
     ShouldRunBackupButtonBeEnabled();
@@ -162,55 +162,55 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     for( var i=0; i<$scope.includes.length; i++ ) {
 
       $http({
-	method: 'GET',
+        method: 'GET',
         params: {
                  include_id:$scope.includes[i].Id,
                  env_id:$scope.env.Id,
                  time:new Date().getTime().toString()
                 },
-	url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-	     + "/rsyncbackup/excludes"
+        url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+             + "/rsyncbackup/excludes"
       }).success( function(data, status, headers, config) {
 
-	try {
-	  excludes = $.parseJSON(data.Text);
-	} catch (e) {
-	  clearMessages();
-	  $scope.message = "Error: " + e;
-	  $scope.message_jobid = id;
-	}
+        try {
+          excludes = $.parseJSON(data.Text);
+        } catch (e) {
+          clearMessages();
+          $scope.message = "Error: " + e;
+          $scope.message_jobid = id;
+        }
 
-	if( excludes.length != 0 ) {
+        if( excludes.length != 0 ) {
           for( var j=0; j<$scope.includes.length; j++ ){
             if( $scope.includes[j].Id == excludes[0].IncludeId ) {
-	      $scope.includes[j].Excludes = excludes;
+              $scope.includes[j].Excludes = excludes;
               break;
             }
           }
-	}
+        }
 
       }).error( function(data,status) {
-	if (status>=500) {
-	  $scope.login.errtext = "Server error.";
-	  $scope.login.error = true;
-	  $scope.login.pageurl = "login.html";
-	} else if (status==401) {
-	  $scope.login.errtext = "Session expired.";
-	  $scope.login.error = true;
-	  $scope.login.pageurl = "login.html";
-	} else if (status>=400) {
-	  clearMessages();
-	  $scope.mainmessage = "Server said: " + data['Error'];
-	} else if (status==0) {
-	  // This is a guess really
-	  $scope.login.errtext = "Could not connect to server.";
-	  $scope.login.error = true;
-	  $scope.login.pageurl = "login.html";
-	} else {
-	  $scope.login.errtext = "Logged out due to an unknown error.";
-	  $scope.login.error = true;
-	  $scope.login.pageurl = "login.html";
-	}
+        if (status>=500) {
+          $scope.login.errtext = "Server error.";
+          $scope.login.error = true;
+          $scope.login.pageurl = "login.html";
+        } else if (status==401) {
+          $scope.login.errtext = "Session expired.";
+          $scope.login.error = true;
+          $scope.login.pageurl = "login.html";
+        } else if (status>=400) {
+          clearMessages();
+          $scope.mainmessage = "Server said: " + data['Error'];
+        } else if (status==0) {
+          // This is a guess really
+          $scope.login.errtext = "Could not connect to server.";
+          $scope.login.error = true;
+          $scope.login.pageurl = "login.html";
+        } else {
+          $scope.login.errtext = "Logged out due to an unknown error.";
+          $scope.login.error = true;
+          $scope.login.pageurl = "login.html";
+        }
       });
     }
   }
@@ -220,6 +220,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
 
     $scope.curtask = $scope.tasks[index];
+    $scope.includes = [];
 
     $scope.backuptasks = false;
     $scope.settings = true;
@@ -627,16 +628,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       controller: $scope.Add_TaskModalCtrl,
       size: 'md',
       resolve: {
-	// these variables are passed to the ModalInstanceCtrl
-	TaskDesc: function () {
-	  return $scope.TaskDesc;
-	},
-	CapTag: function () {
-	  return $scope.CapTag;
-	},
-	Title: function () {
-	  return "New Backup Task";
-	}
+        // these variables are passed to the ModalInstanceCtrl
+        TaskDesc: function () {
+          return $scope.TaskDesc;
+        },
+        CapTag: function () {
+          return $scope.CapTag;
+        },
+        Title: function () {
+          return "New Backup Task";
+        }
       }
     });
 
@@ -728,16 +729,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       controller: $scope.Add_TaskModalCtrl,
       size: 'md',
       resolve: {
-	// these variables are passed to the ModalInstanceCtrl
-	TaskDesc: function () {
-	  return $scope.TaskDesc;
-	},
-	CapTag: function () {
-	  return $scope.CapTag;
-	},
-	Title: function () {
-	  return "Edit Backup Task";
-	}
+        // these variables are passed to the ModalInstanceCtrl
+        TaskDesc: function () {
+          return $scope.TaskDesc;
+        },
+        CapTag: function () {
+          return $scope.CapTag;
+        },
+        Title: function () {
+          return "Edit Backup Task";
+        }
       }
     });
 
@@ -851,16 +852,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       controller: $scope.Add_IncludeModalCtrl,
       size: 'md',
       resolve: {
-	// these variables are passed to the ModalInstanceCtrl
-	Host: function () {
-	  return $scope.Host;
-	},
-	Base: function () {
-	  return $scope.Base;
-	},
-	Title: function () {
-	  return "New Host Include";
-	}
+        // these variables are passed to the ModalInstanceCtrl
+        Host: function () {
+          return $scope.Host;
+        },
+        Base: function () {
+          return $scope.Base;
+        },
+        Title: function () {
+          return "New Host Include";
+        }
       }
     });
 
@@ -887,16 +888,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       controller: $scope.Add_IncludeModalCtrl,
       size: 'md',
       resolve: {
-	// these variables are passed to the ModalInstanceCtrl
-	Host: function () {
-	  return $scope.Host;
-	},
-	Base: function () {
-	  return $scope.Base;
-	},
-	Title: function () {
-	  return "Edit Host Include";
-	}
+        // these variables are passed to the ModalInstanceCtrl
+        Host: function () {
+          return $scope.Host;
+        },
+        Base: function () {
+          return $scope.Base;
+        },
+        Title: function () {
+          return "Edit Host Include";
+        }
       }
     });
 
@@ -947,52 +948,54 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $http({
       method: 'GET',
       params: {
-	       include_id:$scope.includes[i].Id,
-	       env_id:$scope.env.Id,
-	       time:new Date().getTime().toString()
-	      },
+               include_id:$scope.includes[i].Id,
+               env_id:$scope.env.Id,
+               time:new Date().getTime().toString()
+              },
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-	   + "/rsyncbackup/excludes"
+           + "/rsyncbackup/excludes"
     }).success( function(data, status, headers, config) {
 
       try {
-	excludes = $.parseJSON(data.Text);
+        excludes = $.parseJSON(data.Text);
       } catch (e) {
-	clearMessages();
-	$scope.message = "Error: " + e;
-	$scope.message_jobid = id;
+        clearMessages();
+        $scope.message = "Error: " + e;
+        $scope.message_jobid = id;
       }
 
       if( excludes.length != 0 ) {
-	for( var j=0; j<$scope.includes.length; j++ ){
-	  if( $scope.includes[j].Id == excludes[0].IncludeId ) {
-	    $scope.includes[j].Excludes = excludes;
-	    break;
-	  }
-	}
+        for( var j=0; j<$scope.includes.length; j++ ){
+          if( $scope.includes[j].Id == excludes[0].IncludeId ) {
+            $scope.includes[j].Excludes = excludes;
+            break;
+          }
+        }
+      } else {
+        $scope.includes[i].Excludes = [];
       }
 
     }).error( function(data,status) {
       if (status>=500) {
-	$scope.login.errtext = "Server error.";
-	$scope.login.error = true;
-	$scope.login.pageurl = "login.html";
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
       } else if (status==401) {
-	$scope.login.errtext = "Session expired.";
-	$scope.login.error = true;
-	$scope.login.pageurl = "login.html";
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
       } else if (status>=400) {
-	clearMessages();
-	$scope.mainmessage = "Server said: " + data['Error'];
+        clearMessages();
+        $scope.mainmessage = "Server said: " + data['Error'];
       } else if (status==0) {
-	// This is a guess really
-	$scope.login.errtext = "Could not connect to server.";
-	$scope.login.error = true;
-	$scope.login.pageurl = "login.html";
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
       } else {
-	$scope.login.errtext = "Logged out due to an unknown error.";
-	$scope.login.error = true;
-	$scope.login.pageurl = "login.html";
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
       }
     });
   }
@@ -1089,7 +1092,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.DeleteExclude = function( Path, Id ) {
+  $scope.DeleteExclude = function( Path, Id, IncludeId ) {
   // ----------------------------------------------------------------------
 
     var modalInstance = $uibModal.open({
@@ -1108,14 +1111,14 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     });
 
     modalInstance.result.then(function () {
-      $scope.DeleteExcludeRest(Id, index);
+      $scope.DeleteExcludeRest(Id, IncludeId);
     }, function () {
       $log.info('Modal dismissed at: ' + new Date());
     });
   }
 
   // ----------------------------------------------------------------------
-  $scope.DeleteExcludeRest = function( id ) {
+  $scope.DeleteExcludeRest = function( id, includeid ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
@@ -1127,10 +1130,13 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       // Refresh the row FIXME TODO TODO
-       //var desc = $.grep($scope.includes,
-       //  function(e){ return (e.Id==name && !e.StateFileName); });
-       //$scope.GetExclude( index );
+       // Refresh the row
+       for( var i=0; i<$scope.includes.length; ++i ) {
+         if( $scope.includes[i].Id == includeid ) {
+           $scope.GetExclude( i );
+           break;
+         }
+       }
 
     }).error( function(data,status) {
       if (status>=500) {

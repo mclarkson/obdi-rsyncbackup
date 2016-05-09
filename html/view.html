@@ -327,7 +327,7 @@ td p {
 	    <td>{{item.Base}}</td>
 	    <td style="width: 100%">
 	      <div ng-repeat="exclitem in item.Excludes">
-		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id)">
+		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
                   <i title="Delete Item" class="fa fa-minus red"></i></a>
 		  {{exclitem.Path}}</p>
 	      </div>
