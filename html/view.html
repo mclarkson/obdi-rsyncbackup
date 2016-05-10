@@ -173,11 +173,11 @@
         style="margin-top: -5px;">
           <i class="fa fa-arrow-left"> </i> Go Back</button>
 
-        <!--<button class="btn btn-sm btn-success pull-right" type="button"
-        ng-if="mainview && editincludes" ng-click="ApplySettings()"
+        <button class="btn btn-sm btn-success pull-right" type="button"
+        ng-if="mainview && editsettings" ng-click="ApplySettingsRest()"
+        ng-disabled="btnapplysettingsdisabled"
         style="margin-top: -5px; margin-right: 8px;">
           <i class="fa fa-check"> </i> Apply</button>
-        -->
 
       </h3>
     </div>
@@ -186,6 +186,7 @@
   <div class="row">
     <div class="col-sm-12">
 
+<!--
       <div class="alert alert-danger alert-dismissable" ng-show="message">
         <button type="button" class="close" data-dismiss="alert"
           aria-hidden="true">&times;</button>
@@ -196,6 +197,7 @@
           aria-hidden="true">&times;</button>
         {{okmessage}}
       </div>
+-->
 
     </div>
   </div>
@@ -317,7 +319,7 @@
 	  <div class="col-sm-7">
 	    <div class="dropdown-close">
 	      <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-	      <select selectpicker required ng-model="settings.protocol">
+	      <select selectpicker required ng-model="settings.Protocol">
 		<option value="">Choose a transport protocol</option>
 		<option value="rsyncd">rsyncd</option>
 	      </select>
@@ -332,7 +334,7 @@
 	  <div class="col-sm-7">
 	    <div class="dropdown-close">
 	      <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-	      <select selectpicker required ng-model="settings.pre">
+	      <select selectpicker required ng-model="settings.Pre">
 		<option value="">None</option>
 		<option>create_zfs_snapshot</option>
 	      </select>
@@ -345,7 +347,7 @@
 	<div class="form-group">
 	  <label for="rsync_opts" class="col-sm-3 control-label">RSYNC_OPTS</label>
 	  <div class="col-sm-7">
-	    <input class="form-control" id="rsync_opts" ng-model="settings.rsync_opts"
+	    <input class="form-control" id="rsync_opts" ng-model="settings.RsyncOpts"
 	    placeholder="Extra rsync options" type="text" ng-trim='false' required>
 	  </div>
 	</div>
@@ -357,7 +359,7 @@
 	      BASEDIR
 	  </label>
 	  <div class="col-sm-7">
-	    <input class="form-control" id="base_dir" ng-model="settings.base_dir"
+	    <input class="form-control" id="base_dir" ng-model="settings.BaseDir"
 	    placeholder="Path of directory containing backups." type="text">
 	  </div>
 	</div>
@@ -369,7 +371,7 @@
 	      KNOWNHOSTS
 	  </label>
 	  <div class="col-sm-7">
-	    <input class="form-control" id="known_hosts" ng-model="settings.known_hosts"
+	    <input class="form-control" id="known_hosts" ng-model="settings.KnownHosts"
 	    placeholder="Location of the ssh known_hosts file."
 	    ng-trim='false' type="text">
 	  </div>
@@ -382,7 +384,7 @@
 	      NUMPERIODS
 	  </label>
 	  <div class="col-sm-7">
-	    <input class="form-control" id="num_periods" ng-model="settings.num_periods"
+	    <input class="form-control" id="num_periods" ng-model="settings.NumPeriods"
 	    placeholder="Number of periods in a day."
 	    ng-trim='false' type="text">
 	  </div>
@@ -395,7 +397,7 @@
 	      TIMEOUT
 	  </label>
 	  <div class="col-sm-7">
-	    <input class="form-control" id="timeout" ng-model="settings.timeout"
+	    <input class="form-control" id="timeout" ng-model="settings.Timeout"
 	    placeholder="Timeout in seconds. 0 or empty to disable timeout."
 	    ng-trim='false' type="text">
 	  </div>
@@ -467,6 +469,7 @@
 	  </tr>
 	</table>
       </div> <!-- table-responsive -->
+      &nbsp;<br/>&nbsp;<br/>
     </div>
   </div>
 

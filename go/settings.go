@@ -27,9 +27,15 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id       int64
-	TaskDesc string
-	CapTag   string
+	Id         int64
+	TaskId     int64
+	Protocol   string
+	Pre        string
+	RsyncOpts  string
+	BaseDir    string
+	KnownHosts string
+	NumPeriods int64
+	Timeout    int64
 }
 
 // Name of the sqlite3 database file
@@ -39,13 +45,17 @@ const DBFILE = "rsyncbackup.db"
 // DATABASE FUNCS
 // ***************************************************************************
 
-// The 'tasks' table
-type Task struct {
-	Id       int64
-	TaskDesc string
-	CapTag   string
-	Dc       string // Data centre name
-	Env      string // Environment name
+// The 'settings' table
+type Setting struct {
+	Id         int64
+	TaskId     int64
+	Protocol   string
+	Pre        string
+	RsyncOpts  string
+	BaseDir    string
+	KnownHosts string
+	NumPeriods int64
+	Timeout    int64
 }
 
 // Create tables and indexes in InitDB
@@ -53,14 +63,14 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 
 	db := gormInst.db // shortcut
 
-	// Create the Task table
-	if err := db.AutoMigrate(Task{}).Error; err != nil {
-		txt := fmt.Sprintf("AutoMigrate Task table failed: %s", err)
+	// Create the Setting table
+	if err := db.AutoMigrate(Setting{}).Error; err != nil {
+		txt := fmt.Sprintf("AutoMigrate Setting table failed: %s", err)
 		return ApiError{txt}
 	}
 
 	// Add any indexes
-	//db.Model(Task{}).AddIndex("idx_hello_text", "text")
+	//db.Model(Setting{}).AddIndex("idx_task_id", "task_id")
 
 	return nil
 }
@@ -73,6 +83,15 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	// GET requests don't change state, so, don't change state
 
+	// task_id is required, '?task_id=xxx'
+
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'task_id' must be set", response)
+		return nil
+	}
+
+	task_id_str := args.QueryString["env_id"][0]
+
 	// env_id is required, '?env_id=xxx'
 
 	if len(args.QueryString["env_id"]) == 0 {
@@ -84,16 +103,12 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -105,12 +120,12 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// Get all tasks for this dc and env
+	// Get settings for this task_id
 
 	db := gormdb.DB() // for convenience
-	tasks := []Task{}
+	settings := []Setting{}
 	Lock()
-	if err = db.Find(&tasks, "dc = ? and env = ?", dc, env).Error; err != nil {
+	if err = db.Find(&settings, "task_id = ?", task_id_str).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
@@ -119,14 +134,18 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	// Create a map of the query result
 
-	u := make([]map[string]interface{}, len(tasks))
-	for i := range tasks {
+	u := make([]map[string]interface{}, len(settings))
+	for i := range settings {
 		u[i] = make(map[string]interface{})
-		u[i]["Id"] = tasks[i].Id
-		u[i]["TaskDesc"] = tasks[i].TaskDesc
-		u[i]["CapTag"] = tasks[i].CapTag
-		u[i]["Dc"] = tasks[i].Dc
-		u[i]["Env"] = tasks[i].Env
+		u[i]["Id"] = settings[i].Id
+		u[i]["TaskId"] = settings[i].TaskId
+		u[i]["Protocol"] = settings[i].Protocol
+		u[i]["Pre"] = settings[i].Pre
+		u[i]["RsyncOpts"] = settings[i].RsyncOpts
+		u[i]["BaseDir"] = settings[i].BaseDir
+		u[i]["KnownHosts"] = settings[i].KnownHosts
+		u[i]["NumPeriods"] = settings[i].NumPeriods
+		u[i]["Timeout"] = settings[i].Timeout
 	}
 
 	// JSONify the query result
@@ -163,6 +182,16 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	// POST requests can change state
 
+	// task_id is required, '?task_id=xxx'
+
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'task_id' must be set", response)
+		return nil
+	}
+
+	task_id_str := args.QueryString["env_id"][0]
+        task_id_i64,_ := strconv.ParseInt(task_id_str, 10, 64)
+
 	// env_id is required, '?env_id=xxx'
 
 	if len(args.QueryString["env_id"]) == 0 {
@@ -174,16 +203,12 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -208,29 +233,33 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// The following Task will be written to the db
+	// The following Setting will be written to the db
 
-	task := Task{
-		Id:       0,
-		TaskDesc: postdata.TaskDesc,
-		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+	setting := Setting{
+		Id:          0,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
 	}
 
-	// Add the Task entry
+	// Add the Setting entry
 
 	Lock()
-	if err := db.Save(&task).Error; err != nil {
+	if err := db.Save(&setting).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	// JSONify the task
+	// JSONify the setting
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(setting)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -262,6 +291,16 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
+	// task_id is required, '?task_id=xxx'
+
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'task_id' must be set", response)
+		return nil
+	}
+
+	task_id_str := args.QueryString["env_id"][0]
+        task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
+
 	// env_id is required, '?env_id=xxx'
 
 	if len(args.QueryString["env_id"]) == 0 {
@@ -273,16 +312,12 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -307,37 +342,40 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	// Search the tasks table for the task id
+	// Search the settings table for the setting id
 
-	tasks := []Task{}
+	settings := []Setting{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", postdata.Id,
-		dc, env).Error; err != nil {
+	if err := db.Find(&settings, "id = ?", postdata.Id).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	if len(tasks) == 0 {
+	if len(settings) == 0 {
 		id := strconv.FormatInt(postdata.Id, 10)
-		ReturnError("Task '"+id+"' not found. Can't update.", response)
+		ReturnError("Setting '"+id+"' not found. Can't update.", response)
 		return nil
 	}
 
-	// The following Task will be written to the db
-	task := Task{
-		Id:       postdata.Id,
-		TaskDesc: postdata.TaskDesc,
-		CapTag:   postdata.CapTag,
-		Dc:       dc,
-		Env:      env,
+	// The following Setting will be written to the db
+	setting := Setting{
+		Id:          postdata.Id,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
 	}
 
-	// Update the Task entry
+	// Update the Setting entry
 
 	Lock()
-	if err := db.Save(&task).Error; err != nil {
+	if err := db.Save(&setting).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -346,7 +384,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(setting)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
@@ -366,6 +404,16 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
+	// task_id is required, '?task_id=xxx'
+
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'task_id' must be set", response)
+		return nil
+	}
+
+	task_id_str := args.QueryString["env_id"][0]
+        task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
+
 	// env_id is required, '?env_id=xxx'
 
 	if len(args.QueryString["env_id"]) == 0 {
@@ -377,16 +425,12 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Check if the user is allowed to access the environment
 	var err error
-	var foundenv Env
-	if foundenv, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
+	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
 
-	// We got this far so access is allowed. Get the dc and env text values
-
-	dc := foundenv.DcSysName
-	env := foundenv.SysName
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -403,36 +447,39 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 	id_str := args.PathParams["id"]
 	id_int, _ := strconv.ParseInt(args.PathParams["id"], 10, 64)
 
-	// Search the tasks table for the task id
+	// Search the settings table for the setting id
 
-	tasks := []Task{}
+	settings := []Setting{}
 	Lock()
-	if err := db.Find(&tasks, "id = ? and dc = ? and env = ?", id_str,
-		dc, env).Error; err != nil {
+	if err := db.Find(&settings, "id = ?", id_str).Error; err != nil {
 		Unlock()
 		ReturnError("Query error. "+err.Error(), response)
 		return nil
 	}
 	Unlock()
 
-	if len(tasks) == 0 {
-		ReturnError("Task '"+id_str+"' not found. Can't delete.", response)
+	if len(settings) == 0 {
+		ReturnError("Setting '"+id_str+"' not found. Can't delete.", response)
 		return nil
 	}
 
-	// Set up an Task with the id to be deleted
-	task := Task{
-		Id:       id_int,
-		TaskDesc: "",
-		CapTag:   "",
-		Dc:       dc,
-		Env:      env,
+	// Set up an Setting with the id to be deleted
+	setting := Setting{
+		Id:          id_int,
+		TaskId:      task_id_i64,
+		Protocol:    "",
+		Pre:         "",
+		RsyncOpts:   "",
+		BaseDir:     "",
+		KnownHosts:  "",
+		NumPeriods:  0,
+		Timeout:     0,
 	}
 
-	// Delete the Task entry from the DB
+	// Delete the Setting entry from the DB
 
 	Lock()
-	if err := db.Delete(&task).Error; err != nil {
+	if err := db.Delete(&setting).Error; err != nil {
 		Unlock()
 		ReturnError("Update error: "+err.Error(), response)
 		return nil
@@ -441,7 +488,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Output JSON
 
-	TempJsonData, err := json.Marshal(task)
+	TempJsonData, err := json.Marshal(setting)
 	if err != nil {
 		ReturnError("Marshal error: "+err.Error(), response)
 		return nil
