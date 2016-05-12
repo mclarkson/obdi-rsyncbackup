@@ -93,7 +93,7 @@ id=`grep Id $t | grep -Eo "[0-9]+"`
 
 if [[ -z $id ]]; then
 	curl -k -d '{
-		"Desc": "Shows some information. Arg1 - Must be set to any value",
+		"Desc": "Rsync backup script. Only the verbose option, -V, is used here.",
 		"Name": "'"$script"'",
 		"Source": "'"$source"'"
 	}' $proto://$ipport/api/admin/$guid/scripts
