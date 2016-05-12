@@ -24,10 +24,10 @@ import (
 	"os"
 )
 
-// The format of the json sent by the client in a POST request
-type PostedData struct {
-	Grain string
-	Text  string
+// Create tables and indexes in InitDB
+func (gormInst *GormDB) InitDB(dbname string) error {
+
+	return nil
 }
 
 // ***************************************************************************
@@ -44,24 +44,42 @@ type PostedData struct {
 
 func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
-	// GET requests don't change state, so, don't change state
+	ReturnError("Internal error: Unimplemented HTTP GET", response)
+	return nil
+}
 
-	// Require the client to send '?var_a=value' query string
-	if len(args.QueryString["var_a"]) == 0 {
-		ReturnError("'var_a' must be set", response)
+func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
+
+	// POST requests can change state.
+
+	// Run the backup script.
+
+	if len(args.QueryString["task_id"]) == 0 {
+		ReturnError("'task_id' must be set", response)
 		return nil
 	}
 
+	var cmdargs string
+
+	if len(args.QueryString["verbose"]) > 0 {
+		cmdargs = "-V"
+	}
+
+	// Set up the environment variables
+
+	envvars := `PROTOCOL=rsyncd PRE=create_zfs_snapshot BASEDIR=/backup/servers-zfs/ INCL="phhlapphot001 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_volumes/**
+phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_volumes/**"`
+
 	sa := ScriptArgs{
 		// The name of the script to send an run
-		ScriptName: "helloworldrunscript-show.sh",
+		ScriptName: "backup.sh",
 		// The arguments to use when running the script
-		CmdArgs: args.QueryString["var_a"][0],
+		CmdArgs: cmdargs,
 		// Environment variables to pass to the script
-		EnvVars: "",
+		EnvVars: envvars,
 		// Name of an environment capability (where isworkerdef == true)
 		// that can point to a worker other than the default.
-		EnvCapDesc: "HELLOWORLD_RUNSCRIPT_WORKER",
+		EnvCapDesc: "RSYNCBACKUP_WORKER_1",
 		// Type 1 - User Job - Output is
 		//     sent back as it's created
 		// Type 2 - System Job - All output
@@ -70,78 +88,13 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		Type: 1,
 	}
 
-	var err error
 	var jobid int64
-	if jobid, err = t.RunScript(args, sa, response); err != nil {
-		// RunScript wrote the error so just return
-		return nil
-	}
-
-	reply := Reply{jobid, "", SUCCESS, ""}
-	jsondata, err := json.Marshal(reply)
-	if err != nil {
-		ReturnError("Marshal error: "+err.Error(), response)
-		return nil
-	}
-	*response = jsondata
-
-	return nil
-}
-
-func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
-
-	// POST requests can change state
-
-	ReturnError("Internal error: Unimplemented HTTP POST", response)
-	return nil
-
-	// Decode the post data into struct
-
-	var postedData PostedData
-
-	if err := json.Unmarshal(args.PostData, &postedData); err != nil {
-		txt := fmt.Sprintf("Error decoding JSON ('%s')"+".", err.Error())
-		ReturnError("Error decoding the POST data ("+
-			fmt.Sprintf("%s", args.PostData)+"). "+txt, response)
-		return nil
-	}
-
-	// Use salt to change the version, if it's changed
-
-	if len(args.QueryString["var_a"]) == 0 {
-		ReturnError("'var_a' must be set", response)
-		return nil
-	}
-
-	sa := ScriptArgs{
-		// The name of the script to send an run
-		ScriptName: "helloworldrunscript-sets.sh",
-		// The arguments to use when running the script
-		CmdArgs: args.QueryString["var_a"][0] + " " +
-			postedData.Grain + "," + postedData.Text,
-		// Environment variables to pass to the script
-		EnvVars: "",
-		// Name of an environment capability (where isworkerdef == true)
-		// that can point to a worker other than the default.
-		EnvCapDesc: "HELLOWORLD_RUNSCRIPT_WORKER",
-		// Type 1 - User Job - Output is
-		//     sent back as it's created
-		// Type 2 - System Job - All output
-		//     is saved in one single line.
-		//     Good for json etc.
-		Type: 2,
-	}
-
-	var jobid int64
-	if len(postedData.Grain) > 0 && len(postedData.Text) > 0 {
+	{
 		var err error
 		if jobid, err = t.RunScript(args, sa, response); err != nil {
 			// RunScript wrote the error so just return
 			return nil
 		}
-	} else {
-		ReturnError("No POST data received. Nothing to do.", response)
-		return nil
 	}
 
 	reply := Reply{jobid, "", SUCCESS, ""}
