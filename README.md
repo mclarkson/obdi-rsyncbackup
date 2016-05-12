@@ -116,10 +116,15 @@ $ ipport="127.0.0.1:443"
 $ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
   https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
 
-# Back up
+# Back-up
 
 $ curl -k -X POST \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=1&task_id=1"
+
+# Verbose back-up (verbose paramater can be set to any value)
+
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=1&task_id=1&verbose=t"
 
 ```
 
