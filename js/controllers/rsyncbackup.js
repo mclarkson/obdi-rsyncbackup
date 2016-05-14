@@ -37,9 +37,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
   // Alerting
   $scope.message = "";
-  $scope.mainmessage = "";
   $scope.okmessage = "";
   $scope.login.error = false;
+  $scope.message_jobid = 0;
 
   // Hiding/Showing
   $scope.btnsayhellodisabled = true;
@@ -53,6 +53,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.editsettings = false;
   $scope.btnbackupdisabled = true;
   $scope.btnapplysettingsdisabled = false;
+  $scope.gettingsettings = false;
+  $scope.gotsettings = false;
   $scope.status = {};
 
   // Fixes
@@ -82,10 +84,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   var clearMessages = function() {
   // ----------------------------------------------------------------------
     $scope.message = "";
-    $scope.mainmessage = "";
     $scope.okmessage = "";
     $scope.login.error = false;
     $scope.error = false;
+    $scope.message_jobid = 0;
   }
 
   // ----------------------------------------------------------------------
@@ -100,7 +102,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.envchosen = false;
     $scope.editincludes = false;
     $scope.editsettings = false;
+    $scope.gettingsettings = false;
+    $scope.gotsettings = false;
     $scope.spacing = 20;
+    $scope.message_jobid = 0;
   };
 
   // ----------------------------------------------------------------------
@@ -137,10 +142,80 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
+  $scope.showOutputlines = function( id ) {
+  // ----------------------------------------------------------------------
+
+    $rootScope.outputlines_plugin = {};
+    $rootScope.outputlines_plugin.id = id;
+    $scope.setView( "plugins/systemjobs/html/outputlines.html" );
+  }
+
+  // ----------------------------------------------------------------------
   $scope.Selected = function( incl_index ) {
   // ----------------------------------------------------------------------
 
     ShouldRunBackupButtonBeEnabled();
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.RunBackup = function() {
+  // ----------------------------------------------------------------------
+
+    var items = "";
+    var comma = "";
+    for( var i=0; i<$scope.includes.length; ++i ) {
+      if( $scope.includes[i].Selected == true ) {
+        items += comma + $scope.includes[i].Id;
+        comma = ",";
+      }
+    }
+
+    $http({
+      method: "POST",
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/backup?env_id=" + $scope.env.Id
+           + "&task_id=" + $scope.curtask.Id
+           + "&items=" + items
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      try {
+        //alert(data);
+        //var job = $.parseJSON(data);
+        var job = data;
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+        return;
+      }
+
+      $scope.message_jobid = job.JobId;
+      $scope.okmessage = "Backup request sent.";
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
   }
 
   // ----------------------------------------------------------------------
@@ -182,7 +257,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         } catch (e) {
           clearMessages();
           $scope.message = "Error: " + e;
-          $scope.message_jobid = id;
         }
 
         if( excludes.length != 0 ) {
@@ -205,7 +279,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
           $scope.login.pageurl = "login.html";
         } else if (status>=400) {
           clearMessages();
-          $scope.mainmessage = "Server said: " + data['Error'];
+          $scope.message = "Server said: " + data['Error'];
         } else if (status==0) {
           // This is a guess really
           $scope.login.errtext = "Could not connect to server.";
@@ -227,6 +301,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     clearMessages();
     $scope.curtask = $scope.tasks[index];
     $scope.includes = [];
+    $scope.gettingsettings = true;
+    $scope.gotsettings = false;
 
     $http({
       method: 'GET',
@@ -241,7 +317,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
-        $scope.message_jobid = id;
       }
 
       if( typeof($scope.settings) == 'undefined' ) {
@@ -255,6 +330,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 			    Timeout:0 };
       }
 
+      $scope.gettingsettings = false;
+      $scope.gotsettings = true;
+
     }).error( function(data,status) {
       if (status>=500) {
         $scope.login.errtext = "Server error.";
@@ -266,7 +344,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       } else if (status>=400) {
         clearMessages();
-        $scope.mainmessage = "Server said: " + data['Error'];
+        $scope.message = "Server said: " + data['Error'];
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";
@@ -312,7 +390,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
-        $scope.message_jobid = id;
       }
 
       $scope.okmessage = "Settings were updated successfully.";
@@ -382,7 +459,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
-        $scope.message_jobid = id;
       }
 
       if( data.length == 0 ) {
@@ -404,7 +480,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       } else if (status>=400) {
         clearMessages();
-        $scope.mainmessage = "Server said: " + data['Error'];
+        $scope.message = "Server said: " + data['Error'];
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";
@@ -446,7 +522,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       } else if (status>=400) {
         clearMessages();
-        $scope.mainmessage = "Server said: " + data['Error'];
+        $scope.message = "Server said: " + data['Error'];
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";
@@ -489,7 +565,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
-        $scope.message_jobid = id;
       }
 
       $scope.spacing = 0;
@@ -1091,7 +1166,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
-        $scope.message_jobid = id;
       }
 
       if( excludes.length != 0 ) {
@@ -1116,7 +1190,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       } else if (status>=400) {
         clearMessages();
-        $scope.mainmessage = "Server said: " + data['Error'];
+        $scope.message = "Server said: " + data['Error'];
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";

@@ -36,6 +36,7 @@ type PostedData struct {
 	KnownHosts string
 	NumPeriods int64
 	Timeout    int64
+	Verbose    bool
 }
 
 // Name of the sqlite3 database file
@@ -56,6 +57,7 @@ type Setting struct {
 	KnownHosts string
 	NumPeriods int64
 	Timeout    int64
+	Verbose    bool
 }
 
 // Create tables and indexes in InitDB
@@ -70,7 +72,7 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 	}
 
 	// Add any indexes
-	//db.Model(Setting{}).AddIndex("idx_task_id", "task_id")
+	db.Model(Setting{}).AddIndex("idx_settings_task_id", "task_id")
 
 	return nil
 }
@@ -146,6 +148,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["KnownHosts"] = settings[i].KnownHosts
 		u[i]["NumPeriods"] = settings[i].NumPeriods
 		u[i]["Timeout"] = settings[i].Timeout
+		u[i]["Verbose"] = settings[i].Verbose
 	}
 
 	// JSONify the query result
@@ -190,7 +193,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	}
 
 	task_id_str := args.QueryString["env_id"][0]
-        task_id_i64,_ := strconv.ParseInt(task_id_str, 10, 64)
+	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
 
@@ -236,15 +239,16 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// The following Setting will be written to the db
 
 	setting := Setting{
-		Id:          0,
-		TaskId:      task_id_i64,
-		Protocol:    postdata.Protocol,
-		Pre:         postdata.Pre,
-		RsyncOpts:   postdata.RsyncOpts,
-		BaseDir:     postdata.BaseDir,
-		KnownHosts:  postdata.KnownHosts,
-		NumPeriods:  postdata.NumPeriods,
-		Timeout:     postdata.Timeout,
+		Id:         0,
+		TaskId:     task_id_i64,
+		Protocol:   postdata.Protocol,
+		Pre:        postdata.Pre,
+		RsyncOpts:  postdata.RsyncOpts,
+		BaseDir:    postdata.BaseDir,
+		KnownHosts: postdata.KnownHosts,
+		NumPeriods: postdata.NumPeriods,
+		Timeout:    postdata.Timeout,
+		Verbose:    postdata.Verbose,
 	}
 
 	// Add the Setting entry
@@ -299,7 +303,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 	}
 
 	task_id_str := args.QueryString["env_id"][0]
-        task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
+	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
 
@@ -361,15 +365,16 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// The following Setting will be written to the db
 	setting := Setting{
-		Id:          postdata.Id,
-		TaskId:      task_id_i64,
-		Protocol:    postdata.Protocol,
-		Pre:         postdata.Pre,
-		RsyncOpts:   postdata.RsyncOpts,
-		BaseDir:     postdata.BaseDir,
-		KnownHosts:  postdata.KnownHosts,
-		NumPeriods:  postdata.NumPeriods,
-		Timeout:     postdata.Timeout,
+		Id:         postdata.Id,
+		TaskId:     task_id_i64,
+		Protocol:   postdata.Protocol,
+		Pre:        postdata.Pre,
+		RsyncOpts:  postdata.RsyncOpts,
+		BaseDir:    postdata.BaseDir,
+		KnownHosts: postdata.KnownHosts,
+		NumPeriods: postdata.NumPeriods,
+		Timeout:    postdata.Timeout,
+		Verbose:    postdata.Verbose,
 	}
 
 	// Update the Setting entry
@@ -412,7 +417,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 	}
 
 	task_id_str := args.QueryString["env_id"][0]
-        task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
+	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
 
@@ -465,15 +470,15 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 
 	// Set up an Setting with the id to be deleted
 	setting := Setting{
-		Id:          id_int,
-		TaskId:      task_id_i64,
-		Protocol:    "",
-		Pre:         "",
-		RsyncOpts:   "",
-		BaseDir:     "",
-		KnownHosts:  "",
-		NumPeriods:  0,
-		Timeout:     0,
+		Id:         id_int,
+		TaskId:     task_id_i64,
+		Protocol:   "",
+		Pre:        "",
+		RsyncOpts:  "",
+		BaseDir:    "",
+		KnownHosts: "",
+		NumPeriods: 0,
+		Timeout:    0,
 	}
 
 	// Delete the Setting entry from the DB

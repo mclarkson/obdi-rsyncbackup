@@ -22,7 +22,9 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	//"sort"
 	"strconv"
+	"strings"
 )
 
 // Name of the sqlite3 database file
@@ -54,6 +56,7 @@ type Setting struct {
 	KnownHosts string
 	NumPeriods int64
 	Timeout    int64
+	Verbose    bool
 }
 
 // Create tables and indexes in InitDB
@@ -104,6 +107,19 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	task_id_str := args.QueryString["task_id"][0]
 
+	// items is optional, '?items=1,2,3'
+
+	var items []int64
+	if len(args.QueryString["items"]) > 0 {
+		s := strings.Split(args.QueryString["items"][0], ",")
+		for i := range s {
+			itemid, _ := strconv.ParseInt(s[i], 10, 64)
+			items = append(items, itemid)
+		}
+		//sort.Ints(items)
+	}
+	//logit(fmt.Sprintf("%#v",items))
+
 	// Check if the user is allowed to access the environment
 	var err error
 	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
@@ -125,21 +141,14 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	db := gormdb.DB() // for convenience
 
-	// Command arguments
-
-	var cmdargs string
-	if len(args.QueryString["verbose"]) > 0 {
-		cmdargs = "-V"
-	}
-
 	// Set up the environment variables
 
 	/* envvars := `PROTOCOL=rsyncd PRE=create_zfs_snapshot BASEDIR=/backup/servers-zfs/ INCL="phhlapphot001 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_volumes/**
-phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_volumes/**"`
-        */
+	phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_volumes/**"`
+	*/
 
 	// The string of environment variables
-        var env_vars_str string
+	var env_vars_str string
 
 	// Get settings
 
@@ -175,9 +184,16 @@ phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_vol
 		env_vars_str += space + "KNOWNHOSTS=" + `"` + setting.KnownHosts + `"`
 		space = " "
 	}
-	env_vars_str += space + "NUMPERIODS=" + strconv.FormatInt(setting.NumPeriods,10)
+	env_vars_str += space + "NUMPERIODS=" + strconv.FormatInt(setting.NumPeriods, 10)
 	space = " "
-	env_vars_str += space + "TIMEOUT=" + strconv.FormatInt(setting.Timeout,10)
+	env_vars_str += space + "TIMEOUT=" + strconv.FormatInt(setting.Timeout, 10)
+
+	// Command arguments
+
+	var cmdargs string
+	if setting.Verbose {
+		cmdargs = "-V"
+	}
 
 	// Get all includes for this task
 
@@ -192,11 +208,25 @@ phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_vol
 
 	// Get excludes
 
-        var newline string
+	var newline string
 
 	env_vars_str += space + "INCL=\""
 
+	var notInItemsList = func(id int64) bool {
+		for i := range items {
+			if id == items[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+OUTER:
 	for i := range includes {
+
+		if notInItemsList(includes[i].Id) {
+			continue OUTER
+		}
 
 		env_vars_str += newline + includes[i].Host + " " + includes[i].Base + " "
 
@@ -220,7 +250,7 @@ phhlapphot002 backup /var/log/** /hcom/scripts/** /hcom/work/** /hcom/docker_vol
 
 	env_vars_str += "\""
 
-        logit(env_vars_str)
+	//logit(env_vars_str)
 
 	// Run the backup script.
 
