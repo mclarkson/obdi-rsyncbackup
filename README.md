@@ -8,7 +8,48 @@ Backup using rsync. Achieves compression and deduplication when using zfs.
 
 ## What is it?
 
-blah
+A simple backup solution for Linux servers, that achieves deduplication
+and compression using the zfs file system.
+
+## Installation
+
+Installation is in two parts, installing the plugin, and setting up the server
+that will be used for storing the backups.
+
+### Installing the plugin
+
+* Log into the admin interface, 'https://ObdiHost/manager/admin'.
+* In Plugins -> Manage Repositories add, 'https://github.com/mclarkson/obdi-nettools-repository.git'
+* In Plugins -> Add Plugin, choose 'rsyncbackup' and Install.
+
+### Server Set-up
+
+Instructions for a CentOS 6 server. Centos 7 should be the same.
+
+```
+# CentOS 6
+
+yum install zfs
+
+# Create a zfs pool on a logical volume
+
+modprobe zfs
+lvcreate -L1t -n servers-zfs vg1
+zpool create backup /dev/vg1/servers-zfs
+zfs create -o dedup=on -o compression=gzip backup/backup-zfs
+
+# Disable atime
+
+zfs set atime=off backup/servers-zfs
+
+# List and check settings
+
+zfs list
+zpool list
+zfs get dedup
+zfs get compression
+zfs get atime
+```
 
 ## Dev
 
