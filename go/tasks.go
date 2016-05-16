@@ -43,9 +43,9 @@ const DBFILE = "rsyncbackup.db"
 type Task struct {
 	Id       int64
 	TaskDesc string
-	CapTag   string
-	DcId     int64 // Data centre name
-	EnvId    int64 // Environment name
+	CapTag   string // Capability tag
+	DcId     int64  // Data centre name
+	EnvId    int64  // Environment name
 }
 
 // Create tables and indexes in InitDB

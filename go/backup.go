@@ -30,6 +30,15 @@ import (
 // Name of the sqlite3 database file
 const DBFILE = "rsyncbackup.db"
 
+// The 'tasks' table
+type Task struct {
+	Id       int64
+	TaskDesc string
+	CapTag   string
+	DcId     int64 // Data centre name
+	EnvId    int64 // Environment name
+}
+
 // The 'includes' table
 type Include struct {
 	Id     int64
@@ -254,6 +263,16 @@ OUTER:
 
 	// Run the backup script.
 
+	// Get the task to get the CapabilityTag
+	task := Task{}
+	Lock()
+	if err = db.First(&task, "id = ?", task_id_str).Error; err != nil {
+		Unlock()
+		ReturnError("Query error. "+err.Error(), response)
+		return nil
+	}
+	Unlock()
+
 	sa := ScriptArgs{
 		// The name of the script to send an run
 		ScriptName: "backup.sh",
@@ -263,7 +282,7 @@ OUTER:
 		EnvVars: env_vars_str,
 		// Name of an environment capability (where isworkerdef == true)
 		// that can point to a worker other than the default.
-		EnvCapDesc: "RSYNCBACKUP_WORKER_1",
+		EnvCapDesc: task.CapTag,
 		// Type 1 - User Job - Output is
 		//     sent back as it's created
 		// Type 2 - System Job - All output
