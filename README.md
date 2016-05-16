@@ -13,8 +13,9 @@ and compression using the zfs file system.
 
 ## Installation
 
-Installation is in two parts, installing the plugin, and setting up the server
-that will be used for storing the backups.
+Installation is in three parts, installing the plugin, setting up the server
+that will be used for storing the backups, and set up the servers that you
+want to back up.
 
 #### Installing the plugin
 
@@ -71,6 +72,39 @@ tab, add the RSYNCBACKUP_WORKER_1 capability and click Apply, then add the URL o
 Obdi worker to the RSYNCBACKUP_WORKER_1 capability.
 
 Obdi can now use this server as a backup server.
+
+#### Setting up the Servers to be Backed Up From
+
+On every server enable rsyncd by ensuring xinetd has disable set to no for `/etc/xinetd.d/rsync'.
+For example:
+
+```
+service rsync
+{
+        disable = no
+        flags           = IPv6
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/bin/rsync
+        server_args     = --daemon
+        log_on_failure  += USERID
+}
+```
+
+Use the following configuration for `/etc/rsyncd.conf':
+
+```
+[backup]
+    path = /
+    comment = Full system backup
+    read only = true
+    uid = 0
+    gid = 0
+    exclude = dev/** proc/** media/** mnt/** selinux/** sys/** tmp/**
+```
+
+Lock down access using hosts.allow, hosts.deny and/or iptables.
 
 ## Dev
 
