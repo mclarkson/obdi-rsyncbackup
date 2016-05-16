@@ -101,7 +101,8 @@ service rsync
 }
 ```
 
-Use the following configuration for `/etc/rsyncd.conf':
+Supply an rsyncd configuration. For example, use the following configuration
+in `/etc/rsyncd.conf' to do be able to do a full system backup:
 
 ```
 [backup]
