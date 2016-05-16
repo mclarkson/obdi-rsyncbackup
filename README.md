@@ -4,7 +4,7 @@ Backup using rsync. Achieves compression and deduplication when using zfs.
 
 ## Screenshot
 
-![](images/rsyncbackup.png?raw=true)
+![](images/obdi-rsyncbackup.png?raw=true)
 
 ## What is it?
 
@@ -16,13 +16,13 @@ and compression using the zfs file system.
 Installation is in two parts, installing the plugin, and setting up the server
 that will be used for storing the backups.
 
-### Installing the plugin
+#### Installing the plugin
 
 * Log into the admin interface, 'https://ObdiHost/manager/admin'.
 * In Plugins -> Manage Repositories add, 'https://github.com/mclarkson/obdi-nettools-repository.git'
 * In Plugins -> Add Plugin, choose 'rsyncbackup' and Install.
 
-### Server Set-up
+#### Server Set-up
 
 Instructions for a CentOS 6 server. Centos 7 should be the same.
 
