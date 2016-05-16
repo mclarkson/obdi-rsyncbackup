@@ -5,6 +5,12 @@ Backup using rsync. Achieves compression and deduplication when using zfs.
 BIG NOTE: This plugin does the rsync and snapshotting. More work is required
 to create a consistent backup for databases etc.
 
+# Todo
+
+* Custom per-server 'pre' scripts to do things such as stopping services before
+  back-up then starting once complete.
+* Scheduling (use cron and rest api for now).
+
 ## Screenshot
 
 ![](images/obdi-rsyncbackup-small.png?raw=true)
@@ -106,6 +112,17 @@ Use the following configuration for `/etc/rsyncd.conf':
     gid = 0
     exclude = dev/** proc/** media/** mnt/** selinux/** sys/** tmp/**
 ```
+
+With the above set-up the following settings will work:
+
+* PROTOCOL = rsyncd
+* PRE = 'create_zfs_snapshot'.
+* RSYNC_OPTS = your options, e.g. "--sparse", "-z".
+* BASEDIR = '/backup/servers-zfs/'.
+* KNOWNHOSTS = empty.
+* NUMPERIODS = 1 or more.
+* TIMEOUT = 0 (disabled) or more seconds.
+* Verbose = on or off, keep off unless testing.
 
 Lock down access using hosts.allow, hosts.deny and/or iptables.
 
