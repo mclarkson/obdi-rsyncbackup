@@ -4,7 +4,7 @@ Backup using rsync. Achieves compression and deduplication when using zfs.
 
 ## Screenshot
 
-![](images/obdi-rsyncbackup.png?raw=true)
+![](images/obdi-rsyncbackup.png?raw=true =500x)
 
 ## What is it?
 
