@@ -2,6 +2,9 @@
 
 Backup using rsync. Achieves compression and deduplication when using zfs.
 
+BIG NOTE: This plugin does the rsync and snapshotting. More work is required
+to create a consistent backup for databases etc.
+
 ## Screenshot
 
 ![](images/obdi-rsyncbackup-small.png?raw=true)
