@@ -31,12 +31,12 @@ Instructions for a CentOS 6 server. Centos 7 should be the same.
 
 yum install zfs
 
-# Create a zfs pool on a logical volume
+# Create a 1TB zfs pool on a logical volume
 
 modprobe zfs
 lvcreate -L1t -n servers-zfs vg1
 zpool create backup /dev/vg1/servers-zfs
-zfs create -o dedup=on -o compression=gzip backup/backup-zfs
+zfs create -o dedup=on -o compression=gzip backup/servers-zfs
 
 # Disable atime
 
@@ -49,7 +49,28 @@ zpool list
 zfs get dedup
 zfs get compression
 zfs get atime
+
+# Add mount to fstab and mount it
+mkdir /backup
+echo "/dev/mapper/vg1-backup  /backup                 ext4    defaults        1 2" >>/etc/fstab
+mount /backup
+
+# Enable EPEL YUM repository
+rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+# Enable Obdi COPR YUM repository
+curl -o /etc/yum.repos.d/obdi.repo \
+  https://copr.fedorainfracloud.org/coprs/mclarkson/Obdi/repo/epel-6/mclarkson-Obdi-epel-6.repo
+
+# Install Obdi
+yum -y install obdi-worker
 ```
+
+In the admin interface -> Environments, edit the environment, switch to the Capabilities
+tab, add the RSYNCBACKUP_WORKER_1 capability and click Apply, then add the URL of the new
+Obdi worker to the RSYNCBACKUP_WORKER_1 capability.
+
+Obdi can now use this server as a backup server.
 
 ## Dev
 
