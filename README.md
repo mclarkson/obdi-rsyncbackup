@@ -44,6 +44,7 @@ yum install zfs
 
 # Create a 1TB zfs pool on a logical volume
 
+mkdir /backup
 modprobe zfs
 lvcreate -L1t -n servers-zfs vg1
 zpool create backup /dev/vg1/servers-zfs
@@ -61,11 +62,6 @@ zfs get dedup
 zfs get compression
 zfs get atime
 
-# Add mount to fstab and mount it
-mkdir /backup
-echo "/dev/mapper/vg1-backup  /backup                 ext4    defaults        1 2" >>/etc/fstab
-mount /backup
-
 # Enable EPEL YUM repository
 rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
@@ -73,7 +69,7 @@ rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 curl -o /etc/yum.repos.d/obdi.repo \
   https://copr.fedorainfracloud.org/coprs/mclarkson/Obdi/repo/epel-6/mclarkson-Obdi-epel-6.repo
 
-# Install Obdi
+# Install Obdi Worker
 yum -y install obdi-worker
 ```
 
