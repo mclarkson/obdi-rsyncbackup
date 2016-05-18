@@ -10,6 +10,7 @@ to create a consistent backup for databases etc.
 * Custom per-server 'pre' scripts to do things such as stopping services before
   back-up then starting once complete.
 * Scheduling (use cron and rest api for now).
+* Viewing and retrieving files and snapshots.
 
 ## Screenshot
 
