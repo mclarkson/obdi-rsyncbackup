@@ -55,6 +55,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.btnapplysettingsdisabled = false;
   $scope.gettingsettings = false;
   $scope.gotsettings = false;
+  $scope.includesfilter = "";
+  $scope.tasksfilter = "";
   $scope.status = {};
 
   // Fixes
@@ -68,16 +70,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   // Not used since search is disabled
 
-    if( $scope.grainsview.show == false ) {
-      $scope.hostfilter = args;
+    if( $scope.editincludes == true ) {
+      $scope.includesfilter = args;
       $scope.checkbox_allnone = false;
-      for( var i=0; i < $scope.servernames.length; i=i+1 ) {
-        $scope.servernames[i].Selected = false;
+      for( var i=0; i < $scope.includes.length; i=i+1 ) {
+        $scope.includes[i].Selected = false;
       }
-      ReviewBtnStatus();
+      ShouldRunBackupButtonBeEnabled();
     } else {
-      $scope.grainfilter = args;
-    }
+      $scope.tasksfilter = args;
+    } 
   });
 
   // ----------------------------------------------------------------------

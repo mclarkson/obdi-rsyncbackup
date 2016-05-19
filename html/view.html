@@ -265,7 +265,7 @@
             </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="item in tasks | filter:mapfilter">
+              <tr ng-repeat="item in tasks | filter:tasksfilter">
               <td>{{item.Id}}</td>
               <td style="width: 100%">{{item.TaskDesc}}</td>
               <td>{{item.CapTag}}</td>
@@ -468,7 +468,7 @@
 	  </tr>
 	  </thead>
 	  <tbody>
-	    <tr ng-repeat="item in includes | filter:mapfilter">
+	    <tr ng-repeat="item in includes | filter:includesfilter">
 	    <td style="text-align: center;">
 	      <input type="checkbox"
 	      ng-model="item.Selected"
