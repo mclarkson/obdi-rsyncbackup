@@ -121,7 +121,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	var items []int64
 	has_item_list := false
 	if len(args.QueryString["items"]) > 0 {
-		has_item_list := true
+		has_item_list = true
 		s := strings.Split(args.QueryString["items"][0], ",")
 		for i := range s {
 			itemid, _ := strconv.ParseInt(s[i], 10, 64)
