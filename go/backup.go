@@ -119,13 +119,14 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// items is optional, '?items=1,2,3'
 
 	var items []int64
+	has_item_list := false
 	if len(args.QueryString["items"]) > 0 {
+		has_item_list := true
 		s := strings.Split(args.QueryString["items"][0], ",")
 		for i := range s {
 			itemid, _ := strconv.ParseInt(s[i], 10, 64)
 			items = append(items, itemid)
 		}
-		//sort.Ints(items)
 	}
 	//logit(fmt.Sprintf("%#v",items))
 
@@ -222,6 +223,9 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	env_vars_str += space + "INCL=\""
 
 	var notInItemsList = func(id int64) bool {
+		if !has_item_list {
+			return false
+		}
 		for i := range items {
 			if id == items[i] {
 				return false
