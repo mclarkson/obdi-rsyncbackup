@@ -1,22 +1,11 @@
 #!/bin/bash
+# This script will add include entries to a TASKID as per the INCL configuration
+
+TASKID=1
+ENVID=1
 
 # INCL format:
-# server_name source_file_or_directory [exclude_file_or_directory]...
-
-# System settings
-
-PROTOCOL=rsyncd
-#RSYNC_OPTS="--progress"
-RSYNC_OPTS="--sparse"
-BASEDIR=/backup/servers-zfs/
-KNOWNHOSTS=
-NUMPERIODS=1
-TIMEOUT=0
-MAXFILES=0
-
-PRE=create_zfs_snapshot
-
-POST=
+# server_name source_file_or_directory_or_rsyncd_name [exclude_file_or_directory]...
 
 INCL="
 host001 backup /var/log/** /opt/scripts/** /opt/work/** /opt/docker_volumes/**
@@ -112,7 +101,7 @@ fi
 while read host include excludes; do
   [[ -z $host || $host =~ ^"#" ]] && continue
   id=$( curl -ks -d '{"Host":"'"$host"'","Base":"'"$include"'"}' \
-    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes?env_id=1&task_id=1" | \
+    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes?env_id=$ENVID&task_id=$TASKID" | \
     sed -n 's/.*\\"Id\\":\([0-9]\+\).*/\1/p' )
   [[ -z $id ]] && {
     echo "Failed $host. No id returned for insert."
@@ -123,7 +112,7 @@ while read host include excludes; do
   set -f
   for exclude in $excludes; do
     curl -ks -d '{"Path":"'"$exclude"'"}' \
-      "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&include_id=$id"
+      "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=$ENVID&include_id=$id"
     echo
   done
 done <<<"$INCL"

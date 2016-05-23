@@ -110,6 +110,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.message_jobid = 0;
     $scope.includesfilter = "";
     $scope.tasksfilter = "";
+    $scope.checkbox_allnone = false;
   };
 
   // ----------------------------------------------------------------------
@@ -436,6 +437,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editincludes = true;
     $scope.includesfilter = "";
     $scope.tasksfilter = "";
+    $scope.checkbox_allnone = false;
 
     $scope.FillIncludesArray( $scope.curtask.Id )
   }
