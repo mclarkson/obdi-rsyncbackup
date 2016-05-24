@@ -353,14 +353,14 @@ func main() {
 
 	listener, err := net.Listen("tcp", ":"+os.Args[1])
 	if err != nil {
-		txt := fmt.Sprintf("Listen error. ", err)
+		txt := fmt.Sprintf("Listen error. %s", err)
 		logit(txt)
 	}
 
 	//logit("Plugin listening on port " + os.Args[1])
 
 	if conn, err := listener.Accept(); err != nil {
-		txt := fmt.Sprintf("Accept error. ", err)
+		txt := fmt.Sprintf("Accept error. %s", err)
 		logit(txt)
 	} else {
 		//logit("New connection established")
