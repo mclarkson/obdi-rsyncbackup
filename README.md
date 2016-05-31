@@ -124,6 +124,37 @@ With the above set-up the following settings will work:
 
 Lock down access using hosts.allow, hosts.deny and/or iptables.
 
+## Example cron job
+
+This example cron job will start a backup at 06.15 every day:
+
+```
+15 06 * * * /home/a_user/cron/dobackup.sh
+```
+
+The preceeding cron job will run the dobackup.sh script:
+
+```
+#!/bin/bash
+
+ENVID=1
+TASKID=1
+
+# Log in
+
+ipport="127.0.0.1:443"
+
+guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Back-up
+
+curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=$ENVID&task_id=$TASKID"
+```
+
+Ensure dobackup.sh is executable with 'chmod +x dobackup.sh'.
+
 ## Dev
 
 rsyncbackup.db schema:
