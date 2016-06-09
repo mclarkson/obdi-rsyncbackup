@@ -243,6 +243,16 @@
 
     <!-- Backup Tasks -->
 
+    <!-- Left pad Action buttons -->
+    <style>
+    td a .fa-cogs,
+    td a .fa-play,
+    td a .fa-files-o
+    {
+      padding-left: 6px
+    }
+    </style>
+
     <div ng-if="backuptasks" class="col-sm-12">
       <h4 class="page-header" style="margin-top: {{spacing}}px">
         {{env.DcDispName}} - {{env.DispName}}</h4>
@@ -272,14 +282,18 @@
               <td style="width: 100%">{{item.TaskDesc}}</td>
               <td>{{item.CapTag}}</td>
               <td style="white-space: nowrap">
-		<a href="#" ng-click="DeleteItem(item.TaskDesc,item.Id)">
-		  <i class="fa fa-trash-o red" title="Delete Item"></i></a>
-		<a href="#" ng-click="EditTask(item.TaskDesc,item.CapTag,item.Id)">
-		  <i class="fa fa-edit" title="Edit Item"></i></a>
+		<a href="#" ng-click="DeleteBackupTask(item.TaskDesc,item.Id)">
+		  <i class="fa fa-trash-o red" title="Delete Backup Task"></i></a>
+		<a href="#" ng-click="ShowFiles(item.TaskDesc,item.CapTag,item.Id)">
+		  <i class="fa fa-files-o" title="View Snapshots and Files"></i></a>
+		<a href="#" ng-click="EditBackupTask(item.TaskDesc,item.CapTag,item.Id)">
+		  <i class="fa fa-edit" title="Edit Backup Task"></i></a>
 		<a href="#" ng-click="ConfigureSettings($index)">
 		  <i class="fa fa-cog" title="Settings"></i></a>
 		<a href="#" ng-click="ConfigureIncludes($index)">
 		  <i class="fa fa-cogs" title="Includes and Excludes"></i></a>
+		<a href="#" ng-click="RunBackup($index)">
+		  <i class="fa fa-play green" title="Run a full backup now"></i></a>
               </td>
             </tr>
           </table>
@@ -481,7 +495,7 @@
 	    <td style="width: 100%">
 	      <div ng-repeat="exclitem in item.Excludes">
 		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
-                  <i title="Delete Item" class="fa fa-minus red"></i></a>
+                  <i title="Delete Exclude" class="fa fa-minus red"></i></a>
 		  {{exclitem.Path}}</p>
 	      </div>
 	      <p><a title="Add Exclude" href="" ng-click="NewExclude(item.Id,$index)">
@@ -498,6 +512,75 @@
       </div> <!-- table-responsive -->
       &nbsp;<br/>&nbsp;<br/>
     </div>
-  </div>
 
+    <!-- Show Files -->
+
+    <div ng-if="showfiles" class="col-sm-12">
+
+      <h4 class="page-header" style="margin-top: {{spacing}}px">
+        {{curtask.TaskDesc}}</h4>
+
+      <!--
+      <button class="btn btn-sm btn-default" type="button"
+	ng-click="AddInclude()">
+	<i class="fa fa-plus-circle"> </i> Add Host</button>
+
+      <button class="btn btn-sm btn-success pull-right" type="button"
+	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
+	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
+      -->
+
+      <style>
+      td p {
+	  white-space: nowrap;
+	  margin-bottom: 2px;
+      }
+      </style>
+
+      <div class="table-responsive" style="margin-top: 8px;">
+	<table class="table table-striped table-bordered"
+	  style="margin-bottom:4px;">
+	  <thead>
+	  <tr>
+	    <th style="text-align: center;">
+	      <input type="checkbox" ng-click="SelectAllNone()"
+	      ng-model="checkbox_allnone">
+	    </th>
+	    <th>Host</th>
+	    <th>Include</th>
+	    <th>Excludes</th>
+	    <th>Action</th>
+	  </tr>
+	  </thead>
+	  <tbody>
+	    <tr ng-repeat="item in includes | filter:includesfilter">
+	    <td style="text-align: center;">
+	      <input type="checkbox"
+	      ng-model="item.Selected"
+	      ng-change="Selected($index)">
+	    </td>
+	    <td>{{item.Host}}</td>
+	    <td>{{item.Base}}</td>
+	    <td style="width: 100%">
+	      <div ng-repeat="exclitem in item.Excludes">
+		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
+                  <i title="Delete Exclude" class="fa fa-minus red"></i></a>
+		  {{exclitem.Path}}</p>
+	      </div>
+	      <p><a title="Add Exclude" href="" ng-click="NewExclude(item.Id,$index)">
+                 <i class="fa fa-plus green"></i> New</a></p>
+	    </td>
+	    <td style="white-space: nowrap">
+	      <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">
+		<i class="fa fa-trash-o red" title="Delete Include"></i></a>
+	      <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
+		<i class="fa fa-edit" title="Edit Include"></i></a>
+	    </td>
+	  </tr>
+	</table>
+      </div> <!-- table-responsive -->
+      &nbsp;<br/>&nbsp;<br/>
+    </div>
+
+  </div>
 </div>

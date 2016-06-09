@@ -50,6 +50,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.tasks_result_in_progress = false;
   $scope.envchosen = false;
   $scope.backuptasks = true;
+  $scope.showfiles = false;
   $scope.editincludes = false;
   $scope.editsettings = false;
   $scope.btnbackupdisabled = true;
@@ -107,6 +108,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editincludes = false;
     $scope.editsettings = false;
     $scope.gettingsettings = false;
+    $scope.showfiles = false;
     $scope.gotsettings = false;
     $scope.spacing = 20;
     $scope.message_jobid = 0;
@@ -165,13 +167,17 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
-  $scope.RunBackup = function() {
+  $scope.RunBackup = function(index) {
   // ----------------------------------------------------------------------
 
+    if( typeof index !== 'undefined' ) $scope.curtask = $scope.tasks[index];
+
+    var itemsprop = "";
     var items = "";
     var comma = "";
     for( var i=0; i<$scope.includes.length; ++i ) {
       if( $scope.includes[i].Selected == true ) {
+        itemsprop = "&items=";
         items += comma + $scope.includes[i].Id;
         comma = ",";
       }
@@ -182,7 +188,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
            + "/rsyncbackup/backup?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
-           + "&items=" + items
+           + itemsprop + items
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
@@ -613,6 +619,64 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // --------
 
   // ----------------------------------------------------------------------
+  $scope.ShowFiles = function( ) {
+  // ----------------------------------------------------------------------
+  // Runs the helloworld-runscript.sh script on the worker.
+
+    $scope.showfiles_result = false;
+    $scope.showfiles_result_in_progress = true;
+
+    clearMessages();
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/tasks?env_id="
+           + $scope.env.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      try {
+        $scope.tasks = $.parseJSON(data.Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+      }
+
+      $scope.spacing = 0;
+      $scope.task_result = true;
+      $scope.tasks_result_in_progress = false;
+      $scope.showkeybtnblockhidden = true;
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // --------
+
+  // ----------------------------------------------------------------------
   $scope.DeleteInclude = function( Host, Base, Id ) {
   // ----------------------------------------------------------------------
 
@@ -705,7 +769,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // --------
 
   // ----------------------------------------------------------------------
-  $scope.DeleteItem = function( TaskDesc, Id ) {
+  $scope.DeleteBackupTask = function( TaskDesc, Id ) {
   // ----------------------------------------------------------------------
 
     var modalInstance = $uibModal.open({
@@ -936,7 +1000,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // --------------------------------------------------------------------
-  $scope.EditTask = function (TaskDesc, CapTag, Id) {
+  $scope.EditBackupTask = function (TaskDesc, CapTag, Id) {
   // --------------------------------------------------------------------
 
     $scope.TaskDesc = TaskDesc;
