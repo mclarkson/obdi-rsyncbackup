@@ -42,11 +42,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.message_jobid = 0;
 
   // Hiding/Showing
-  $scope.btnsayhellodisabled = true;
   $scope.btnsayhellopressed = false;
   $scope.btnenvlistdisabled = false;
   $scope.showkeybtnblockhidden = false;
-  $scope.page_result = false;
+  $scope.task_result = false;
+  $scope.tasks_btn_not_pressed = true;
+  $scope.tasks_result_in_progress = false;
   $scope.envchosen = false;
   $scope.backuptasks = true;
   $scope.editincludes = false;
@@ -96,11 +97,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.Restart = function() {
   // ----------------------------------------------------------------------
     clearMessages();
-    $scope.btnsayhellodisabled = true;
     $scope.btnenvlistdisabled = false;
     $scope.showkeybtnblockhidden = false;
     $scope.btnapplysettingsdisabled = false;
-    $scope.page_result = false;
+    $scope.task_result = false;
+    $scope.tasks_btn_not_pressed = true;
+    $scope.tasks_result_in_progress = false;
     $scope.envchosen = false;
     $scope.editincludes = false;
     $scope.editsettings = false;
@@ -122,7 +124,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.envchosen = true;
     $scope.btnenvlistdisabled = true;
     $scope.env = envobj;
-    $scope.btnsayhellodisabled = false;
+    $scope.tasks_btn_not_pressed = true;
     $scope.status.isopen = !$scope.status.isopen; //close the dropdown
   };
 
@@ -554,7 +556,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
-    //$scope.page_result = false;
+    $scope.task_result = false;
+    $scope.tasks_btn_not_pressed = false;
+    $scope.tasks_result_in_progress = true;
     //$scope.tasks = "";
 
     clearMessages();
@@ -576,7 +580,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       $scope.spacing = 0;
-      $scope.page_result = true;
+      $scope.task_result = true;
+      $scope.tasks_result_in_progress = false;
       $scope.showkeybtnblockhidden = true;
 
     }).error( function(data,status) {

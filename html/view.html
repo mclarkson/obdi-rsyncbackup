@@ -246,8 +246,10 @@
     <div ng-if="backuptasks" class="col-sm-12">
       <h4 class="page-header" style="margin-top: {{spacing}}px">
         {{env.DcDispName}} - {{env.DispName}}</h4>
-      <p ng-if="!page_result">Press the Show Items button.</p>
-      <div ng-if="page_result">
+      <p ng-if="tasks_btn_not_pressed">Press the Show Backup Tasks button.</p>
+      <p ng-if="tasks_result_in_progress">Getting list of tasks. This might take a while
+        <i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
+      <div ng-if="task_result">
 
 	<button class="btn btn-sm btn-default" type="button"
 	  ng-click="AddTask()">
