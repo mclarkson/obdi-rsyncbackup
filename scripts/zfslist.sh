@@ -15,8 +15,7 @@ while read name used avail type x; do
         echo "Invalid output from zfs command."
         echo "  zfs list -H -r $BASEDIR -t filesystem,snapshot -o name,used,avail,type"
         echo "Produced:"
-        echo -n "  "
-        zfs list -H -r $BASEDIR -t filesystem,snapshot -o name,used,avail,type 2>&1
+        echo "  $Output"
         echo "Output should contain exactly 4 columns on each line."
         exit 1
     }
