@@ -167,7 +167,51 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
-  $scope.RunBackup = function(index) {
+  $scope.RunBackup = function( TaskDesc, index ) {
+  // ----------------------------------------------------------------------
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'StartFullBackup.html',
+      controller: $scope.ModalRunBackupInstanceCtrl,
+      size: 'sm',
+      resolve: {
+        // the loginname variable is passed to the ModalInstanceCtrl
+        TaskDesc: function () {
+          return TaskDesc;
+        },
+        index: function () {
+          return index;
+        }
+      }
+    });
+
+    modalInstance.result.then(function () {
+      $scope.RunBackupRest(index);
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  }
+
+  // --------------------------------------------------------------------
+  $scope.ModalRunBackupInstanceCtrl = function ($scope, $uibModalInstance,
+      TaskDesc, index) {
+  // --------------------------------------------------------------------
+
+    // So the template can access 'loginname' in this new scope
+    $scope.TaskDesc = TaskDesc;
+    $scope.index = index;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.RunBackupRest = function(index) {
   // ----------------------------------------------------------------------
 
     if( typeof index !== 'undefined' ) $scope.curtask = $scope.tasks[index];
@@ -316,6 +360,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.includes = [];
     $scope.gettingsettings = true;
     $scope.gotsettings = false;
+    $scope.backuptasks = false;
+    $scope.editsettings = true;
+    $scope.editincludes = false;
+    $scope.spacing = 0;
 
     $http({
       method: 'GET',
@@ -369,10 +417,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.login.pageurl = "login.html";
       }
     });
-
-    $scope.backuptasks = false;
-    $scope.editsettings = true;
-    $scope.editincludes = false;
   }
 
   // ----------------------------------------------------------------------
@@ -456,6 +500,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.backuptasks = true;
     $scope.editincludes = false;
     $scope.editsettings = false;
+    $scope.showfiles = false;
+    $scope.spacing = 0;
   }
 
   // ----------------------------------------------------------------------
@@ -619,10 +665,13 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // --------
 
   // ----------------------------------------------------------------------
-  $scope.ShowFiles = function( ) {
+  $scope.ShowFiles = function( index ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
+    $scope.curtask = $scope.tasks[index];
+    $scope.backuptasks = false;
+    $scope.showfiles = true;
     $scope.showfiles_result = false;
     $scope.showfiles_result_in_progress = true;
 

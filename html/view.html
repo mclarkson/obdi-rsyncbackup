@@ -33,6 +33,19 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="StartFullBackup.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Start Full Backup</h3>
+    </div>
+    <div class="modal-body">
+      Start a backup of all servers in &ldquo;{{TaskDesc}}&rdquo;?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">Yes</button>
+        <button class="btn btn-success" ng-click="cancel()">No</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="DeleteInclude.html">
     <div class="modal-header">
         <h3 class="modal-title">Delete Include</h3>
@@ -169,7 +182,7 @@
           <i class="fa fa-refresh"> </i> Restart</button>
 
         <button class="btn btn-sm btn-default pull-right" type="button"
-        ng-if="mainview && (editincludes || editsettings)" ng-click="Back()"
+        ng-if="mainview && (editincludes || editsettings || showfiles)" ng-click="Back()"
         style="margin-top: -5px;">
           <i class="fa fa-arrow-left"> </i> Go Back</button>
 
@@ -284,7 +297,7 @@
               <td style="white-space: nowrap">
 		<a href="#" ng-click="DeleteBackupTask(item.TaskDesc,item.Id)">
 		  <i class="fa fa-trash-o red" title="Delete Backup Task"></i></a>
-		<a href="#" ng-click="ShowFiles(item.TaskDesc,item.CapTag,item.Id)">
+		<a href="#" ng-click="ShowFiles($index)">
 		  <i class="fa fa-files-o" title="View Snapshots and Files"></i></a>
 		<a href="#" ng-click="EditBackupTask(item.TaskDesc,item.CapTag,item.Id)">
 		  <i class="fa fa-edit" title="Edit Backup Task"></i></a>
@@ -292,7 +305,7 @@
 		  <i class="fa fa-cog" title="Settings"></i></a>
 		<a href="#" ng-click="ConfigureIncludes($index)">
 		  <i class="fa fa-cogs" title="Includes and Excludes"></i></a>
-		<a href="#" ng-click="RunBackup($index)">
+		<a href="#" ng-click="RunBackup(item.TaskDesc,$index)">
 		  <i class="fa fa-play green" title="Run a full backup now"></i></a>
               </td>
             </tr>
@@ -303,20 +316,10 @@
 
     <!-- Settings -->
 
-    <div ng-if="editsettings" class="form-horizontal prepend-xs-1 col-sm-12">
+    <div ng-if="editsettings" class="form-horizontal col-sm-12">
 
       <h4 class="page-header" style="margin-top: {{spacing}}px">
         {{curtask.TaskDesc}}</h4>
-
-<!--
-      <button class="btn btn-sm btn-default" type="button"
-	ng-click="AddInclude()">
-	<i class="fa fa-plus-circle"> </i> Add Host</button>
-
-      <button class="btn btn-sm btn-success pull-right" type="button"
-	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
-	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
--->
 
       <div ng-if="gettingsettings">
 	<p ng-if="!pluginsAvailFinished">Getting settings
