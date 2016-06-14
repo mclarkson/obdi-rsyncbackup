@@ -522,7 +522,7 @@
     <div ng-if="showfiles" class="col-sm-12">
 
       <h4 class="page-header" style="margin-top: {{spacing}}px">
-        {{curtask.TaskDesc}}</h4>
+        Snapshots and Files for {{curtask.TaskDesc}}</h4>
 
       <!--
       <button class="btn btn-sm btn-default" type="button"
@@ -577,18 +577,24 @@
         This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
 
       <div ng-if="showfiles_files" class="table-responsive" style="margin-top: 8px;">
+
+        <p ng-if="path_arr.length == 0">Path: /</p>
+        <p ng-if="path_arr.length > 0">Path: <span ng-repeat="p in path_arr">
+          / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
+
 	<table class="table table-striped table-bordered"
 	  style="margin-bottom:4px;">
 	  <thead>
 	  <tr>
-	    <th>File Type/Perms</th>
+	    <th>Type/Perms</th>
 	    <th>Links</th>
 	    <th>Group</th>
 	    <th>User</th>
 	    <th>Size</th>
 	    <th>Date</th>
 	    <th>Time</th>
-	    <th>File Name</th>
+	    <th style="width: 100%">File Name</th>
+	    <th>Action</th>
 	  </tr>
 	  </thead>
 	  <tbody>
@@ -601,16 +607,16 @@
 	    <td>{{item.date}}</td>
 	    <td>{{item.time}}</td>
 	    <td>
-              <a ng-if="item.type == 'd'" href="#" title="Enter Directory"
-                ng-click="EnterDirectory()">{{item.name}}</a>
+              <a ng-if="item.type == 'd'" href="#" title="Display Directory"
+                ng-click="ViewDirectory(item.name)">{{item.name}}</a>
               <span ng-if="item.type != 'd'">{{item.name}}</span>
             </td>
 	    <td style="white-space: nowrap">
 	      <a ng-if="item.type == 'snapshot'"
                 href="#" ng-click="DeleteSnapshot(item.Host,item.Base,item.Id)">
 		<i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
-	      <a href="#" ng-click="ViewDirectory(item.Host,item.Base,item.Id)">
-		<i class="fa fa-eye" title="View Files"></i></a>
+	      <a href="#" ng-click="ViewDirectory(item.name)" ng-if="item.type == 'd'">
+		<i class="fa fa-folder-open-o" title="Display Directory"></i></a>
 	    </td>
 	  </tr>
 	</table>

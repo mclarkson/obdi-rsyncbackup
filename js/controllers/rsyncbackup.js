@@ -30,6 +30,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.zfslist = [];
   $scope.filelist = [];
   $scope.tasks = "";
+  $scope.path = "";
   $scope.newitem = {};
   $scope.newitem.Text = "";
   $scope.checkbox_allnone = false;
@@ -56,6 +57,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.showfiles_result = false;
   $scope.showfiles_result_in_progress = false;
   $scope.showfiles_files = false;
+  $scope.showfiles_root = true;
   $scope.showfiles_files_in_progress = false;
   $scope.editincludes = false;
   $scope.editsettings = false;
@@ -122,6 +124,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editsettings = false;
     $scope.gettingsettings = false;
     $scope.showfiles = false;
+    $scope.showfiles_result = false;
+    $scope.showfiles_files = false;
+    $scope.showfiles_root = true;
     $scope.gotsettings = false;
     $scope.spacing = 20;
     $scope.message_jobid = 0;
@@ -517,6 +522,11 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editincludes = false;
     $scope.editsettings = false;
     $scope.showfiles = false;
+    $scope.showfiles_result = false;
+    $scope.showfiles_result_in_progress = false;
+    $scope.showfiles_files = false;
+    $scope.showfiles_files_in_progress = false;
+    $scope.showfiles_root = true;
     $scope.spacing = 0;
   }
 
@@ -752,15 +762,25 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     }).success( function(data, status, headers, config) {
 
       $scope.filelist = [];
+      filelist = [];
 
       // Extract data into array
       //
       try {
-        $scope.filelist = $.parseJSON(data[0].Text);
+        filelist = $.parseJSON(data[0].Text);
       } catch (e) {
         clearMessages();
         $scope.message = "Error: " + e;
         $scope.message_jobid = id;
+      }
+
+      for( var i=0; i<filelist.length; ++i ) {
+        if( $scope.showfiles_root == true && filelist[i].name == ".." ) {
+          continue;
+        }
+        if( filelist[i].name != "." ) {
+          $scope.filelist.push( filelist[i] );
+        }
       }
 
       $scope.showfiles_files = true;
@@ -837,23 +857,55 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.ViewDirectory = function( index ) {
+  $scope.ViewDirectory = function( path ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
-    $scope.curtask = $scope.tasks[index];
-    $scope.backuptasks = false;
-    $scope.showfiles = true;
+    if( typeof path === 'number' ) {
+      $scope.path = "";
+      $scope.showfiles_root = false;
+      for( var i=0; i<=path; ++i ) {
+        $scope.path += "/" + $scope.path_arr[i];
+      }
+      for( var j=i; j<=$scope.path_arr.length; ++j ) {
+        $scope.path_arr.pop();
+      }
+    } else if( typeof path === 'undefined' ) {
+      $scope.path = "";
+      $scope.path_arr = [];
+      $scope.showfiles_root = true;
+    } else if( path == ".." ) {
+      $scope.path = "";
+      $scope.path_arr.pop();
+      if( $scope.path_arr.length == 0 ) {
+        $scope.path_arr = [];
+        $scope.showfiles_root = true;
+      } else {
+        $scope.showfiles_root = false;
+        for( var i=0; i<$scope.path_arr.length; ++i ) {
+          $scope.path += "/" + $scope.path_arr[i];
+        }
+      }
+    } else {
+      $scope.path += "/" + path;
+      $scope.path_arr.push( path );
+      $scope.showfiles_root = false;
+    }
+
+    //$scope.curtask = $scope.tasks[index];
     $scope.showfiles_result = false;
-    $scope.showfiles_result_in_progress = true;
+    $scope.showfiles_result_in_progress = false;
+    $scope.showfiles_files = false;
+    $scope.showfiles_files_in_progress = true;
 
     clearMessages();
 
     $http({
       method: 'GET',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/rsyncbackup/zfslist?env_id=" + $scope.env.Id
+           + "/rsyncbackup/ls?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
+           + "&path=" + $scope.path
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
@@ -891,17 +943,17 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // Runs the helloworld-runscript.sh script on the worker.
 
     $scope.curtask = $scope.tasks[index];
+    $scope.backuptasks = false;
+    $scope.showfiles = true;
     $scope.showfiles_result = false;
-    $scope.showfiles_result_in_progress = false;
-    $scope.showfiles_files = false;
-    $scope.showfiles_files_in_progress = true;
+    $scope.showfiles_result_in_progress = true;
 
     clearMessages();
 
     $http({
       method: 'GET',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/rsyncbackup/ls?env_id=" + $scope.env.Id
+           + "/rsyncbackup/zfslist?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {

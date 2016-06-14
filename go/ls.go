@@ -113,6 +113,13 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	task_id_str := args.QueryString["task_id"][0]
 
+	// path is optional, '?path=xxx'
+
+	path_str := ""
+	if len(args.QueryString["path"]) > 0 {
+		path_str = args.QueryString["path"][0]
+	}
+
 	// Check if the user is allowed to access the environment
 	var err error
 	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
@@ -156,13 +163,11 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	}
 	Unlock()
 
-        path := ""
-
 	sa := ScriptArgs{
 		// The name of the script to send an run
 		ScriptName: "ls.sh",
 		// The arguments to use when running the script
-		CmdArgs: setting.BaseDir + "/" + path,
+		CmdArgs: setting.BaseDir + "/" + path_str,
 		// Environment variables to pass to the script
 		EnvVars: "", //`A=1 B=2 C='a b c' D=44`,
 		// Name of an environment capability (where isworkerdef == true)
