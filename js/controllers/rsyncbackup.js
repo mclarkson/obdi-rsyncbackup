@@ -28,6 +28,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.excludes = [];
   $scope.env = {};
   $scope.zfslist = [];
+  $scope.filelist = [];
   $scope.tasks = "";
   $scope.newitem = {};
   $scope.newitem.Text = "";
@@ -52,6 +53,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.envchosen = false;
   $scope.backuptasks = true;
   $scope.showfiles = false;
+  $scope.showfiles_result = false;
+  $scope.showfiles_result_in_progress = false;
+  $scope.showfiles_files = false;
+  $scope.showfiles_files_in_progress = false;
   $scope.editincludes = false;
   $scope.editsettings = false;
   $scope.btnbackupdisabled = true;
@@ -61,6 +66,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.includesfilter = "";
   $scope.tasksfilter = "";
   $scope.zfslistfilter = "";
+  $scope.filelistfilter = "";
   $scope.status = {};
 
   // Fixes
@@ -81,8 +87,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.includes[i].Selected = false;
       }
       ShouldRunBackupButtonBeEnabled();
-    } else if( $scope.showfiles ) {
+    } else if( $scope.showfiles_result ) {
       $scope.zfslistfilter = args;
+    } else if( $scope.showfiles_files ) {
+      $scope.filelistfilter = args;
     } else {
       $scope.tasksfilter = args;
     } 
@@ -120,6 +128,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.includesfilter = "";
     $scope.tasksfilter = "";
     $scope.checkbox_allnone = false;
+    $scope.zfslist = [];
+    $scope.filelist = [];
   };
 
   // ----------------------------------------------------------------------
@@ -731,6 +741,54 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
+  $scope.GetFileListOutputLine = function( id ) {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/outputlines?job_id=" + id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      $scope.filelist = [];
+
+      // Extract data into array
+      //
+      try {
+        $scope.filelist = $.parseJSON(data[0].Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+        $scope.message_jobid = id;
+      }
+
+      $scope.showfiles_files = true;
+      $scope.showfiles_files_in_progress = false;
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // ----------------------------------------------------------------------
   $scope.GetZfsListOutputLine = function( id ) {
   // ----------------------------------------------------------------------
 
@@ -779,7 +837,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
-  $scope.ShowFiles = function( index ) {
+  $scope.ViewDirectory = function( index ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
@@ -795,6 +853,55 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       method: 'GET',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
            + "/rsyncbackup/zfslist?env_id=" + $scope.env.Id
+           + "&task_id=" + $scope.curtask.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      $scope.PollForJobFinish(data.JobId,50,0,$scope.GetFileListOutputLine);
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.ShowFilesystemsAndSnapshots = function( index ) {
+  // ----------------------------------------------------------------------
+  // Runs the helloworld-runscript.sh script on the worker.
+
+    $scope.curtask = $scope.tasks[index];
+    $scope.showfiles_result = false;
+    $scope.showfiles_result_in_progress = false;
+    $scope.showfiles_files = false;
+    $scope.showfiles_files_in_progress = true;
+
+    clearMessages();
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/ls?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
