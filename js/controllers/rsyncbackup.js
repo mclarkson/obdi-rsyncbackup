@@ -27,6 +27,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.settings = {};
   $scope.excludes = [];
   $scope.env = {};
+  $scope.zfslist = [];
   $scope.tasks = "";
   $scope.newitem = {};
   $scope.newitem.Text = "";
@@ -42,7 +43,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.message_jobid = 0;
 
   // Hiding/Showing
-  $scope.btnsayhellopressed = false;
+  $scope.btnshowbackuptasksdisabled = true;
   $scope.btnenvlistdisabled = false;
   $scope.showkeybtnblockhidden = false;
   $scope.task_result = false;
@@ -59,26 +60,29 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.gotsettings = false;
   $scope.includesfilter = "";
   $scope.tasksfilter = "";
+  $scope.zfslistfilter = "";
   $scope.status = {};
 
   // Fixes
   $scope.spacing = 20;
 
   // Disable the search box
-  $rootScope.$broadcast( "searchdisabled", true );
+  $rootScope.$broadcast( "searchdisabled", false );
 
   // ----------------------------------------------------------------------
   $scope.$on( "search", function( event, args ) {
   // ----------------------------------------------------------------------
   // Not used since search is disabled
 
-    if( $scope.editincludes == true ) {
+    if( $scope.editincludes ) {
       $scope.includesfilter = args;
       $scope.checkbox_allnone = false;
       for( var i=0; i < $scope.includes.length; i=i+1 ) {
         $scope.includes[i].Selected = false;
       }
       ShouldRunBackupButtonBeEnabled();
+    } else if( $scope.showfiles ) {
+      $scope.zfslistfilter = args;
     } else {
       $scope.tasksfilter = args;
     } 
@@ -99,6 +103,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
     clearMessages();
     $scope.btnenvlistdisabled = false;
+    $scope.btnshowbackuptasksdisabled = true;
     $scope.showkeybtnblockhidden = false;
     $scope.btnapplysettingsdisabled = false;
     $scope.task_result = false;
@@ -125,6 +130,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $event.stopPropagation();
     $scope.envchosen = true;
     $scope.btnenvlistdisabled = true;
+    $scope.btnshowbackuptasksdisabled = false;
     $scope.env = envobj;
     $scope.tasks_btn_not_pressed = true;
     $scope.status.isopen = !$scope.status.isopen; //close the dropdown
@@ -665,6 +671,114 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // --------
 
   // ----------------------------------------------------------------------
+  $scope.PollForJobFinish = function( id,delay,count,func ) {
+  // ----------------------------------------------------------------------
+      $timeout( function() {
+        $http({
+          method: 'GET',
+          url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+               + "/jobs?job_id=" + id
+							 + '&time='+new Date().getTime().toString()
+        }).success( function(data, status, headers, config) {
+          job = data[0];
+          if(job.Status == 0 || job.Status == 1 || job.Status == 4) {
+            if( count > 120 ) {
+              clearMessages();
+              $scope.message = "Job took too long. check job ID " +
+                               + id + ", then try again.";
+              $scope.message_jobid = job['Id'];
+            } else {
+              // Then retry: capped exponential backoff
+              delay = delay < 600 ? delay * 2 : 1000;
+              count = count + 1;
+              $scope.PollForJobFinish(id,delay,count,func);
+            }
+          } else if(job.Status == 5) { // Job was successfully completed
+            func( id );
+          } else { // Some error
+            clearMessages();
+            $scope.message = "Server said: " + job['StatusReason'];
+            $scope.message_jobid = job['Id'];
+            if( func == $scope.GetVersionListOutputLine ) {
+              $scope.versionlist_error = true;
+            }
+          }
+        }).error( function(data,status) {
+          if (status>=500) {
+            $scope.login.errtext = "Server error.";
+            $scope.login.error = true;
+            $scope.login.pageurl = "login.html";
+          } else if (status==401) {
+            $scope.login.errtext = "Session expired.";
+            $scope.login.error = true;
+            $scope.login.pageurl = "login.html";
+          } else if (status>=400) {
+            clearMessages();
+            $scope.message = "Server said: " + data['Error'];
+            $scope.error = true;
+          } else if (status==0) {
+            // This is a guess really
+            $scope.login.errtext = "Could not connect to server.";
+            $scope.login.error = true;
+            $scope.login.pageurl = "login.html";
+          } else {
+            $scope.login.errtext = "Logged out due to an unknown error.";
+            $scope.login.error = true;
+            $scope.login.pageurl = "login.html";
+          }
+        });
+      }, delay );
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.GetZfsListOutputLine = function( id ) {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/outputlines?job_id=" + id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      $scope.zfslist = [];
+
+      // Extract data into array
+      //
+      try {
+        $scope.zfslist = $.parseJSON(data[0].Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+        $scope.message_jobid = id;
+      }
+
+      $scope.showfiles_result = true;
+      $scope.showfiles_result_in_progress = false;
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // ----------------------------------------------------------------------
   $scope.ShowFiles = function( index ) {
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
@@ -680,22 +794,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $http({
       method: 'GET',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/rsyncbackup/tasks?env_id="
-           + $scope.env.Id
+           + "/rsyncbackup/zfslist?env_id=" + $scope.env.Id
+           + "&task_id=" + $scope.curtask.Id
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-      try {
-        $scope.tasks = $.parseJSON(data.Text);
-      } catch (e) {
-        clearMessages();
-        $scope.message = "Error: " + e;
-      }
-
-      $scope.spacing = 0;
-      $scope.task_result = true;
-      $scope.tasks_result_in_progress = false;
-      $scope.showkeybtnblockhidden = true;
+      $scope.PollForJobFinish(data.JobId,50,0,$scope.GetZfsListOutputLine);
 
     }).error( function(data,status) {
       if (status>=500) {
