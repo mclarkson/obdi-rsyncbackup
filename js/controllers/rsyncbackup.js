@@ -512,7 +512,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.tasksfilter = "";
     $scope.checkbox_allnone = false;
 
-    $scope.FillIncludesArray( $scope.curtask.Id )
+    $scope.FillIncludesArray( $scope.curtask.Id );
   }
 
   // ----------------------------------------------------------------------
@@ -861,35 +861,39 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
+    // Manipulate Path navigation array
     if( typeof path === 'number' ) {
-      $scope.path = "";
-      $scope.showfiles_root = false;
-      for( var i=0; i<=path; ++i ) {
-        $scope.path += "/" + $scope.path_arr[i];
-      }
-      for( var j=i; j<=$scope.path_arr.length; ++j ) {
+      var index = path;
+      var num2del = $scope.path_arr.length-(index+1)
+      for( var i=0; i<num2del; ++i ) {
         $scope.path_arr.pop();
       }
+      $scope.showfiles_pathnav_clicked = true;
+      $scope.showfiles_root = false;
     } else if( typeof path === 'undefined' ) {
-      $scope.path = "";
+      $scope.showfiles_pathnav_clicked = false;
       $scope.path_arr = [];
       $scope.showfiles_root = true;
     } else if( path == ".." ) {
-      $scope.path = "";
+      if( $scope.showfiles_pathnav_clicked ) {
+	$scope.showfiles_pathnav_clicked = false;
+      }
       $scope.path_arr.pop();
       if( $scope.path_arr.length == 0 ) {
         $scope.path_arr = [];
         $scope.showfiles_root = true;
       } else {
         $scope.showfiles_root = false;
-        for( var i=0; i<$scope.path_arr.length; ++i ) {
-          $scope.path += "/" + $scope.path_arr[i];
-        }
       }
     } else {
-      $scope.path += "/" + path;
       $scope.path_arr.push( path );
       $scope.showfiles_root = false;
+    }
+
+    // Create path text from path array
+    $scope.path = "";
+    for( var i=0; i<$scope.path_arr.length; ++i ) {
+      $scope.path += "/" + $scope.path_arr[i];
     }
 
     //$scope.curtask = $scope.tasks[index];
