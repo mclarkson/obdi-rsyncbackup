@@ -232,6 +232,37 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
+  $scope.RunBackupSelected = function( ) {
+  // ----------------------------------------------------------------------
+
+    var modalInstance = $uibModal.open({
+      templateUrl: 'StartSelectedBackup.html',
+      controller: $scope.ModalRunSelectedBackupInstanceCtrl,
+      size: 'sm',
+    });
+
+    modalInstance.result.then(function () {
+      $scope.RunBackupRest();
+    }, function () {
+      $log.info('Modal dismissed at: ' + new Date());
+    });
+  }
+
+  // --------------------------------------------------------------------
+  $scope.ModalRunSelectedBackupInstanceCtrl = function ($scope,
+    $uibModalInstance) {
+  // --------------------------------------------------------------------
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+  };
+
+  // ----------------------------------------------------------------------
   $scope.RunBackupRest = function(index) {
   // ----------------------------------------------------------------------
 

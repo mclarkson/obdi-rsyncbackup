@@ -46,6 +46,19 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="StartSelectedBackup.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Start Partial Backup</h3>
+    </div>
+    <div class="modal-body">
+      Start a backup of selected servers?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">Yes</button>
+        <button class="btn btn-success" ng-click="cancel()">No</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="DeleteInclude.html">
     <div class="modal-header">
         <h3 class="modal-title">Delete Include</h3>
@@ -462,7 +475,7 @@
 	<i class="fa fa-plus-circle"> </i> Add Host</button>
 
       <button class="btn btn-sm btn-success pull-right" type="button"
-	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
+	ng-click="RunBackupSelected()" ng-disabled="btnbackupdisabled">
 	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
 
       <style>
