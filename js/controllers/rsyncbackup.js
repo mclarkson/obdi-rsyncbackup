@@ -966,7 +966,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-      $scope.PollForJobFinish(data.JobId,50,0,$scope.GetFileListOutputLine);
+      $scope.PollForJobFinish(data.JobId,10,0,$scope.GetFileListOutputLine);
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -1015,7 +1015,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-      $scope.PollForJobFinish(data.JobId,50,0,$scope.GetZfsListOutputLine);
+      $scope.PollForJobFinish(data.JobId,10,0,$scope.GetZfsListOutputLine);
 
     }).error( function(data,status) {
       if (status>=500) {
