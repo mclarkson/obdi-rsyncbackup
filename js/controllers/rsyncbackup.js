@@ -894,6 +894,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     // Manipulate Path navigation array
     if( typeof path === 'number' ) {
+      // 'path' var is an index value, a click in pathnav
       var index = path;
       var num2del = $scope.path_arr.length-(index+1)
       for( var i=0; i<num2del; ++i ) {
@@ -902,12 +903,14 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.showfiles_pathnav_clicked = true;
       $scope.showfiles_root = false;
     } else if( typeof path === 'undefined' ) {
+      // Bottom of the tree, reset
       $scope.showfiles_pathnav_clicked = false;
       $scope.path_arr = [];
       $scope.showfiles_root = true;
     } else if( path == ".." ) {
+      // Go up one directory
       if( $scope.showfiles_pathnav_clicked ) {
-	$scope.showfiles_pathnav_clicked = false;
+        $scope.showfiles_pathnav_clicked = false;
       }
       $scope.path_arr.pop();
       if( $scope.path_arr.length == 0 ) {
@@ -917,6 +920,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.showfiles_root = false;
       }
     } else {
+      // Descend into 'path' directory
       $scope.path_arr.push( path );
       $scope.showfiles_root = false;
     }
@@ -927,7 +931,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.path += "/" + $scope.path_arr[i];
     }
 
-    //$scope.curtask = $scope.tasks[index];
     $scope.showfiles_result = false;
     $scope.showfiles_result_in_progress = false;
     $scope.showfiles_files = false;
