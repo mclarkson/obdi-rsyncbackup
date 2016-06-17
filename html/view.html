@@ -571,7 +571,7 @@
 	  </thead>
 	  <tbody>
 	    <tr ng-repeat="item in zfslist | filter:zfslistfilter">
-	    <td><a href="#" title="View Files" ng-click="ViewDirectory()">{{item.name}}</a></td>
+	    <td><a href="#" title="View Files" ng-click="ViewSnapDirectory(item.name)">{{item.name}}</a></td>
 	    <td>{{item.type}}</td>
 	    <td>{{item.avail}}</td>
 	    <td>{{item.used}}</td>
@@ -579,7 +579,7 @@
 	      <a ng-if="item.type == 'snapshot'"
                 href="#" ng-click="DeleteSnapshot(item.Host,item.Base,item.Id)">
 		<i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
-	      <a href="#" ng-click="ViewDirectory()">
+	      <a href="#" ng-click="ViewSnapDirectory(item.name)">
 		<i class="fa fa-eye" title="View Files"></i></a>
 	    </td>
 	  </tr>
@@ -591,8 +591,9 @@
 
       <div ng-if="showfiles_files">
 
-        <p ng-if="path_arr.length == 0">Path: /</p>
-        <p ng-if="path_arr.length > 0">Path: <span ng-repeat="p in path_arr track by $index">
+        <p ng-if="path_arr.length == 0">Path: {{snapshotdir}} /</p>
+        <p ng-if="path_arr.length > 0">Path: {{snapshotdir}}
+          <span ng-repeat="p in path_arr track by $index">
           / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
 
 	<div class="table-responsive" style="margin-top: 8px;">

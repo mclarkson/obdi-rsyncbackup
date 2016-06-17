@@ -120,6 +120,16 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		path_str = args.QueryString["path"][0]
 	}
 
+	// snapshot is optional, '?snapshot=', '?snapshot=20160901.1'
+
+	snapshot_dir := ""
+	if len(args.QueryString["snapshot"]) > 0 {
+                if len(args.QueryString["snapshot"][0])>0 {
+			snapshot_dir = ".zfs/snapshot/"
+			snapshot_dir += args.QueryString["snapshot"][0] + "/"
+		}
+	}
+
 	// Check if the user is allowed to access the environment
 	var err error
 	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
@@ -167,7 +177,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		// The name of the script to send an run
 		ScriptName: "ls.sh",
 		// The arguments to use when running the script
-		CmdArgs: setting.BaseDir + "/" + path_str,
+		CmdArgs: setting.BaseDir + "/" + snapshot_dir + path_str,
 		// Environment variables to pass to the script
 		EnvVars: "", //`A=1 B=2 C='a b c' D=44`,
 		// Name of an environment capability (where isworkerdef == true)

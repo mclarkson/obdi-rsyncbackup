@@ -34,6 +34,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.newitem = {};
   $scope.newitem.Text = "";
   $scope.checkbox_allnone = false;
+  $scope.snapshotdir = "";
 
   // Pages
   $scope.mainview = true;
@@ -888,9 +889,26 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // ----------------------------------------------------------------------
+  $scope.ViewSnapDirectory = function( snap_or_fs ) {
+  // ----------------------------------------------------------------------
+
+    // snap_or_fs looks like:
+    //   backup/servers-zfs                <-- filesystem
+    //   backup/servers-zfs@20160224.1     <-- snapshot
+
+    $scope.snapshotdir = snap_or_fs.split("@")[1];
+
+    if( typeof $scope.snapshotdir === "undefined" ) {
+      $scope.snapshotdir = "";
+    }
+
+    $scope.ViewDirectory()
+
+  };
+
+  // ----------------------------------------------------------------------
   $scope.ViewDirectory = function( path ) {
   // ----------------------------------------------------------------------
-  // Runs the helloworld-runscript.sh script on the worker.
 
     // Manipulate Path navigation array
     if( typeof path === 'number' ) {
@@ -903,7 +921,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.showfiles_pathnav_clicked = true;
       $scope.showfiles_root = false;
     } else if( typeof path === 'undefined' ) {
-      // Bottom of the tree, reset
+      // Bottom of the tree, called by ViewSnapDirectory, resets path
       $scope.showfiles_pathnav_clicked = false;
       $scope.path_arr = [];
       $scope.showfiles_root = true;
@@ -944,6 +962,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + "/rsyncbackup/ls?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
            + "&path=" + $scope.path
+           + "&snapshot=" + $scope.snapshotdir
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
