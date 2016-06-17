@@ -124,7 +124,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	snapshot_dir := ""
 	if len(args.QueryString["snapshot"]) > 0 {
-                if len(args.QueryString["snapshot"][0])>0 {
+		if len(args.QueryString["snapshot"][0]) > 0 {
 			snapshot_dir = ".zfs/snapshot/"
 			snapshot_dir += args.QueryString["snapshot"][0] + "/"
 		}
