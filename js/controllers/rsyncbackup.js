@@ -79,6 +79,140 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $rootScope.$broadcast( "searchdisabled", false );
 
   // ----------------------------------------------------------------------
+  $scope.run = function() {
+  // ----------------------------------------------------------------------
+
+    if( typeof $rootScope.outputlines_plugin !== "undefined" &&
+      typeof $rootScope.outputlines_plugin.back !== "undefined" ) {
+
+        delete $rootScope.outputlines_plugin.back;
+        $scope.load();
+
+      } else {
+        // Get the list of environments
+        $scope.FillEnvironmentsArray();
+      }
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.save = function() {
+  // ----------------------------------------------------------------------
+
+    $rootScope.rsyncbackup = {};
+
+    // Data
+    $rootScope.rsyncbackup.environments = $scope.environments;
+    $rootScope.rsyncbackup.includes = $scope.includes;
+    $rootScope.rsyncbackup.settings = $scope.settings;
+    $rootScope.rsyncbackup.excludes = $scope.excludes;
+    $rootScope.rsyncbackup.env = $scope.env;
+    $rootScope.rsyncbackup.zfslist = $scope.zfslist;
+    $rootScope.rsyncbackup.filelist = $scope.filelist;
+    $rootScope.rsyncbackup.tasks = $scope.tasks;
+    $rootScope.rsyncbackup.path = $scope.path;
+    $rootScope.rsyncbackup.newitem = $scope.newitem;
+    $rootScope.rsyncbackup.checkbox_allnone = $scope.checkbox_allnone;
+    $rootScope.rsyncbackup.snapshotdir = $scope.snapshotdir;
+
+    // Pages
+    $rootScope.rsyncbackup.mainview = $scope.mainview;
+
+    // Alerting
+    $rootScope.rsyncbackup.message = $scope.message;
+    $rootScope.rsyncbackup.okmessage = $scope.okmessage;
+    $rootScope.rsyncbackup.login = $scope.login;
+    $rootScope.rsyncbackup.message_jobid = $scope.message_jobid;
+
+    // Hiding/Showing
+    $rootScope.rsyncbackup.btnshowbackuptasksdisabled = $scope.btnshowbackuptasksdisabled;
+    $rootScope.rsyncbackup.btnenvlistdisabled = $scope.btnenvlistdisabled;
+    $rootScope.rsyncbackup.showkeybtnblockhidden = $scope.showkeybtnblockhidden;
+    $rootScope.rsyncbackup.task_result = $scope.task_result;
+    $rootScope.rsyncbackup.tasks_btn_not_pressed = $scope.tasks_btn_not_pressed;
+    $rootScope.rsyncbackup.tasks_result_in_progress = $scope.tasks_result_in_progress;
+    $rootScope.rsyncbackup.envchosen = $scope.envchosen;
+    $rootScope.rsyncbackup.backuptasks = $scope.backuptasks;
+    $rootScope.rsyncbackup.showfiles = $scope.showfiles;
+    $rootScope.rsyncbackup.showfiles_result = $scope.showfiles_result;
+    $rootScope.rsyncbackup.showfiles_result_in_progress = $scope.showfiles_result_in_progress;
+    $rootScope.rsyncbackup.showfiles_files = $scope.showfiles_files;
+    $rootScope.rsyncbackup.showfiles_root = $scope.showfiles_root;
+    $rootScope.rsyncbackup.showfiles_files_in_progress = $scope.showfiles_files_in_progress;
+    $rootScope.rsyncbackup.editincludes = $scope.editincludes;
+    $rootScope.rsyncbackup.editsettings = $scope.editsettings;
+    $rootScope.rsyncbackup.btnbackupdisabled = $scope.btnbackupdisabled;
+    $rootScope.rsyncbackup.btnapplysettingsdisabled = $scope.btnapplysettingsdisabled;
+    $rootScope.rsyncbackup.gettingsettings = $scope.gettingsettings;
+    $rootScope.rsyncbackup.gotsettings = $scope.gotsettings;
+    $rootScope.rsyncbackup.includesfilter = $scope.includesfilter;
+    $rootScope.rsyncbackup.tasksfilter = $scope.tasksfilter;
+    $rootScope.rsyncbackup.zfslistfilter = $scope.zfslistfilter;
+    $rootScope.rsyncbackup.filelistfilter = $scope.filelistfilter;
+    $rootScope.rsyncbackup.status = $scope.status;
+
+    // Fixes
+    $rootScope.rsyncbackup.spacing = $scope.spacing;
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.load = function() {
+  // ----------------------------------------------------------------------
+
+    // Data
+    $scope.environments = $rootScope.rsyncbackup.environments;
+    $scope.includes = $rootScope.rsyncbackup.includes;
+    $scope.settings = $rootScope.rsyncbackup.settings;
+    $scope.excludes = $rootScope.rsyncbackup.excludes;
+    $scope.env = $rootScope.rsyncbackup.env;
+    $scope.zfslist = $rootScope.rsyncbackup.zfslist;
+    $scope.filelist = $rootScope.rsyncbackup.filelist;
+    $scope.tasks = $rootScope.rsyncbackup.tasks;
+    $scope.path = $rootScope.rsyncbackup.path;
+    $scope.newitem = $rootScope.rsyncbackup.newitem;
+    $scope.checkbox_allnone = $rootScope.rsyncbackup.checkbox_allnone;
+    $scope.snapshotdir = $rootScope.rsyncbackup.snapshotdir;
+
+    // Pages
+    $scope.mainview = $rootScope.rsyncbackup.mainview;
+
+    // Alerting
+    $scope.message = $rootScope.rsyncbackup.message;
+    $scope.okmessage = $rootScope.rsyncbackup.okmessage;
+    $scope.login = $rootScope.rsyncbackup.login;
+    $scope.message_jobid = $rootScope.rsyncbackup.message_jobid;
+
+    // Hiding/Showing
+    $scope.btnshowbackuptasksdisabled = $rootScope.rsyncbackup.btnshowbackuptasksdisabled;
+    $scope.btnenvlistdisabled = $rootScope.rsyncbackup.btnenvlistdisabled;
+    $scope.showkeybtnblockhidden = $rootScope.rsyncbackup.showkeybtnblockhidden;
+    $scope.task_result = $rootScope.rsyncbackup.task_result;
+    $scope.tasks_btn_not_pressed = $rootScope.rsyncbackup.tasks_btn_not_pressed;
+    $scope.tasks_result_in_progress = $rootScope.rsyncbackup.tasks_result_in_progress;
+    $scope.envchosen = $rootScope.rsyncbackup.envchosen;
+    $scope.backuptasks = $rootScope.rsyncbackup.backuptasks;
+    $scope.showfiles = $rootScope.rsyncbackup.showfiles;
+    $scope.showfiles_result = $rootScope.rsyncbackup.showfiles_result;
+    $scope.showfiles_result_in_progress = $rootScope.rsyncbackup.showfiles_result_in_progress;
+    $scope.showfiles_files = $rootScope.rsyncbackup.showfiles_files;
+    $scope.showfiles_root = $rootScope.rsyncbackup.showfiles_root;
+    $scope.showfiles_files_in_progress = $rootScope.rsyncbackup.showfiles_files_in_progress;
+    $scope.editincludes = $rootScope.rsyncbackup.editincludes;
+    $scope.editsettings = $rootScope.rsyncbackup.editsettings;
+    $scope.btnbackupdisabled = $rootScope.rsyncbackup.btnbackupdisabled;
+    $scope.btnapplysettingsdisabled = $rootScope.rsyncbackup.btnapplysettingsdisabled;
+    $scope.gettingsettings = $rootScope.rsyncbackup.gettingsettings;
+    $scope.gotsettings = $rootScope.rsyncbackup.gotsettings;
+    $scope.includesfilter = $rootScope.rsyncbackup.includesfilter;
+    $scope.tasksfilter = $rootScope.rsyncbackup.tasksfilter;
+    $scope.zfslistfilter = $rootScope.rsyncbackup.zfslistfilter;
+    $scope.filelistfilter = $rootScope.rsyncbackup.filelistfilter;
+    $scope.status = $rootScope.rsyncbackup.status;
+
+    // Fixes
+    $scope.spacing = $rootScope.rsyncbackup.spacing;
+  }
+
+  // ----------------------------------------------------------------------
   $scope.$on( "search", function( event, args ) {
   // ----------------------------------------------------------------------
   // Not used since search is disabled
@@ -176,8 +310,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.showOutputlines = function( id ) {
   // ----------------------------------------------------------------------
 
+    $scope.save();
     $rootScope.outputlines_plugin = {};
     $rootScope.outputlines_plugin.id = id;
+    $rootScope.outputlines_plugin.back = "plugins/rsyncbackup/html/view.html";
     $scope.setView( "plugins/systemjobs/html/outputlines.html" );
   }
 
@@ -655,9 +791,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
     });
   };
-
-  // Get the list of environments straight away
-  $scope.FillEnvironmentsArray();
 
   // REST functions
 
@@ -1831,5 +1964,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $uibModalInstance.dismiss('cancel');
     };
   };
+
+  $scope.run();
 
 });
