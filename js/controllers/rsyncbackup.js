@@ -81,6 +81,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   $scope.run = function() {
   // ----------------------------------------------------------------------
+  // Fill the env array or load saved data (by clicking back [to here])
 
     if( typeof $rootScope.outputlines_plugin !== "undefined" &&
       typeof $rootScope.outputlines_plugin.back !== "undefined" ) {
