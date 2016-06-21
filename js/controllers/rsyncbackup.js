@@ -23,6 +23,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
   // Data
   $scope.environments = [];
+  $scope.envcapmaps = [];
   $scope.includes = [];
   $scope.settings = {};
   $scope.excludes = [];
@@ -70,6 +71,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.tasksfilter = "";
   $scope.zfslistfilter = "";
   $scope.filelistfilter = "";
+  $scope.show_p2ec2_button = false;
   $scope.status = {};
 
   // Fixes
@@ -81,7 +83,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   $scope.run = function() {
   // ----------------------------------------------------------------------
-  // Fill the env array or load saved data (by clicking back [to here])
+  // Fill the env array or load saved data if we've come Back here.
 
     if( typeof $rootScope.outputlines_plugin !== "undefined" &&
       typeof $rootScope.outputlines_plugin.back !== "undefined" ) {
@@ -103,6 +105,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     // Data
     $rootScope.rsyncbackup.environments = $scope.environments;
+    $rootScope.rsyncbackup.envcapmaps = $scope.envcapmaps;
     $rootScope.rsyncbackup.includes = $scope.includes;
     $rootScope.rsyncbackup.settings = $scope.settings;
     $rootScope.rsyncbackup.excludes = $scope.excludes;
@@ -149,6 +152,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $rootScope.rsyncbackup.tasksfilter = $scope.tasksfilter;
     $rootScope.rsyncbackup.zfslistfilter = $scope.zfslistfilter;
     $rootScope.rsyncbackup.filelistfilter = $scope.filelistfilter;
+    $rootScope.rsyncbackup.show_p2ec2_button = $scope.show_p2ec2_button;
     $rootScope.rsyncbackup.status = $scope.status;
 
     // Fixes
@@ -161,6 +165,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     // Data
     $scope.environments = $rootScope.rsyncbackup.environments;
+    $scope.envcapmaps = $rootScope.rsyncbackup.envcapmaps;
     $scope.includes = $rootScope.rsyncbackup.includes;
     $scope.settings = $rootScope.rsyncbackup.settings;
     $scope.excludes = $rootScope.rsyncbackup.excludes;
@@ -207,6 +212,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.tasksfilter = $rootScope.rsyncbackup.tasksfilter;
     $scope.zfslistfilter = $rootScope.rsyncbackup.zfslistfilter;
     $scope.filelistfilter = $rootScope.rsyncbackup.filelistfilter;
+    $scope.show_p2ec2_button = $rootScope.rsyncbackup.show_p2ec2_button;
     $scope.status = $rootScope.rsyncbackup.status;
 
     // Fixes
@@ -271,6 +277,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.checkbox_allnone = false;
     $scope.zfslist = [];
     $scope.filelist = [];
+    $scope.show_p2ec2_button = false;
   };
 
   // ----------------------------------------------------------------------
@@ -793,6 +800,44 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     });
   };
 
+  // ----------------------------------------------------------------------
+  $scope.FillEnvCapMapsArray = function() {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/envcapmaps?env_id=" + $scope.env.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      $scope.envcapmaps = data;
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
   // REST functions
 
   // ----------------------------------------------------------------------
@@ -827,6 +872,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.task_result = true;
       $scope.tasks_result_in_progress = false;
       $scope.showkeybtnblockhidden = true;
+
+      // Get environment capabilities.
+      // We check this later for enabling features from other plugins
+      $scope.FillEnvCapMapsArray();
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -951,6 +1000,27 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
       $scope.showfiles_files = true;
       $scope.showfiles_files_in_progress = false;
+
+      // Check if this is a candidate for P2EC2 (physical to aws ec2 instance)
+      for( var i=0; i<$scope.envcapmaps.length; ++i ) {
+        if( $scope.envcapmaps[i].EnvCapCode == "HAS_P2EC2" ) {
+          // Obdi P2EC2 is installed, see if this directory is a candidate.
+          // A linux candidate should have bin,boot,dev,etc,home,lib,mnt,root,sbin,sys,usr,var.
+          // Check filelist for those directories:
+          var got = 0
+          var dirs = ["bin","boot","dev","etc","home","lib","mnt","root","sbin","sys","usr","var"];
+          for( var j=0; j<$scope.filelist.length; ++j ) {
+            for( var k=0; k<dirs.length; ++k ) {
+              if( $scope.filelist[j].name == dirs[k] ) {
+                ++got;
+                break;
+              }
+            }
+          }
+          if( got == 12 ) $scope.show_p2ec2_button = true;
+          break;
+        }
+      }
 
     }).error( function(data,status) {
       if (status>=500) {
