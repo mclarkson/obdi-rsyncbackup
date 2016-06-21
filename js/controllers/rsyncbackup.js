@@ -1017,7 +1017,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
               }
             }
           }
-          if( got == 12 ) $scope.show_p2ec2_button = true;
+          if( got == dirs.length ) $scope.show_p2ec2_button = true;
           break;
         }
       }
