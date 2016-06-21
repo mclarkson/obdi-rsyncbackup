@@ -1003,7 +1003,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
       // Check if this is a candidate for P2EC2 (physical to aws ec2 instance)
       for( var i=0; i<$scope.envcapmaps.length; ++i ) {
-        if( $scope.envcapmaps[i].EnvCapCode == "HAS_P2EC2" ) {
+        if( $scope.envcapmaps[i].EnvCapCode == "HAS_AWS_P2EC2" ) {
           // Obdi P2EC2 is installed, see if this directory is a candidate.
           // A linux candidate should have bin,boot,dev,etc,home,lib,mnt,root,sbin,sys,usr,var.
           // Check filelist for those directories:
