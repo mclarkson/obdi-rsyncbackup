@@ -965,6 +965,19 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }, delay );
   };
 
+  // --------
+
+  // ----------------------------------------------------------------------
+  $scope.RunP2EC2 = function( id ) {
+  // ----------------------------------------------------------------------
+
+    $scope.save();
+    $rootScope.awsp2ec2_plugin = {};
+    $rootScope.awsp2ec2_plugin.id = id;
+    $rootScope.awsp2ec2_plugin.back = "plugins/rsyncbackup/html/view.html";
+    $scope.setView( "plugins/aws-p2ec2/html/view.html" );
+  }
+
   // ----------------------------------------------------------------------
   $scope.GetFileListOutputLine = function( id ) {
   // ----------------------------------------------------------------------
