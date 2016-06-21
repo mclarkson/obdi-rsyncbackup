@@ -61,6 +61,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.showfiles_files = false;
   $scope.showfiles_root = true;
   $scope.showfiles_files_in_progress = false;
+  $scope.showfiles_pathnav_clicked = true;
+  $scope.show_p2ec2_button = false;
+  $scope.path_arr = [];
   $scope.editincludes = false;
   $scope.editsettings = false;
   $scope.btnbackupdisabled = true;
@@ -71,7 +74,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.tasksfilter = "";
   $scope.zfslistfilter = "";
   $scope.filelistfilter = "";
-  $scope.show_p2ec2_button = false;
   $scope.status = {};
 
   // Fixes
@@ -86,9 +88,19 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // Fill the env array or load saved data if we've come Back here.
 
     if( typeof $rootScope.outputlines_plugin !== "undefined" &&
-      typeof $rootScope.outputlines_plugin.back !== "undefined" ) {
+        typeof $rootScope.outputlines_plugin.back !== "undefined" ) {
+
+        // Handle viewing job output
 
         delete $rootScope.outputlines_plugin.back;
+        $scope.load();
+
+      } else if( typeof $rootScope.awsp2ec2_plugin !== "undefined" &&
+                 typeof $rootScope.awsp2ec2_plugin.back !== "undefined" ) {
+
+        // Handle viewing aws p2ec2
+
+        delete $rootScope.awsp2ec2_plugin.back;
         $scope.load();
 
       } else {
@@ -142,6 +154,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $rootScope.rsyncbackup.showfiles_files = $scope.showfiles_files;
     $rootScope.rsyncbackup.showfiles_root = $scope.showfiles_root;
     $rootScope.rsyncbackup.showfiles_files_in_progress = $scope.showfiles_files_in_progress;
+    $rootScope.rsyncbackup.showfiles_pathnav_clicked = $scope.showfiles_pathnav_clicked;
+    $rootScope.rsyncbackup.show_p2ec2_button = $scope.show_p2ec2_button;
+    $rootScope.rsyncbackup.path_arr = $scope.path_arr;
     $rootScope.rsyncbackup.editincludes = $scope.editincludes;
     $rootScope.rsyncbackup.editsettings = $scope.editsettings;
     $rootScope.rsyncbackup.btnbackupdisabled = $scope.btnbackupdisabled;
@@ -152,7 +167,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $rootScope.rsyncbackup.tasksfilter = $scope.tasksfilter;
     $rootScope.rsyncbackup.zfslistfilter = $scope.zfslistfilter;
     $rootScope.rsyncbackup.filelistfilter = $scope.filelistfilter;
-    $rootScope.rsyncbackup.show_p2ec2_button = $scope.show_p2ec2_button;
+    $rootScope.rsyncbackup.curtask = $scope.curtask;
     $rootScope.rsyncbackup.status = $scope.status;
 
     // Fixes
@@ -202,6 +217,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.showfiles_files = $rootScope.rsyncbackup.showfiles_files;
     $scope.showfiles_root = $rootScope.rsyncbackup.showfiles_root;
     $scope.showfiles_files_in_progress = $rootScope.rsyncbackup.showfiles_files_in_progress;
+    $scope.showfiles_pathnav_clicked = $rootScope.rsyncbackup.showfiles_pathnav_clicked;
+    $scope.show_p2ec2_button = $rootScope.rsyncbackup.show_p2ec2_button;
+    $scope.path_arr = $rootScope.rsyncbackup.path_arr;
     $scope.editincludes = $rootScope.rsyncbackup.editincludes;
     $scope.editsettings = $rootScope.rsyncbackup.editsettings;
     $scope.btnbackupdisabled = $rootScope.rsyncbackup.btnbackupdisabled;
@@ -212,7 +230,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.tasksfilter = $rootScope.rsyncbackup.tasksfilter;
     $scope.zfslistfilter = $rootScope.rsyncbackup.zfslistfilter;
     $scope.filelistfilter = $rootScope.rsyncbackup.filelistfilter;
-    $scope.show_p2ec2_button = $rootScope.rsyncbackup.show_p2ec2_button;
+    $scope.curtask = $rootScope.rsyncbackup.curtask;
     $scope.status = $rootScope.rsyncbackup.status;
 
     // Fixes
@@ -968,12 +986,11 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // --------
 
   // ----------------------------------------------------------------------
-  $scope.RunP2EC2 = function( id ) {
+  $scope.RunP2EC2 = function() {
   // ----------------------------------------------------------------------
 
     $scope.save();
     $rootScope.awsp2ec2_plugin = {};
-    $rootScope.awsp2ec2_plugin.id = id;
     $rootScope.awsp2ec2_plugin.back = "plugins/rsyncbackup/html/view.html";
     $scope.setView( "plugins/aws-p2ec2/html/view.html" );
   }
@@ -1221,6 +1238,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     $scope.curtask = $scope.tasks[index];
     $scope.backuptasks = false;
+    $scope.show_p2ec2_button = false;
     $scope.showfiles = true;
     $scope.showfiles_result = false;
     $scope.showfiles_result_in_progress = true;
