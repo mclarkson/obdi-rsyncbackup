@@ -1114,6 +1114,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.ViewDirectory = function( path ) {
   // ----------------------------------------------------------------------
 
+    // Reset P2EC2 button for every directory
+    $scope.show_p2ec2_button = false;
+
     // Manipulate Path navigation array
     if( typeof path === 'number' ) {
       // 'path' var is an index value, a click in pathnav
