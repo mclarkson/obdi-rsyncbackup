@@ -29,7 +29,8 @@ while read size path x; do
 done <<<"$Output"
 
 # Output in JSON format
-u=(B KiB MiB GiB TiB PiB ZiB)
+#u=(B KiB MiB GiB TiB PiB ZiB)
+u=(B KB MB GB TB PB ZB)
 echo -n "["
 while read size name; do
     sizeb=$size
