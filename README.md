@@ -273,5 +273,19 @@ $ curl -k -X POST \
 
 ```
 
+# List directory contents
+
+```
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/ls?env_id=1&task_id=1&path=nosnap/server001"
+```
+
+# Calculate unpacked, undeduped directory size
+
+```
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/dirsize?env_id=1&task_id=1&path=nosnap/server001"
+```
+
 See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)
 for more information about Net plugins.
