@@ -11,7 +11,7 @@ DIR="${1%/}/"
 }
 
 # Change DIVISOR to 1024 for binary calculations
-DIVISOR=1000
+declare -i DIVISOR=1000
 
 Output=$(du --apparent-size -hbs $DIR 2>&1)
 
@@ -35,9 +35,9 @@ while read size name; do
     sizeb=$size
     let size*=100
     index=0
-    while [[ $size -ge $DIVISOR ]]; do
+    while [[ $size -ge $((DIVISOR*100)) ]]; do
         let index+=1
-        let size=size/$DIVISOR
+        let size=size/DIVISOR
     done
     sizeh="$(echo $size | awk '{ printf("%.1f", $1/100); }') ${u[index]}"
 
