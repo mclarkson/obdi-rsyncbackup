@@ -7,6 +7,7 @@ to create a consistent backup for databases etc.
 
 # Todo
 
+* Delete snapshots
 * Custom per-server 'pre' scripts to do things such as stopping services before
   back-up then starting once complete.
 * Scheduling (use cron and rest api for now).
