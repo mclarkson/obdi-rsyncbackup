@@ -50,6 +50,8 @@ mkdir /backup
 modprobe zfs
 lvcreate -L1t -n servers-zfs vg1
 zpool create backup /dev/vg1/servers-zfs
+
+# Note: dedup needs a large amount of memory.
 zfs create -o dedup=on -o compression=gzip backup/servers-zfs
 
 # Disable atime
