@@ -18,7 +18,7 @@ to create a consistent backup for databases etc.
 
 ## What is it?
 
-A simple backup solution for Linux servers, that achieves deduplication
+A simple backup solution for Linux servers that achieves deduplication
 and compression using the zfs file system.
 
 ## Installation
