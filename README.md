@@ -128,7 +128,7 @@ With the above set-up the following settings will work:
 * KNOWNHOSTS = empty.
 * NUMPERIODS = 1 or more.
 * TIMEOUT = 0 (disabled) or more seconds.
-* Verbose = on or off, keep off unless testing.
+* Verbose = on or off. Will make the database grow if set to 'on'.
 
 Lock down access using hosts.allow, hosts.deny and/or iptables.
 
