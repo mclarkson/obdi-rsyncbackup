@@ -37,6 +37,8 @@ want to back up.
 
 Instructions for a CentOS 6 server. Centos 7 should be the same.
 
+Set up zfs:
+
 ```
 # CentOS 6
 
@@ -61,7 +63,11 @@ zpool list
 zfs get dedup
 zfs get compression
 zfs get atime
+```
 
+Install the obdi worker:
+
+```
 # Enable EPEL YUM repository
 rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
