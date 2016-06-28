@@ -62,6 +62,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.showfiles_root = true;
   $scope.showfiles_files_in_progress = false;
   $scope.showfiles_pathnav_clicked = true;
+  $scope.showfiles_files_start = false;
   $scope.show_p2ec2_button = false;
   $scope.path_arr = [];
   $scope.editincludes = false;
@@ -154,6 +155,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $rootScope.rsyncbackup.showfiles_files = $scope.showfiles_files;
     $rootScope.rsyncbackup.showfiles_root = $scope.showfiles_root;
     $rootScope.rsyncbackup.showfiles_files_in_progress = $scope.showfiles_files_in_progress;
+    $rootScope.rsyncbackup.showfiles_files_start = $scope.showfiles_files_start;
     $rootScope.rsyncbackup.showfiles_pathnav_clicked = $scope.showfiles_pathnav_clicked;
     $rootScope.rsyncbackup.show_p2ec2_button = $scope.show_p2ec2_button;
     $rootScope.rsyncbackup.path_arr = $scope.path_arr;
@@ -217,6 +219,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.showfiles_files = $rootScope.rsyncbackup.showfiles_files;
     $scope.showfiles_root = $rootScope.rsyncbackup.showfiles_root;
     $scope.showfiles_files_in_progress = $rootScope.rsyncbackup.showfiles_files_in_progress;
+    $scope.showfiles_files_start = $rootScope.rsyncbackup.showfiles_files_start;
     $scope.showfiles_pathnav_clicked = $rootScope.rsyncbackup.showfiles_pathnav_clicked;
     $scope.show_p2ec2_button = $rootScope.rsyncbackup.show_p2ec2_button;
     $scope.path_arr = $rootScope.rsyncbackup.path_arr;
@@ -1029,6 +1032,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       $scope.showfiles_files = true;
+      $scope.showfiles_files_start = false;
       $scope.showfiles_files_in_progress = false;
 
       // Check if this is a candidate for P2EC2 (physical to aws ec2 instance)
@@ -1098,6 +1102,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       $scope.showfiles_result = true;
+      $scope.showfiles_files_start = false;
       $scope.showfiles_result_in_progress = false;
 
     }).error( function(data,status) {
@@ -1131,6 +1136,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     //   backup/servers-zfs@20160224.1     <-- snapshot
 
     $scope.snapshotdir = snap_or_fs.split("@")[1];
+    $scope.showfiles_files_start = true;
 
     if( typeof $scope.snapshotdir === "undefined" ) {
       $scope.snapshotdir = "";
@@ -1188,7 +1194,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     $scope.showfiles_result = false;
     $scope.showfiles_result_in_progress = false;
-    $scope.showfiles_files = false;
+    //$scope.showfiles_files = false;
     $scope.showfiles_files_in_progress = true;
 
     clearMessages();

@@ -590,15 +590,19 @@
 	</table>
       </div> <!-- table-responsive -->
 
-      <p ng-if="showfiles_files_in_progress">Getting the list of files.
+      <p ng-if="showfiles_files_start">Getting the list of files.
         This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
 
       <div ng-if="showfiles_files">
 
-        <p ng-if="path_arr.length == 0">Path: {{snapshotdir}} /</p>
-        <p ng-if="path_arr.length > 0">Path: {{snapshotdir}}
-          <span ng-repeat="p in path_arr track by $index">
-          / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
+	<p ng-if="showfiles_files_in_progress">Getting the list of files.
+	  This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
+	<div ng-if="!showfiles_files_in_progress">
+	  <p ng-if="path_arr.length == 0">Path: {{snapshotdir}} /</p>
+	  <p ng-if="path_arr.length > 0">Path: {{snapshotdir}}
+	    <span ng-repeat="p in path_arr track by $index">
+	    / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
+	</div>
 
 	<div class="table-responsive" style="margin-top: 8px;">
 
