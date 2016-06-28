@@ -7,10 +7,11 @@ to create a consistent backup for databases etc.
 
 # Todo
 
+* Delete snapshots
 * Custom per-server 'pre' scripts to do things such as stopping services before
   back-up then starting once complete.
 * Scheduling (use cron and rest api for now).
-* Viewing and retrieving files and snapshots.
+* ~~Viewing and retrieving files and snapshots.~~
 
 ## Screenshot
 
@@ -18,7 +19,7 @@ to create a consistent backup for databases etc.
 
 ## What is it?
 
-A simple backup solution for Linux servers, that achieves deduplication
+A simple backup solution for Linux servers that achieves deduplication
 and compression using the zfs file system.
 
 ## Installation
@@ -37,6 +38,8 @@ want to back up.
 
 Instructions for a CentOS 6 server. Centos 7 should be the same.
 
+Set up zfs:
+
 ```
 # CentOS 6
 
@@ -48,6 +51,8 @@ mkdir /backup
 modprobe zfs
 lvcreate -L1t -n servers-zfs vg1
 zpool create backup /dev/vg1/servers-zfs
+
+# Note: dedup needs a large amount of memory.
 zfs create -o dedup=on -o compression=gzip backup/servers-zfs
 
 # Disable atime
@@ -61,7 +66,11 @@ zpool list
 zfs get dedup
 zfs get compression
 zfs get atime
+```
 
+Install the obdi worker:
+
+```
 # Enable EPEL YUM repository
 rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
@@ -120,7 +129,7 @@ With the above set-up the following settings will work:
 * KNOWNHOSTS = empty.
 * NUMPERIODS = 1 or more.
 * TIMEOUT = 0 (disabled) or more seconds.
-* Verbose = on or off, keep off unless testing.
+* Verbose = on or off. Will make the database grow if set to 'on'.
 
 Lock down access using hosts.allow, hosts.deny and/or iptables.
 
