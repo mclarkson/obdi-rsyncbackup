@@ -33,6 +33,19 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="DeleteSnapshot.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Delete Backup Task</h3>
+    </div>
+    <div class="modal-body">
+      Are you sure you want to delete snapshot &ldquo;{{SnapshotDir}}&rdquo;
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">Yes</button>
+        <button class="btn btn-success" ng-click="cancel()">No</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="StartFullBackup.html">
     <div class="modal-header">
         <h3 class="modal-title">Start Full Backup</h3>
@@ -581,10 +594,10 @@
 	    <td>{{item.used}}</td>
 	    <td style="white-space: nowrap">
 	      <a ng-if="item.type == 'snapshot'"
-                href="#" ng-click="DeleteSnapshot(item.Host,item.Base,item.Id)">
-		<i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
+                href="#" ng-click="DeleteSnapshot(item.name)">
+		    <i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
 	      <a href="#" ng-click="ViewSnapDirectory(item.name)">
-		<i class="fa fa-eye" title="View Files"></i></a>
+		    <i class="fa fa-eye" title="View Files"></i></a>
 	    </td>
 	  </tr>
 	</table>
@@ -636,9 +649,6 @@
 		<span ng-if="item.type != 'd'">{{item.name}}</span>
 	      </td>
 	      <td style="white-space: nowrap">
-		<a ng-if="item.type == 'snapshot'"
-		  href="#" ng-click="DeleteSnapshot(item.Host,item.Base,item.Id)">
-		  <i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
 		<a href="#" ng-click="ViewDirectory(item.name)" ng-if="item.type == 'd'">
 		  <i class="fa fa-folder-open-o" title="Display Directory"></i></a>
 	      </td>
