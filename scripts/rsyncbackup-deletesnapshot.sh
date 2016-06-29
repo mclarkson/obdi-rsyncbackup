@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH=/sbin:/usr/sbin:$PATH
+
 DIR=$1
 
 [[ -z $DIR ]] && {

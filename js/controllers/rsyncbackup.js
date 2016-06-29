@@ -1337,21 +1337,19 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   // Runs the helloworld-runscript.sh script on the worker.
 
-    $scope.message_jobid = job.JobId;
-    $scope.okmessage = "Delete request sent. This may take many minutes to complete.";
-
     $http({
       method: 'POST',
       url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
-           + "/rsyncbackup/deletesnapshot" + id
+           + "/rsyncbackup/deletesnapshot"
            + "?env_id=" + $scope.env.Id
            + "&task_id=" + $scope.curtask.Id
-           + "&snapshot=" + Snapshotdir
+           + "&snapshot=" + SnapshotDir
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       $scope.message_jobid = job.JobId;
-       $scope.okmessage = "Snapshot delete request completed.";
+       $scope.message_jobid = data.JobId;
+       $scope.okmessage = "Delete request sent. This may take many minutes to complete.";
+       $scope.PollForJobFinish(data.JobId,10,0,$scope.GetDeleteSnapshotOutputLine);
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -1366,6 +1364,42 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         clearMessages();
         $scope.message = "Server said: " + data['Error'];
         $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  };
+
+  // ----------------------------------------------------------------------
+  $scope.GetDeleteSnapshotOutputLine = function( id ) {
+  // ----------------------------------------------------------------------
+
+    $http({
+      method: 'GET',
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/outputlines?job_id=" + id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+       $scope.message_jobid = id;
+       $scope.okmessage = "Delete snapshot request completed.";
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";

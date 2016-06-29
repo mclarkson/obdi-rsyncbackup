@@ -22,6 +22,7 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"strings"
 )
 
 // The format of the json sent by the client in a POST request
@@ -107,14 +108,14 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	// Decode the post data into struct
 
-	var postedData PostedData
+	/*var postedData PostedData
 
 	if err := json.Unmarshal(args.PostData, &postedData); err != nil {
 		txt := fmt.Sprintf("Error decoding JSON ('%s')"+".", err.Error())
 		ReturnError("Error decoding the POST data ("+
 			fmt.Sprintf("%s", args.PostData)+"). "+txt, response)
 		return nil
-	}
+	}*/
 
 	// env_id is required, '?env_id=xxx'
 
@@ -134,20 +135,12 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	task_id_str := args.QueryString["task_id"][0]
 
-	// path is optional, '?path=xxx'
-
-	path_str := ""
-	if len(args.QueryString["path"]) > 0 {
-		path_str = args.QueryString["path"][0]
-	}
-
 	// snapshot is optional, '?snapshot=', '?snapshot=20160901.1'
 
 	snapshot_dir := ""
 	if len(args.QueryString["snapshot"]) > 0 {
 		if len(args.QueryString["snapshot"][0]) > 0 {
-			snapshot_dir = ".zfs/snapshot/"
-			snapshot_dir += args.QueryString["snapshot"][0] + "/"
+			snapshot_dir = args.QueryString["snapshot"][0]
 		}
 	}
 
@@ -198,7 +191,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		// The name of the script to send an run
 		ScriptName: "rsyncbackup-deletesnapshot.sh",
 		// The arguments to use when running the script
-		CmdArgs: setting.BaseDir + "/" + snapshot_dir,
+		CmdArgs: strings.Trim(setting.BaseDir, "/") + "@" + snapshot_dir,
 		// Environment variables to pass to the script
 		EnvVars: "", //`A=1 B=2 C='a b c' D=44`,
 		// Name of an environment capability (where isworkerdef == true)
