@@ -279,7 +279,7 @@ OUTER:
 
 	sa := ScriptArgs{
 		// The name of the script to send an run
-		ScriptName: "backup.sh",
+		ScriptName: "rsyncbackup-backup.sh",
 		// The arguments to use when running the script
 		CmdArgs: cmdargs,
 		// Environment variables to pass to the script

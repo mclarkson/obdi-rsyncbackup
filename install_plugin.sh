@@ -82,7 +82,7 @@ curl -k -d '{
 # Add the scripts, removing comment lines (#) and empty lines
 #
 
-script="backup.sh"
+script="rsyncbackup-backup.sh"
 
 source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
 
@@ -104,7 +104,7 @@ fi
 
 # --
 
-script="zfslist.sh"
+script="rsyncbackup-zfslist.sh"
 
 source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
 
@@ -126,7 +126,7 @@ fi
 
 # --
 
-script="ls.sh"
+script="rsyncbackup-ls.sh"
 
 source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
 
@@ -148,7 +148,7 @@ fi
 
 # --
 
-script="dirsize.sh"
+script="rsyncbackup-dirsize.sh"
 
 source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
 

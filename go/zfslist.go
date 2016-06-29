@@ -158,7 +158,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	sa := ScriptArgs{
 		// The name of the script to send an run
-		ScriptName: "zfslist.sh",
+		ScriptName: "rsyncbackup-zfslist.sh",
 		// The arguments to use when running the script
 		CmdArgs: setting.BaseDir,
 		// Environment variables to pass to the script
