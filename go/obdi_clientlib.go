@@ -84,6 +84,7 @@ type Args struct {
 	QueryString map[string][]string
 	PostData    []byte
 	QueryType   string
+	SDToken     string
 }
 
 type Plugin struct{}

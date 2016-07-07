@@ -994,6 +994,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     $scope.save();
     $rootScope.awsp2ec2_plugin = {};
+    $rootScope.awsp2ec2_plugin.envId = $scope.env.Id;
     $rootScope.awsp2ec2_plugin.back = "plugins/rsyncbackup/html/view.html";
     $scope.setView( "plugins/aws-p2ec2/html/view.html" );
   }
