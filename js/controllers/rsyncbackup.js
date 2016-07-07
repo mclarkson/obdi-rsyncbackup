@@ -137,7 +137,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     // Alerting
     $rootScope.rsyncbackup.message = $scope.message;
     $rootScope.rsyncbackup.okmessage = $scope.okmessage;
-    $rootScope.rsyncbackup.login = $scope.login;
+    //$rootScope.rsyncbackup.login = $scope.login;
     $rootScope.rsyncbackup.message_jobid = $scope.message_jobid;
 
     // Hiding/Showing
@@ -201,7 +201,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     // Alerting
     $scope.message = $rootScope.rsyncbackup.message;
     $scope.okmessage = $rootScope.rsyncbackup.okmessage;
-    $scope.login = $rootScope.rsyncbackup.login;
+    //$scope.login = $rootScope.rsyncbackup.login;
     $scope.message_jobid = $rootScope.rsyncbackup.message_jobid;
 
     // Hiding/Showing

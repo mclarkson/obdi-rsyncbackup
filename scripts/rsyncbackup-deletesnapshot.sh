@@ -22,6 +22,7 @@ if [[ $ret -ne 0 ]]; then
 fi
 
 # Output in JSON format
+echo "Command completed successfully."
 echo "$Output"
 
 exit 0
