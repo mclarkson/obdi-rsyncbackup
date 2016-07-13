@@ -181,7 +181,7 @@ id=`grep Id $t | grep -Eo "[0-9]+"`
 
 if [[ -z $id ]]; then
 	curl -k -d '{
-		"Desc": "Get the size of a directory. Arg1 - full path to the directory.",
+		"Desc": "Delete a ZFS snapshot. Arg1 - name of the snapshot.",
 		"Name": "'"$script"'",
 		"Source": "'"$source"'"
 	}' $proto://$ipport/api/admin/$guid/scripts
