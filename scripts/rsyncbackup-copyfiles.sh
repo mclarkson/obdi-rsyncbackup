@@ -13,6 +13,7 @@
 #     REMOTEUSER - User to connect to remote server as.
 #     MOUNTDEV   - Optional. Device to mount.
 #     MOUNTDIR   - Optional. Directory to mount MOUNTDIR on.
+#     UMOUNTDIR  - Optional. Unmount after copy.
 
 export PATH=/sbin:/usr/sbin:$PATH
 
@@ -231,7 +232,17 @@ chmod 0600 $TMPKEYFILE
     }
 
     ssh_cmd $DESTSRV savestdout \
-        "$SUDO mkfs.ext4 -m1 $MOUNTDEV || echo notok"
+        "$SUDO fdisk $MOUNTDEV < <(echo -e 'n\np\n1\n\n\np\nw\nq') || echo notok"
+
+    [[ $LAST_STDOUT == "notok" ]] && {
+        echo "ERROR: Failed partitioning $MOUNTDEV. Cannot continue."
+        exit 1
+    }
+
+    MOUNTPART=${MOUNTDEV}1
+
+    ssh_cmd $DESTSRV savestdout \
+        "$SUDO mkfs.ext4 -m1 $MOUNTPART || echo notok"
 
     [[ $LAST_STDOUT == "notok" ]] && {
         echo "ERROR: Could not create ext4 filesystem. Cannot continue."
@@ -247,7 +258,7 @@ chmod 0600 $TMPKEYFILE
     }
 
     ssh_cmd $DESTSRV savestdout \
-        "$SUDO mount $MOUNTDEV $MOUNTDIR"
+        "$SUDO mount $MOUNTPART $MOUNTDIR"
 
     [[ $LAST_STDOUT == "notok" ]] && {
         echo "ERROR: Could not mount filesystem. Cannot continue."
@@ -270,7 +281,7 @@ echo "> Starting to copy files"
 $SUDO find . | \
     $SUDO cpio -v -o -H crc | gzip -c | \
     ssh -i $TMPKEYFILE -c arcfour $REMOTEUSER@$DESTSRV \
-      "gunzip - | (cd $MOUNTDIR; $SUDO cpio -idum)"
+      "gunzip - | (cd $REMOTEDIR; $SUDO cpio -idum)"
 
 [[ $? -ne 0 ]] && {
     echo "ERROR: CPIO exited with non-zero exit status. The command run was:"
@@ -279,7 +290,7 @@ $SUDO find . | \
 $SUDO find . | \
     $SUDO cpio -v -o -H crc | gzip -c | \
     ssh -i $TMPKEYFILE -c arcfour $REMOTEUSER@$DESTSRV \
-      "gunzip - | (cd $MOUNTDIR; $SUDO cpio -idum)"
+      "gunzip - | (cd $REMOTEDIR; $SUDO cpio -idum)"
 EnD
     echo
     echo "Check Obdi System Jobs logs for more information."
@@ -295,6 +306,9 @@ EnD
 
     ssh_cmd $DESTSRV savestdout \
         "$SUDO fuser -kma $MOUNTDIR || true"
+
+    ssh_cmd $DESTSRV savestdout \
+        "$SUDO umount $MOUNTDIR/* || true"
 
     ssh_cmd $DESTSRV savestdout \
         "$SUDO umount $MOUNTDIR"
