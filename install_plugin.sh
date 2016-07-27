@@ -192,6 +192,28 @@ fi
 
 # --
 
+script="rsyncbackup-copyfiles.sh"
+
+source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
+
+curl -k $proto://$ipport/api/admin/$guid/scripts?name=$script | tee $t
+
+# Grab the id of the last insert
+id=`grep Id $t | grep -Eo "[0-9]+"`
+
+if [[ -z $id ]]; then
+	curl -k -d '{
+		"Desc": "Copies a directory to another server. Arg1 - destination server.",
+		"Name": "'"$script"'",
+		"Source": "'"$source"'"
+	}' $proto://$ipport/api/admin/$guid/scripts
+else
+	curl -k -X PUT -d '{ "Source": "'"$source"'" }' \
+	$proto://$ipport/api/admin/$guid/scripts/$id
+fi
+
+# --
+
 # Delete the temporary file and delete the trap
 rm -f -- "$t"
 trap - EXIT
