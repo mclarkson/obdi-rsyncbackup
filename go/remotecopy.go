@@ -19,6 +19,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/rpc"
 	"os"
@@ -129,21 +130,21 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	var mountdev_str string
 	if len(args.QueryString["mountdev"]) > 0 {
-		mountdev_str := args.QueryString["mountdev"][0]
+		mountdev_str = args.QueryString["mountdev"][0]
 	}
 
 	// mountdir is optional, '?mountdir=xxx'
 
 	var mountdir_str string
 	if len(args.QueryString["mountdir"]) > 0 {
-		mountdir_str := args.QueryString["mountdir"][0]
+		mountdir_str = args.QueryString["mountdir"][0]
 	}
 
 	// umountdir is optional, '?umountdir=xxx'
 
 	var umountdir_str string
 	if len(args.QueryString["umountdir"]) > 0 {
-		umountdir_str := args.QueryString["umountdir"][0]
+		umountdir_str = args.QueryString["umountdir"][0]
 	}
 
 	// Check if the user is allowed to access the environment

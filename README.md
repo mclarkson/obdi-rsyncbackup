@@ -169,7 +169,7 @@ rsyncbackup.db schema:
 
 ![](doc/DB_Schema.png?raw=true)
 
-Backup tasks:
+**Backup tasks:**
 
 ```
 # Log in
@@ -199,7 +199,7 @@ $ curl -k -X DELETE \
   https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks/1?env_id=1
 ```
 
-Includes:
+**Includes:**
 
 ```
 # Log in
@@ -229,7 +229,7 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes/1?env_id=1"
 ```
 
-Excludes:
+**Excludes:**
 
 ```
 # Log in
@@ -259,7 +259,7 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes/1?env_id=1"
 ```
 
-Initiate a backup:
+**Initiate a backup:**
 
 ```
 # Log in
@@ -281,16 +281,35 @@ $ curl -k -X POST \
 
 ```
 
-List directory contents:
+**List directory contents:**
 
 ```
 $ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/ls?env_id=1&task_id=1&path=nosnap/server001"
 ```
 
-Calculate unpacked, undeduped directory size:
+**Calculate unpacked, undeduped directory size:**
 
 ```
 $ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/dirsize?env_id=1&task_id=1&path=nosnap/server001"
+```
+
+**Copy backup directory to another server:**
+
+```
+Required URL parameters:
+
+    env_id    - Environment id.
+    task_id   - Backup task id.
+    path      - Backup path to copy from relative to BASEDIR.
+
+Optional URL parameters:
+    mountdev  - Device to mount, e.g /dev/sdb.
+    mountdir  - Directory to mount /dev/sdb on.
+    umountdir - "true" - will unmount at the end, otherwise it's left mounted.
+```
+
+```
+$ curl -ks -X POST "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/remotecopy?env_id=1&task_id=1&path=/nosnap/phhlapphot005&mountdev=/dev/sdb&mountdir=/incoming/phhlapphot005"
 ```
 
 See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)
