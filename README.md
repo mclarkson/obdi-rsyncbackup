@@ -308,8 +308,10 @@ Optional URL parameters:
     umountdir - "true" - will unmount at the end, otherwise it's left mounted.
 ```
 
+Example:
+
 ```
-$ curl -ks -X POST "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/remotecopy?env_id=1&task_id=1&path=/nosnap/phhlapphot005&mountdev=/dev/sdb&mountdir=/incoming/phhlapphot005"
+$ curl -ks -X POST "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/remotecopy?env_id=1&task_id=1&path=/nosnap/linuxserver001&mountdev=/dev/sdb&mountdir=/incoming/linuxserver001"
 ```
 
 See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)
