@@ -192,7 +192,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'

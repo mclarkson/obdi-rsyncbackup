@@ -232,12 +232,7 @@ chmod 0600 $TMPKEYFILE
     }
 
     ssh_cmd $DESTSRV savestdout \
-        "$SUDO fdisk $MOUNTDEV < <(echo -e 'n\np\n1\n\n\np\nw\nq') || echo notok"
-
-    [[ $LAST_STDOUT == "notok" ]] && {
-        echo "ERROR: Failed partitioning $MOUNTDEV. Cannot continue."
-        exit 1
-    }
+        "$SUDO fdisk $MOUNTDEV < <(echo -e 'n\np\n1\n\n\np\nw\nq')"
 
     MOUNTPART=${MOUNTDEV}1
 
