@@ -285,10 +285,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 
 	// Command arguments
 
-	var cmdargs string
-	if setting.Verbose {
-		cmdargs = awsdata.Aws_obdi_worker_ip
-	}
+	cmdargs := awsdata.Aws_obdi_worker_ip
 
 	// Run the backup script.
 
