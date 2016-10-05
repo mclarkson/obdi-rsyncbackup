@@ -259,6 +259,46 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes/1?env_id=1"
 ```
 
+**Settings:**
+
+```
+# Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{
+    "Id":0,
+    "Protocol":"rsyncd",
+    "Pre":"create_zfs_snapshot",
+    "RsyncOpts":"--sparse",
+    "BaseDir":"/backup/servers-zfs/",
+    "KnownHosts":"",
+    "NumPeriods":1,
+    "Timeout":0,
+    "Verbose":true
+  }' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"RsyncOpts":"--sparse -z"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings/1?env_id=1&task_id=1"
+```
+
 **Initiate a backup:**
 
 ```

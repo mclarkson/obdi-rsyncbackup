@@ -92,7 +92,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 
 	// env_id is required, '?env_id=xxx'
 
@@ -236,6 +236,16 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
+	// Delete any existing entries
+
+	Lock()
+	if err = db.Delete(Setting{}, "task_id = ?", task_id_str).Error; err != nil {
+		Unlock()
+		ReturnError("Query error. "+err.Error(), response)
+		return nil
+	}
+	Unlock()
+
 	// The following Setting will be written to the db
 
 	setting := Setting{
@@ -302,7 +312,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
@@ -416,7 +426,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
