@@ -223,6 +223,8 @@ done
 exit 0
 ```
 
+Ensure prunesnapshots.sh is executable with 'chmod +x prunesnapshots.sh'.
+
 ## Dev
 
 rsyncbackup.db schema:
