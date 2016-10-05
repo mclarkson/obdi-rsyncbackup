@@ -321,10 +321,23 @@ $ curl -k -X POST \
 
 ```
 
+**List zfs snapshots and files contents:**
+
+```
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&task_id=1"
+```
+
 **List directory contents:**
 
 ```
 $ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/ls?env_id=1&task_id=1&path=nosnap/server001"
+```
+
+**Delete snapshot:**
+
+```
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&task_id=1&snapshot=20160804.1"
 ```
 
 **Calculate unpacked, undeduped directory size:**
