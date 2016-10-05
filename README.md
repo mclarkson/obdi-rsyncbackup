@@ -132,7 +132,9 @@ With the above set-up the following settings will work:
 
 Lock down access using hosts.allow, hosts.deny and/or iptables.
 
-## Example cron job
+## Example cron jobs
+
+### Full system backup
 
 This example cron job will start a backup at 06.15 every day:
 
@@ -162,6 +164,64 @@ curl -k -X POST \
 ```
 
 Ensure dobackup.sh is executable with 'chmod +x dobackup.sh'.
+
+### Delete snapshots more than 30 days old
+
+This example cron job will delete old snapshots at 03.00 every day:
+
+```
+00 03 * * * /home/a_user/cron/prunesnapshots.sh
+```
+
+The preceeding cron job will run the prunesnapshots.sh script:
+
+```
+# Log in
+
+ipport="127.0.0.1:443"
+
+guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Get list
+
+job=$(curl -sk \
+    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&task_id=1" | \
+    sed 's/.*"JobId":\([0-9]\+\).*/\1/' )
+
+# Wait for job to finish
+
+while true; do
+    r=$(curl -sk "https://$ipport/api/nomen.nescio/$guid/jobs?job_id=$job")
+    if echo "$r" | grep -qs '"Status": 5'; then
+        break
+    else
+        echo "running"
+    fi
+done
+
+# Get list
+
+snaps=$(curl -sk "https://$ipport/api/nomen.nescio/$guid/outputlines?job_id=$job" |
+    grep "Text" |
+    tr -d '\\' |
+    grep -o '\[.*\]' |
+    python -mjson.tool |
+    grep -Eo "[0-9]{8,8}\.[0-9]")
+
+amonthago=$(date -d "30 days ago" +%Y%m%d)
+
+for i in $snaps; do [[ ${i%.[0-9]} < $amonthago ]] && delete="$delete $i"; done
+
+# Delete snaps more than 30 days old
+
+for SNAP in $delete ; do
+    curl -k -X POST \
+        "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&task_id=1&snapshot=$SNAP"
+done
+
+exit 0
+```
 
 ## Dev
 
