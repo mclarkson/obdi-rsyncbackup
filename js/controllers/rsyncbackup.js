@@ -599,14 +599,17 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       if( typeof($scope.settings) == 'undefined' ) {
-	$scope.settings = { Id:0,
-			    Protocol:"",
-			    Pre:"",
-			    RsyncOpts:"",
-			    BaseDir:"",
-			    KnownHosts:"",
-			    NumPeriods:1,
-			    Timeout:0 };
+        $scope.settings = { Id:0,
+                            Protocol:"",
+                            Pre:"",
+                            Repeat:0,
+                            RepeatPre:"",
+                            RepeatPost:"",
+                            RsyncOpts:"",
+                            BaseDir:"",
+                            KnownHosts:"",
+                            NumPeriods:1,
+                            Timeout:0 };
       }
 
       $scope.gettingsettings = false;
@@ -934,7 +937,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
           method: 'GET',
           url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
                + "/jobs?job_id=" + id
-							 + '&time='+new Date().getTime().toString()
+                                                         + '&time='+new Date().getTime().toString()
         }).success( function(data, status, headers, config) {
           job = data[0];
           if(job.Status == 0 || job.Status == 1 || job.Status == 4) {

@@ -35,6 +35,9 @@ DEFAULT_TIMEOUT=0
 #MAXFILES=5000
 DEFAULT_MAXFILES=0
 
+# Whether to do the rsync twice
+DEFAULT_REPEAT=0
+
 # ===========================================================================
 # Globals - Don't touch anything below
 # ===========================================================================
@@ -57,7 +60,7 @@ main() {
 # ---------------------------------------------------------------------------
 # It all starts here
 
-    local i j src excl server spc="" failed_servers="" path=
+    local i j src excl server spc="" failed_servers="" path= last_status=
     local -i errors=0 exitval=0
 
     set -f # Disable pathname expansion
@@ -174,14 +177,74 @@ main() {
         echo "    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path"
         rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \
             $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path
-        [[ $? -ne 0 ]] && {
+        last_status=$?
+        if [[ $last_status -ne 0 ]]; then
             echo
             echo "ERROR: 'rsync' exited with non-zero status."
             echo
             errors+=1
             failed_servers+="$spc$server"
             spc=" "
-        }
+        else
+            [[ $REPEAT -eq 1 ]] && {
+
+                # REPEATPRE
+
+                set +f # Enable pathname expansion
+
+                while read i; do
+                    [[ -z $i ]] && continue
+                    [[ $i == '#'* ]] && continue
+                    set -- $i
+                    option="$1"
+                    shift
+                    args="$@"
+                    case $option in
+                        pause_processes) pause_processes $args
+                        ;;
+                    esac
+                done <<<"$REPEATPRE"
+
+                set -f # Disable pathname expansion
+
+                # Rsync again
+
+                echo ".. REPEATING .."
+                echo "rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \\"
+                echo "    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path"
+                rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \
+                    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path
+                last_status=$?
+                [[ $last_status -ne 0 ]] && {
+                    echo
+                    echo "ERROR: 'rsync' exited with non-zero status."
+                    echo
+                    errors+=1
+                    failed_servers+="$spc$server"
+                    spc=" "
+                }
+
+                # REPEATPOST
+
+                set +f # Enable pathname expansion
+
+                while read i; do
+                    [[ -z $i ]] && continue
+                    [[ $i == '#'* ]] && continue
+                    set -- $i
+                    option="$1"
+                    shift
+                    args="$@"
+                    case $option in
+                        pause_processes) pause_processes $args
+                        ;;
+                    esac
+                done <<<"$REPEATPOST"
+
+                set -f # Disable pathname expansion
+
+            }
+        fi
         date
         echo "Log for server $server ENDS"
         echo
@@ -322,6 +385,7 @@ init_vars() {
     NUMPERIODS=${NUMPERIODS:-$DEFAULT_NUMPERIODS}
     TIMEOUT=${TIMEOUT:-$DEFAULT_TIMEOUT}
     MAXFILES=${MAXFILES:-$MAXFILES}
+    REPEAT=${REPEAT:-$DEFAULT_REPEAT}
 }
 
 # ---------------------------------------------------------------------------
@@ -366,6 +430,14 @@ leave() {
 # ===========================================================================
 # PRE/POST commands
 # ===========================================================================
+
+# ---------------------------------------------------------------------------
+pause_processes() {
+# ---------------------------------------------------------------------------
+# Pause as many non-critical processes as possible for a consistent backup.
+# Do two backups - 1 unpaused then the next paused to limit downtime.
+
+}
 
 # ---------------------------------------------------------------------------
 create_zfs_snapshot() {

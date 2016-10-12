@@ -31,6 +31,9 @@ type PostedData struct {
 	TaskId     int64
 	Protocol   string
 	Pre        string
+	Repeat     bool
+	RepeatPre  string
+	RepeatPost string
 	RsyncOpts  string
 	BaseDir    string
 	KnownHosts string
@@ -52,6 +55,9 @@ type Setting struct {
 	TaskId     int64
 	Protocol   string
 	Pre        string
+	Repeat     bool
+	RepeatPre  string
+	RepeatPost string
 	RsyncOpts  string
 	BaseDir    string
 	KnownHosts string
@@ -143,6 +149,9 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["TaskId"] = settings[i].TaskId
 		u[i]["Protocol"] = settings[i].Protocol
 		u[i]["Pre"] = settings[i].Pre
+		u[i]["Repeat"] = settings[i].Repeat
+		u[i]["RepeatPre"] = settings[i].RepeatPre
+		u[i]["RepeatPost"] = settings[i].RepeatPost
 		u[i]["RsyncOpts"] = settings[i].RsyncOpts
 		u[i]["BaseDir"] = settings[i].BaseDir
 		u[i]["KnownHosts"] = settings[i].KnownHosts
@@ -253,6 +262,9 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		TaskId:     task_id_i64,
 		Protocol:   postdata.Protocol,
 		Pre:        postdata.Pre,
+		Repeat:     postdata.Repeat,
+		RepeatPre:  postdata.RepeatPre,
+		RepeatPost: postdata.RepeatPost,
 		RsyncOpts:  postdata.RsyncOpts,
 		BaseDir:    postdata.BaseDir,
 		KnownHosts: postdata.KnownHosts,
@@ -379,6 +391,9 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		TaskId:     task_id_i64,
 		Protocol:   postdata.Protocol,
 		Pre:        postdata.Pre,
+		Repeat:     postdata.Repeat,
+		RepeatPre:  postdata.RepeatPre,
+		RepeatPost: postdata.RepeatPost,
 		RsyncOpts:  postdata.RsyncOpts,
 		BaseDir:    postdata.BaseDir,
 		KnownHosts: postdata.KnownHosts,
@@ -484,6 +499,9 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		TaskId:     task_id_i64,
 		Protocol:   "",
 		Pre:        "",
+		Repeat:     false,
+		RepeatPre:  "",
+		RepeatPost: "",
 		RsyncOpts:  "",
 		BaseDir:    "",
 		KnownHosts: "",
