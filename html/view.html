@@ -404,7 +404,7 @@
           <div class="form-group">
             <label class="col-sm-3 control-label">REPEAT</label>
             <div class="col-sm-7">
-              <input type="checkbox" ng-model="settings.Repeat">
+              <input type="checkbox" ng-model="settings.Repeat" style="margin-top:8px;">
             </div>
           </div>
 
@@ -435,6 +435,46 @@
                   <option>unpause_processes</option>
                 </select>
               </div>
+            </div>
+          </div>
+
+          <!-- SSH_KEYFILE -->
+
+          <div class="form-group">
+            <label for="sshkeyfile" class="col-sm-3 control-label">SSH_KEYFILE</label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshkeyfile" ng-model="settings.SshKeyFile"
+              placeholder="E.g. /home/bob/.ssh/id_rsa" type="text" ng-trim='false' required>
+            </div>
+          </div>
+
+          <!-- SSH_UID -->
+
+          <div class="form-group">
+            <label for="sshuid" class="col-sm-3 control-label">SSH_UID</label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshuid" ng-model="settings.SshUid"
+              placeholder="E.g. bob" type="text" ng-trim='false' required>
+            </div>
+          </div>
+
+          <!-- SSH_SUDO -->
+
+          <div class="form-group">
+            <label for="sshsudo" class="col-sm-3 control-label">SSH_SUDO</label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshsudo" ng-model="settings.SshSudo"
+              placeholder="E.g. sudo" type="text" ng-trim='false' required>
+            </div>
+          </div>
+
+          <!-- SSH_NOTPROCS -->
+
+          <div class="form-group">
+            <label for="sshnotprocs" class="col-sm-3 control-label">SSH_NOTPROCS</label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshnotprocs" ng-model="settings.SshNotProcs"
+              placeholder="E.g. getty ssh login syslog sssd audit xinetd" type="text" ng-trim='false' required>
             </div>
           </div>
 

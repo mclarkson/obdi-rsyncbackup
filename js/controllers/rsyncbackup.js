@@ -609,6 +609,10 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
                             BaseDir:"",
                             KnownHosts:"",
                             NumPeriods:1,
+                            SshKeyFile:"",
+                            SshUid:"",
+                            SshSudo:"",
+                            SshNotProcs:"",
                             Timeout:0 };
       }
 

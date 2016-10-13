@@ -27,19 +27,23 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id         int64
-	TaskId     int64
-	Protocol   string
-	Pre        string
-	Repeat     bool
-	RepeatPre  string
-	RepeatPost string
-	RsyncOpts  string
-	BaseDir    string
-	KnownHosts string
-	NumPeriods int64
-	Timeout    int64
-	Verbose    bool
+	Id          int64
+	TaskId      int64
+	Protocol    string
+	Pre         string
+	Repeat      bool
+	RepeatPre   string
+	RepeatPost  string
+	RsyncOpts   string
+	BaseDir     string
+	KnownHosts  string
+	NumPeriods  int64
+	Timeout     int64
+	Verbose     bool
+	SshKeyFile  string
+	SshUid      string
+	SshSudo     string
+	SshNotProcs string
 }
 
 // Name of the sqlite3 database file
@@ -51,19 +55,23 @@ const DBFILE = "rsyncbackup.db"
 
 // The 'settings' table
 type Setting struct {
-	Id         int64
-	TaskId     int64
-	Protocol   string
-	Pre        string
-	Repeat     bool
-	RepeatPre  string
-	RepeatPost string
-	RsyncOpts  string
-	BaseDir    string
-	KnownHosts string
-	NumPeriods int64
-	Timeout    int64
-	Verbose    bool
+	Id          int64
+	TaskId      int64
+	Protocol    string
+	Pre         string
+	Repeat      bool
+	RepeatPre   string
+	RepeatPost  string
+	RsyncOpts   string
+	BaseDir     string
+	KnownHosts  string
+	NumPeriods  int64
+	Timeout     int64
+	Verbose     bool
+	SshKeyFile  string
+	SshUid      string
+	SshSudo     string
+	SshNotProcs string
 }
 
 // Create tables and indexes in InitDB
@@ -158,6 +166,10 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["NumPeriods"] = settings[i].NumPeriods
 		u[i]["Timeout"] = settings[i].Timeout
 		u[i]["Verbose"] = settings[i].Verbose
+		u[i]["SshKeyFile"] = settings[i].SshKeyFile
+		u[i]["SshUid"] = settings[i].SshUid
+		u[i]["SshSudo"] = settings[i].SshSudo
+		u[i]["SshNotProcs"] = settings[i].SshNotProcs
 	}
 
 	// JSONify the query result
@@ -258,19 +270,23 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	// The following Setting will be written to the db
 
 	setting := Setting{
-		Id:         0,
-		TaskId:     task_id_i64,
-		Protocol:   postdata.Protocol,
-		Pre:        postdata.Pre,
-		Repeat:     postdata.Repeat,
-		RepeatPre:  postdata.RepeatPre,
-		RepeatPost: postdata.RepeatPost,
-		RsyncOpts:  postdata.RsyncOpts,
-		BaseDir:    postdata.BaseDir,
-		KnownHosts: postdata.KnownHosts,
-		NumPeriods: postdata.NumPeriods,
-		Timeout:    postdata.Timeout,
-		Verbose:    postdata.Verbose,
+		Id:          0,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		Repeat:      postdata.Repeat,
+		RepeatPre:   postdata.RepeatPre,
+		RepeatPost:  postdata.RepeatPost,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
+		Verbose:     postdata.Verbose,
+		SshKeyFile:  postdata.SshKeyFile,
+		SshUid:      postdata.SshUid,
+		SshSudo:     postdata.SshSudo,
+		SshNotProcs: postdata.SshNotProcs,
 	}
 
 	// Add the Setting entry
@@ -387,19 +403,23 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// The following Setting will be written to the db
 	setting := Setting{
-		Id:         postdata.Id,
-		TaskId:     task_id_i64,
-		Protocol:   postdata.Protocol,
-		Pre:        postdata.Pre,
-		Repeat:     postdata.Repeat,
-		RepeatPre:  postdata.RepeatPre,
-		RepeatPost: postdata.RepeatPost,
-		RsyncOpts:  postdata.RsyncOpts,
-		BaseDir:    postdata.BaseDir,
-		KnownHosts: postdata.KnownHosts,
-		NumPeriods: postdata.NumPeriods,
-		Timeout:    postdata.Timeout,
-		Verbose:    postdata.Verbose,
+		Id:          postdata.Id,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		Repeat:      postdata.Repeat,
+		RepeatPre:   postdata.RepeatPre,
+		RepeatPost:  postdata.RepeatPost,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
+		Verbose:     postdata.Verbose,
+		SshKeyFile:  postdata.SshKeyFile,
+		SshUid:      postdata.SshUid,
+		SshSudo:     postdata.SshSudo,
+		SshNotProcs: postdata.SshNotProcs,
 	}
 
 	// Update the Setting entry
