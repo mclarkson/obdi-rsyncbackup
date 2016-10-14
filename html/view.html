@@ -356,7 +356,10 @@
       <div ng-if="gotsettings">
 
         <p>Settings for rsync backup can be edited below. Defaults will be used
-           for any fields left empty.</p>
+           for any fields left empty. The field labels represent the environment
+           variables that are loaded before the backup script is run, which is
+           why they are all in uppercase.
+        </p>
 
         <div class="form-horizontal prepend-xs-1" role="form">
 
@@ -372,7 +375,18 @@
           <!-- Protocol -->
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">PROTOCOL</label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="PROTOCOL"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The backup script supports rsync over ssh but that
+                  isn't supported here, only connecting to a remote rsyncd
+                  server is supported.">
+                    PROTOCOL
+              </span>
+            </label>
             <div class="col-sm-7">
               <div class="dropdown-close">
                 <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
@@ -387,7 +401,16 @@
           <!-- PRE -->
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">PRE</label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="PRE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Scripts that are run before the backup starts.">
+                  PRE
+              </span>
+            </label>
             <div class="col-sm-7">
               <div class="dropdown-close">
                 <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
@@ -402,7 +425,18 @@
           <!-- PAUSE -->
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">REPEAT</label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEAT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Whether to repeat the rsync immediately after it finishes.
+                  When combined with REPEATPRE and REPEATPOST this setting can produce
+                  consistent backups (for Linux servers) when enabled.">
+                  REPEAT
+              </span>
+            </label>
             <div class="col-sm-7">
               <input type="checkbox" ng-model="settings.Repeat" style="margin-top:8px;">
             </div>
@@ -411,7 +445,17 @@
           <!-- REPEAT PRE -->
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">REPEATPRE</label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPRE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run before the second repeat rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                  REPEATPRE
+              </span>
+            </label>
             <div class="col-sm-7">
               <div class="dropdown-close">
                 <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
@@ -426,7 +470,17 @@
           <!-- REPEAT POST -->
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">REPEATPOST</label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPOST"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run after the final repeated rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                    REPEATPOST
+              </span>
+            </label>
             <div class="col-sm-7">
               <div class="dropdown-close">
                 <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
@@ -441,7 +495,18 @@
           <!-- SSH_KEYFILE -->
 
           <div class="form-group">
-            <label for="sshkeyfile" class="col-sm-3 control-label">SSH_KEYFILE</label>
+            <label for="sshkeyfile" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_KEYFILE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  location of the ssh private key file on the backup server to
+                  be used to connect to remote servers.">
+                    SSH_KEYFILE
+              </span>
+            </label>
             <div class="col-sm-7">
               <input class="form-control" id="sshkeyfile" ng-model="settings.SshKeyFile"
               placeholder="E.g. /home/bob/.ssh/id_rsa" type="text" ng-trim='false' required>
@@ -451,7 +516,17 @@
           <!-- SSH_UID -->
 
           <div class="form-group">
-            <label for="sshuid" class="col-sm-3 control-label">SSH_UID</label>
+            <label for="sshuid" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_UID"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  login name of the user used to connect to remote servers over ssh.">
+                  SSH_UID
+              </span>
+            </label>
             <div class="col-sm-7">
               <input class="form-control" id="sshuid" ng-model="settings.SshUid"
               placeholder="E.g. bob" type="text" ng-trim='false' required>
@@ -461,7 +536,18 @@
           <!-- SSH_SUDO -->
 
           <div class="form-group">
-            <label for="sshsudo" class="col-sm-3 control-label">SSH_SUDO</label>
+            <label for="sshsudo" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_SUDO"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  name of the sudo binary, usually sudo, to run commands as the root
+                  user, or leave blank to disable.">
+                    SSH_SUDO
+              </span>
+            </label>
             <div class="col-sm-7">
               <input class="form-control" id="sshsudo" ng-model="settings.SshSudo"
               placeholder="E.g. sudo" type="text" ng-trim='false' required>
@@ -471,7 +557,17 @@
           <!-- SSH_NOTPROCS -->
 
           <div class="form-group">
-            <label for="sshnotprocs" class="col-sm-3 control-label">SSH_NOTPROCS</label>
+            <label for="sshnotprocs" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_NOTPROCS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                names of processes that should not be paused.">
+                  SSH_NOTPROCS
+              </span>
+            </label>
             <div class="col-sm-7">
               <input class="form-control" id="sshnotprocs" ng-model="settings.SshNotProcs"
               placeholder="E.g. getty ssh login syslog sssd audit xinetd" type="text" ng-trim='false' required>
@@ -481,7 +577,16 @@
           <!-- RSYNC_OPTS -->
 
           <div class="form-group">
-            <label for="rsync_opts" class="col-sm-3 control-label">RSYNC_OPTS</label>
+            <label for="rsync_opts" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="RSYNC_OPTS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify extra options for the rsync command.">
+                    RSYNC_OPTS
+              </span>
+            </label>
             <div class="col-sm-7">
               <input class="form-control" id="rsync_opts" ng-model="settings.RsyncOpts"
               placeholder="Extra rsync options" type="text" ng-trim='false' required>
@@ -492,7 +597,15 @@
 
           <div class="form-group">
             <label for="base_dir" class="col-sm-3 control-label">
-                BASEDIR
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="BASEDIR"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the root of the directory tree containing backup
+                  folders.">
+                    BASEDIR
+              </span>
             </label>
             <div class="col-sm-7">
               <input class="form-control" id="base_dir" ng-model="settings.BaseDir"
@@ -504,7 +617,15 @@
 
           <div class="form-group">
             <label for="known_hosts" class="col-sm-3 control-label">
-                KNOWNHOSTS
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="KNOWNHOSTS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the location of the known_hosts file or leave blank
+                  to use the default location, '~/.ssh/known_hosts'.">
+                    KNOWNHOSTS
+              </span>
             </label>
             <div class="col-sm-7">
               <input class="form-control" id="known_hosts" ng-model="settings.KnownHosts"
@@ -517,7 +638,15 @@
 
           <div class="form-group">
             <label for="num_periods" class="col-sm-3 control-label">
-                NUMPERIODS
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="NUMPERIODS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the number of periods to split a day into for
+                  storing multiple snapshots per day.">
+                    NUMPERIODS
+              </span>
             </label>
             <div class="col-sm-7">
               <input class="form-control" id="num_periods" ng-model="settings.NumPeriods"
@@ -530,7 +659,14 @@
 
           <div class="form-group">
             <label for="timeout" class="col-sm-3 control-label">
-                TIMEOUT
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="TIMEOUT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the rsync idle timeout value.">
+                  TIMEOUT
+              </span>
             </label>
             <div class="col-sm-7">
               <input class="form-control" id="timeout" ng-model="settings.Timeout"
@@ -545,11 +681,23 @@
             <div class="col-sm-offset-3 col-sm-7">
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" ng-model="settings.Verbose"> Verbose
+                  <input type="checkbox" ng-model="settings.Verbose">
+                    <span class="mypopover"
+                      popover-trigger="mouseenter mouseleave"
+                      popover-title="Verbose"
+                      popover-placement="right"
+                      popover-append-to-body="true"
+                      uib-popover="Whether to set the rsync verbose option. This
+                        can produce large logs if enabled but aids with debugging
+                        and verification.">
+                          Verbose
+                    </span>
                 </label>
               </div>
             </div>
           </div>
+
+          <p>&nbsp;</p>
 
         </div>
       </div>

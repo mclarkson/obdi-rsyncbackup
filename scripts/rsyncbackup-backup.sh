@@ -46,7 +46,7 @@ DEFAULT_SSH_KEYFILE=""
 # The user id to connect as.
 DEFAULT_SSH_UID=""
 # The sudo binary, if not connecting as root.
-DEFAULT_SSH_SUDO="sudo"
+#DEFAULT_SSH_SUDO="sudo"
 # Processes that should not be paused.
 DEFAULT_SSH_NOTPROCS="getty ssh login syslog sssd audit xinetd"
     
@@ -422,7 +422,7 @@ init_vars() {
     PAUSEPROCS=${PAUSEPROCS:-$DEFAULT_PAUSEPROCS}
     SSH_KEYFILE=${SSH_KEYFILE:-$DEFAULT_SSH_KEYFILE}
     SSH_UID=${SSH_UID:-$DEFAULT_SSH_UID}
-    SSH_SUDO=${SSH_SUDO:-$DEFAULT_SSH_SUDO}
+    #SSH_SUDO=${SSH_SUDO:-$DEFAULT_SSH_SUDO}
     SSH_NOTPROCS=${SSH_NOTPROCS:-$DEFAULT_SSH_NOTPROCS}
 }
 
