@@ -243,7 +243,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   $scope.$on( "search", function( event, args ) {
   // ----------------------------------------------------------------------
-  // Not used since search is disabled
 
     if( $scope.editincludes ) {
       $scope.includesfilter = args;
@@ -509,6 +508,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
+  $scope.GetExcludeItem = function( index ) {
+  // ----------------------------------------------------------------------
+
+     // Refresh the row
+     if( $scope.includes[index].Excludes.length == 0 ) {
+         $scope.GetExclude( index );
+     }
+  }
+
+  // ----------------------------------------------------------------------
   $scope.GetExcludes = function() {
   // ----------------------------------------------------------------------
 
@@ -759,7 +768,11 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       // Backfill the excludes
-      $scope.GetExcludes();
+      //$scope.GetExcludes();
+
+      for( var i=0; i<$scope.includes.length; i++ ) {
+          $scope.includes[i].Excludes = [];
+      }
 
     }).error( function(data,status) {
       if (status>=500) {

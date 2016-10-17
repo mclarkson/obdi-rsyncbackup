@@ -335,7 +335,8 @@
                 <a href="#" ng-click="RunBackup(item.TaskDesc,$index)">
                   <i class="fa fa-play green" title="Run a full backup now"></i></a>
               </td>
-            </tr>
+              </tr>
+            </tbody>
           </table>
         </div> <!-- table-responsive -->
       </div>
@@ -749,7 +750,8 @@
             </td>
             <td>{{item.Host}}</td>
             <td>{{item.Base}}</td>
-            <td style="width: 100%">
+            <td style="width: 100%"
+                in-view="$inview&&GetExcludeItem($index)">
               <div ng-repeat="exclitem in item.Excludes">
                 <p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
                   <i title="Delete Exclude" class="fa fa-minus red"></i></a>
@@ -764,7 +766,8 @@
               <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
                 <i class="fa fa-edit" title="Edit Include"></i></a>
             </td>
-          </tr>
+            </tr>
+          </tbody>
         </table>
       </div> <!-- table-responsive -->
       &nbsp;<br/>&nbsp;<br/>
@@ -826,7 +829,8 @@
               <a href="#" ng-click="ViewSnapDirectory(item.name)">
                     <i class="fa fa-eye" title="View Files"></i></a>
             </td>
-          </tr>
+            </tr>
+          </tbody>
         </table>
       </div> <!-- table-responsive -->
 
@@ -879,7 +883,8 @@
                 <a href="#" ng-click="ViewDirectory(item.name)" ng-if="item.type == 'd'">
                   <i class="fa fa-folder-open-o" title="Display Directory"></i></a>
               </td>
-            </tr>
+              </tr>
+            </tbody>
           </table>
         </div> <!-- table-responsive -->
       </div>
