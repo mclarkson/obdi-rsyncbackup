@@ -1,14 +1,11 @@
 # obdi-rsyncbackup
 
-Backup using rsync. Achieves compression and deduplication when using zfs.
-
-BIG NOTE: This plugin does the rsync and snapshotting. More work is required
-to create a consistent backup for databases etc.
+Back up servers using rsync. Achieves compression and deduplication when using zfs.
 
 # Todo
 
-* PRE/POST start/stop/pause/unpause workflow for consistent backups.
-* Scheduling (use cron and rest api for now).
+* ~~PRE/POST start/stop/pause/unpause workflow for consistent backups.~~
+* ~~Scheduling (use cron and rest api for now).~~
 * ~~Delete snapshots~~ done
 * ~~Viewing and files and snapshots.~~ done
 
