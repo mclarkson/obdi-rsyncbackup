@@ -226,7 +226,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		space = " "
 	}
 	if len(setting.SshNotProcs) > 0 {
-		env_vars_str += space + "SSH_NOTPROCS=" + setting.SshNotProcs
+		env_vars_str += space + "SSH_NOTPROCS=" + `"` + setting.SshNotProcs + `"`
 		space = " "
 	}
 	env_vars_str += space + "NUMPERIODS=" + strconv.FormatInt(setting.NumPeriods, 10)
