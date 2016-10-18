@@ -36,6 +36,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.newitem.Text = "";
   $scope.checkbox_allnone = false;
   $scope.snapshotdir = "";
+  $scope.filteredItems_saved = [];
 
   // Pages
   $scope.mainview = true;
@@ -251,6 +252,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.includes[i].Selected = false;
       }
       ShouldRunBackupButtonBeEnabled();
+      if( args != "" ) {
+          $timeout( function() {
+          for( var i=0; i<$scope.filteredItems_saved.length; ++i ) {
+            $scope.GetExcludeById( $scope.filteredItems_saved[i].Id );
+          }}, 1000 );
+      }
     } else if( $scope.showfiles_result ) {
       $scope.zfslistfilter = args;
     } else if( $scope.showfiles_files ) {
@@ -259,6 +266,14 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.tasksfilter = args;
     } 
   });
+
+  // ----------------------------------------------------------------------
+  $scope.copyToController = function (data) {
+  // ----------------------------------------------------------------------
+  // I can't get to filteredItems unless I copy the data out first.
+
+    $scope.filteredItems_saved = data;
+  }
 
   // ----------------------------------------------------------------------
   var clearMessages = function() {
@@ -1981,6 +1996,19 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   };
 
   // Excludes
+
+  // ----------------------------------------------------------------------
+  $scope.GetExcludeById = function(id) {
+  // ----------------------------------------------------------------------
+
+      // Find the index in includes array
+      for( var i=0; i<$scope.includes.length; ++i ) {
+          if( $scope.includes[i].Id == id ) {
+              $scope.GetExclude( i );
+              break;
+          }
+      }
+  }
 
   // ----------------------------------------------------------------------
   $scope.GetExclude = function(i) {

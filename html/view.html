@@ -742,7 +742,7 @@
           </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="item in includes | filter:includesfilter">
+            <tr ng-repeat="item in filteredItems = (includes | filter:includesfilter)">
             <td style="text-align: center;">
               <input type="checkbox"
               ng-model="item.Selected"
@@ -767,6 +767,7 @@
                 <i class="fa fa-edit" title="Edit Include"></i></a>
             </td>
             </tr>
+            {{copyToController(filteredItems)}}
           </tbody>
         </table>
       </div> <!-- table-responsive -->
