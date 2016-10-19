@@ -26,6 +26,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.envcapmaps = [];
   $scope.includes = [];
   $scope.settings = {};
+  $scope.settings.Repeat = true;
   $scope.excludes = [];
   $scope.env = {};
   $scope.zfslist = [];
@@ -606,6 +607,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editsettings = true;
     $scope.editincludes = false;
     $scope.spacing = 0;
+    $scope.settings = {};
+    $scope.settings.Repeat = true;
 
     $http({
       method: 'GET',
@@ -626,7 +629,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.settings = { Id:0,
                             Protocol:"",
                             Pre:"",
-                            Repeat:0,
+                            Repeat:true,
                             RepeatPre:"",
                             RepeatPost:"",
                             RsyncOpts:"",
@@ -639,6 +642,22 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
                             SshNotProcs:"",
                             Timeout:0 };
       }
+
+      $scope.$watch('settings.Repeat', function( newval, oldval ) {
+        $timeout( function() {
+          if( newval == false ) {
+              $('#repeatpre').prop('disabled',true);
+              $('#repeatpost').prop('disabled',true);
+              $('#repeatpre').selectpicker('refresh');
+              $('#repeatpost').selectpicker('refresh');
+          } else {
+              $('#repeatpre').prop('disabled',false);
+              $('#repeatpost').prop('disabled',false);
+              $('#repeatpre').selectpicker('refresh');
+              $('#repeatpost').selectpicker('refresh');
+          }
+        },200);
+      });
 
       $scope.gettingsettings = false;
       $scope.gotsettings = true;

@@ -423,7 +423,30 @@
             </div>
           </div>
 
-          <!-- PAUSE -->
+          <!-- VERBOSE -->
+
+          <!--
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-7">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-model="settings.Verbose">
+                    <span class="mypopover"
+                      popover-trigger="mouseenter mouseleave"
+                      popover-title="Verbose"
+                      popover-placement="right"
+                      popover-append-to-body="true"
+                      uib-popover="Whether to set the rsync verbose option. This
+                        can produce large logs (possibly hundreds of megabytes of
+                        logs stored in the system database) if enabled but aids
+                        with debugging and verification.">
+                          Verbose
+                    </span>
+                </label>
+              </div>
+            </div>
+          </div>
+          -->
 
           <div class="form-group">
             <label class="col-sm-3 control-label">
@@ -432,146 +455,15 @@
                 popover-title="REPEAT"
                 popover-placement="right"
                 popover-append-to-body="true"
-                uib-popover="Whether to repeat the rsync immediately after it finishes.
-                  When combined with REPEATPRE and REPEATPOST this setting can produce
-                  consistent backups (for Linux servers) when enabled.">
-                  REPEAT
+                uib-popover="Whether to set the rsync verbose option. This
+                  can produce large logs if enabled (possibly hundreds of
+                  megabytes of logs stored in the system database) but aids
+                  with debugging and verification.">
+                  Verbose
               </span>
             </label>
             <div class="col-sm-7">
-              <input type="checkbox" ng-model="settings.Repeat" style="margin-top:8px;">
-            </div>
-          </div>
-
-          <!-- REPEAT PRE -->
-
-          <div class="form-group">
-            <label class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="REPEATPRE"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="The script to run before the second repeat rsync is run.
-                  This option does nothing if REPEAT is unchecked.">
-                  REPEATPRE
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <div class="dropdown-close">
-                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-                <select selectpicker required ng-model="settings.RepeatPre">
-                  <option value="">None</option>
-                  <option>pause_processes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- REPEAT POST -->
-
-          <div class="form-group">
-            <label class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="REPEATPOST"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="The script to run after the final repeated rsync is run.
-                  This option does nothing if REPEAT is unchecked.">
-                    REPEATPOST
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <div class="dropdown-close">
-                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-                <select selectpicker required ng-model="settings.RepeatPost">
-                  <option value="">None</option>
-                  <option>unpause_processes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- SSH_KEYFILE -->
-
-          <div class="form-group">
-            <label for="sshkeyfile" class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="SSH_KEYFILE"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
-                  location of the ssh private key file on the backup server to
-                  be used to connect to remote servers.">
-                    SSH_KEYFILE
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <input class="form-control" id="sshkeyfile" ng-model="settings.SshKeyFile"
-              placeholder="E.g. /home/bob/.ssh/id_rsa" type="text" ng-trim='false' required>
-            </div>
-          </div>
-
-          <!-- SSH_UID -->
-
-          <div class="form-group">
-            <label for="sshuid" class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="SSH_UID"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
-                  login name of the user used to connect to remote servers over ssh.">
-                  SSH_UID
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <input class="form-control" id="sshuid" ng-model="settings.SshUid"
-              placeholder="E.g. bob" type="text" ng-trim='false' required>
-            </div>
-          </div>
-
-          <!-- SSH_SUDO -->
-
-          <div class="form-group">
-            <label for="sshsudo" class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="SSH_SUDO"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
-                  name of the sudo binary, usually sudo, to run commands as the root
-                  user, or leave blank to disable.">
-                    SSH_SUDO
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <input class="form-control" id="sshsudo" ng-model="settings.SshSudo"
-              placeholder="E.g. sudo" type="text" ng-trim='false' required>
-            </div>
-          </div>
-
-          <!-- SSH_NOTPROCS -->
-
-          <div class="form-group">
-            <label for="sshnotprocs" class="col-sm-3 control-label">
-              <span class="mypopover"
-                popover-trigger="mouseenter mouseleave"
-                popover-title="SSH_NOTPROCS"
-                popover-placement="right"
-                popover-append-to-body="true"
-                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
-                names of processes that should not be paused.">
-                  SSH_NOTPROCS
-              </span>
-            </label>
-            <div class="col-sm-7">
-              <input class="form-control" id="sshnotprocs" ng-model="settings.SshNotProcs"
-              placeholder="E.g. getty ssh login syslog sssd audit xinetd" type="text" ng-trim='false' required>
+              <input type="checkbox" ng-model="settings.Verbose" style="margin-top:8px;">
             </div>
           </div>
 
@@ -676,25 +568,161 @@
             </div>
           </div>
 
-          <!-- VERBOSE -->
+          <!-- REPEAT/PAUSE -->
 
           <div class="form-group">
-            <div class="col-sm-offset-3 col-sm-7">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-model="settings.Verbose">
-                    <span class="mypopover"
-                      popover-trigger="mouseenter mouseleave"
-                      popover-title="Verbose"
-                      popover-placement="right"
-                      popover-append-to-body="true"
-                      uib-popover="Whether to set the rsync verbose option. This
-                        can produce large logs if enabled but aids with debugging
-                        and verification.">
-                          Verbose
-                    </span>
-                </label>
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEAT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Whether to repeat the rsync immediately after it finishes.
+                  When combined with REPEATPRE and REPEATPOST this setting can produce
+                  consistent backups (for Linux servers) when enabled.">
+                  REPEAT
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input type="checkbox" ng-model="settings.Repeat" style="margin-top:8px;">
+            </div>
+          </div>
+
+          <!-- REPEAT PRE -->
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPRE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run before the second repeat rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                  REPEATPRE
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker id="repeatpre"
+                    required ng-model="settings.RepeatPre">
+                  <option value="">None</option>
+                  <option>pause_processes</option>
+                </select>
               </div>
+            </div>
+          </div>
+
+          <!-- REPEAT POST -->
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPOST"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run after the final repeated rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                    REPEATPOST
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker id="repeatpost"
+                    required ng-model="settings.RepeatPost">
+                  <option value="">None</option>
+                  <option>unpause_processes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SSH_KEYFILE -->
+
+          <div class="form-group">
+            <label for="sshkeyfile" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_KEYFILE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  location of the ssh private key file on the backup server to
+                  be used to connect to remote servers.">
+                    SSH_KEYFILE
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input ng-disabled="!settings.Repeat" class="form-control" id="sshkeyfile"
+               ng-model="settings.SshKeyFile" placeholder="E.g. /home/bob/.ssh/id_rsa"
+               type="text" ng-trim='false' required>
+            </div>
+          </div>
+
+          <!-- SSH_UID -->
+
+          <div class="form-group">
+            <label for="sshuid" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_UID"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  login name of the user used to connect to remote servers over ssh.">
+                  SSH_UID
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshuid" ng-model="settings.SshUid"
+              placeholder="E.g. bob" type="text" ng-trim='false' required
+              ng-disabled="!settings.Repeat">
+            </div>
+          </div>
+
+          <!-- SSH_SUDO -->
+
+          <div class="form-group">
+            <label for="sshsudo" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_SUDO"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  name of the sudo binary, usually sudo, to run commands as the root
+                  user, or leave blank to disable.">
+                    SSH_SUDO
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshsudo" ng-model="settings.SshSudo"
+              placeholder="E.g. sudo" type="text" ng-trim='false' required
+              ng-disabled="!settings.Repeat">
+            </div>
+          </div>
+
+          <!-- SSH_NOTPROCS -->
+
+          <div class="form-group">
+            <label for="sshnotprocs" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_NOTPROCS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                names of processes that should not be paused.">
+                  SSH_NOTPROCS
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshnotprocs" ng-model="settings.SshNotProcs"
+              placeholder="E.g. getty ssh login syslog sssd audit xinetd" type="text"
+              ng-trim='false' required ng-disabled="!settings.Repeat">
             </div>
           </div>
 
