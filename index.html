@@ -11,6 +11,7 @@
   <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
 </head>
 <body>
+
   <section class="page-header">
     <h1 class="project-name">Obdi-rsyncbackup</h1>
     <h2 class="project-tagline">Obdi plugin to do rsync backups with compression, deduplication and snapshotting using
@@ -19,7 +20,40 @@
       <a href="https://github.com/mclarkson/obdi-rsyncbackup/tarball/master" class="btn">Download .tar.gz</a>
       -->
   </section>
+
   <section class="main-content">
+
+    <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>Use Case</h1>
+
+    <p>The following paragraph describes the specific use case this plugin was
+    created for.</p>
+
+    <p>We have 80 Centos 6 servers that need to be backed up. We want to back
+    up these servers efficiently and be able to create an Amazon EC2 AMI or
+    Instance from the backup files.</p>
+
+    <p>The main features:</p>
+    <ul>
+        <li>Efficient back up:
+        <li>Rsync is used to efficiently back up servers.</li>
+        <li>Rsyncd is set up on every server.</li>
+        <li>On the backup server:
+        <li>The ZFS filesystem is used to give us
+        <li>File deduplication - so identical files on many servers are only stored once.</li>
+        <li>File compression - Uncompressed files are compressed to save space.</li>
+        <li>Snapshots in time - Daily or multiple snapshots per day can be taken.</li>
+        </li>
+        </li>
+        </li>
+        <li>Amazon EC2 AMI or Instance creation:
+        <li>Created from existing backups and snapshots.</li>
+        <li>Implemented using two other plugins:
+        <li>obdi-aws-p2ec2, and,</li>
+        <li>obdi-aws-ec2lib.</li>
+        </li>
+        </li>
+    </ul>
+
     <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>obdi-rsyncbackup</h1>
     <p>Back up servers using rsync. Achieves compression and deduplication when using zfs.</p>
     <h1><a id="todo" class="anchor" href="#todo" aria-hidden="true"></a>Todo</h1>
@@ -398,5 +432,6 @@ Optional URL parameters:
       Long</a>.</span>
     </footer>
   </section>
+
 </body>
 </html>
