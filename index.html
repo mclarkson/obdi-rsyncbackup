@@ -35,22 +35,30 @@
     <p>The main features:</p>
     <ul>
         <li>Efficient back up:
-        <li>Rsync is used to efficiently back up servers.</li>
-        <li>Rsyncd is set up on every server.</li>
-        <li>On the backup server:
-        <li>The ZFS filesystem is used to give us
-        <li>File deduplication - so identical files on many servers are only stored once.</li>
-        <li>File compression - Uncompressed files are compressed to save space.</li>
-        <li>Snapshots in time - Daily or multiple snapshots per day can be taken.</li>
-        </li>
-        </li>
+            <ul>
+                <li>Rsync is used to efficiently back up servers.</li>
+                <li>Rsyncd is set up on every server.</li>
+                <li>On the backup server:
+                    <ul>
+                        <li>The ZFS filesystem is used to give us
+                            <li>File deduplication - so identical files on many servers are only stored once.</li>
+                            <li>File compression - Uncompressed files are compressed to save space.</li>
+                            <li>Snapshots in time - Daily or multiple snapshots per day can be taken.</li>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </li>
         <li>Amazon EC2 AMI or Instance creation:
-        <li>Created from existing backups and snapshots.</li>
-        <li>Implemented using two other plugins:
-        <li>obdi-aws-p2ec2, and,</li>
-        <li>obdi-aws-ec2lib.</li>
-        </li>
+            <ul>
+                <li>Created from existing backups and snapshots.</li>
+                <li>Implemented using two other plugins:
+                    <ul>
+                        <li>obdi-aws-p2ec2, and,</li>
+                        <li>obdi-aws-ec2lib.</li>
+                    </ul>
+                </li>
+            </ul>
         </li>
     </ul>
 
