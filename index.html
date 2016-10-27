@@ -40,10 +40,12 @@
                 <li>Rsyncd is set up on every server.</li>
                 <li>On the backup server:
                     <ul>
-                        <li>The ZFS filesystem is used to give us
-                            <li>File deduplication - so identical files on many servers are only stored once.</li>
-                            <li>File compression - Uncompressed files are compressed to save space.</li>
-                            <li>Snapshots in time - Daily or multiple snapshots per day can be taken.</li>
+                        <li>The ZFS filesystem is used to give us:
+                            <ul>
+                                <li>File deduplication - so identical files on many servers are only stored once.</li>
+                                <li>File compression - Uncompressed files are compressed to save space.</li>
+                                <li>Snapshots in time - Daily or multiple snapshots per day can be taken.</li>
+                            </ul>
                         </li>
                     </ul>
                 </li>
