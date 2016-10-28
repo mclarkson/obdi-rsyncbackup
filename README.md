@@ -2,6 +2,10 @@
 
 Back up servers using rsync. Achieves compression and deduplication when using zfs.
 
+# About
+
+[http://www.rsyncbackup.obdi.smorg.co.uk/](http://www.rsyncbackup.obdi.smorg.co.uk/)
+
 # Todo
 
 * ~~PRE/POST start/stop/pause/unpause workflow for consistent backups.~~
