@@ -131,7 +131,7 @@
     <p><strong>Files and Snapshots</strong></p>
     <p>The screenshot shows the output from 'zfs list'. This shows the space used
     and available in the main read/write filesystem, and the space used for each
-    read-only snapshot below. Each snapshot can be browsed just as the filesystem
+    read-only snapshot. Each snapshot can be browsed just as the filesystem
     can be.</p>
 
     <p><img src="doc/rsyncbackup_snapshots_small.png?raw=true" alt="screenshot"></p>
@@ -148,7 +148,7 @@
     <p>Rsync works on includes and excludes and those are shown here. The image
     shows a filtered list where the user searched for '107'. It also shows a
     single selected item, linuxserver107. The 'Backup Selected Now' button
-    was pressed and the Backup request was sent to backup only that server,
+    was pressed and the Backup request was sent to back up only that server,
     which was started as job number 5334. Clicking on the link will take the
     user to the Log output. The log output can also be viewed by clicking
     on the 'System Jobs' menu item.</p>
@@ -157,12 +157,13 @@
 
     <p><strong>Output Log</strong></p>
     <p>The output from rsync is shown and it can be seen that rsync was run, processes
-    paused, then more rsyncing, then unpausing of processes.</p>
+    paused, then more rsyncing done, then processes unpaused.</p>
 
     <p><img src="doc/rsyncbackup_log_small.png?raw=true" alt="screenshot"></p>
 
     <!-- GITHUB PAGE -->
 
+    <!--
     <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>obdi-rsyncbackup</h1>
     <p>Back up servers using rsync. Achieves compression and deduplication when using zfs.</p>
     <h1><a id="todo" class="anchor" href="#todo" aria-hidden="true"></a>Todo</h1>
@@ -181,7 +182,7 @@
       </li>
     </ul>
     <h2><a id="screenshot" class="anchor" href="#screenshot" aria-hidden="true"></a>Screenshot</h2>
-    <!--<p><img src="images/obdi-rsyncbackup-small.png?raw=true" alt=""></p>-->
+    <p><img src="images/obdi-rsyncbackup-small.png?raw=true" alt=""></p>
     <h2><a id="what-is-it" class="anchor" href="#what-is-it" aria-hidden="true"></a>What is it?</h2>
     <p>A simple backup solution for Linux servers that achieves deduplication and compression using the zfs file
     system.</p>
@@ -533,6 +534,7 @@ Optional URL parameters:
 </code></pre>
     <p>See <a href="https://github.com/mclarkson/obdi-nettools-repository">obdi-nettools-repository</a> for more
     information about Net plugins.</p>
+    -->
     <footer class="site-footer">
       <span class="site-footer-owner"><a href="https://github.com/mclarkson/obdi-rsyncbackup">Obdi-rsyncbackup</a> is
       maintained by <a href="https://github.com/mclarkson">mclarkson</a>.</span> <span class="site-footer-credits">This
