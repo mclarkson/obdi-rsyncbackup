@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 for Linux version 5.1.25">
+  <meta charset="UTF-8">
+  <title>Obdi-rsyncbackup by mclarkson</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+</head>
+<body>
+
+  <section class="page-header">
+    <h1 class="project-name">Obdi-rsyncbackup</h1>
+    <h2 class="project-tagline">Obdi plugin to do rsync backups with compression, deduplication and snapshotting using
+    zfs.</h2><a href="https://github.com/mclarkson/obdi-rsyncbackup" class="btn">View on GitHub</a> <!--
+      <a href="https://github.com/mclarkson/obdi-rsyncbackup/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/mclarkson/obdi-rsyncbackup/tarball/master" class="btn">Download .tar.gz</a>
+      -->
+  </section>
+
+  <section class="main-content">
+
+    <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>obdi-rsyncbackup</h1>
+    <p>Back up servers using rsync. Achieves compression and deduplication when using zfs.</p>
+    <h1><a id="todo" class="anchor" href="#todo" aria-hidden="true"></a>Todo</h1>
+    <ul>
+      <li>
+        <del>PRE/POST start/stop/pause/unpause workflow for consistent backups.</del>
+      </li>
+      <li>
+        <del>Scheduling (use cron and rest api for now).</del>
+      </li>
+      <li>
+        <del>Delete snapshots</del> done
+      </li>
+      <li>
+        <del>Viewing and files and snapshots.</del> done
+      </li>
+    </ul>
+    <h2><a id="screenshot" class="anchor" href="#screenshot" aria-hidden="true"></a>Screenshot</h2>
+    <p><img src="images/obdi-rsyncbackup-small.png?raw=true" alt=""></p>
+    <h2><a id="what-is-it" class="anchor" href="#what-is-it" aria-hidden="true"></a>What is it?</h2>
+    <p>A simple backup solution for Linux servers that achieves deduplication and compression using the zfs file
+    system.</p>
+    <h2><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>Installation</h2>
+    <p>Installation is in three parts, installing the plugin, setting up the server that will be used for storing the
+    backups, and set up the servers that you want to back up.</p>
+    <h4><a id="installing-the-plugin" class="anchor" href="#installing-the-plugin" aria-hidden="true"></a>Installing
+    the plugin</h4>
+    <ul>
+      <li>Log into the admin interface, 'https://ObdiHost/manager/admin'.</li>
+      <li>In Plugins -&gt; Manage Repositories add, '<a href=
+      "https://github.com/mclarkson/obdi-nettools-repository.git">https://github.com/mclarkson/obdi-nettools-repository.git</a>'
+      </li>
+      <li>In Plugins -&gt; Add Plugin, choose 'rsyncbackup' and Install.</li>
+    </ul>
+    <h4><a id="server-set-up" class="anchor" href="#server-set-up" aria-hidden="true"></a>Server Set-up</h4>
+    <p>Instructions for a CentOS 6 server. Centos 7 should be the same.</p>
+    <p>Set up zfs:</p>
+    <pre><code># CentOS 6
+
+yum install zfs
+
+# Create a 1TB zfs pool on a logical volume
+
+mkdir /backup
+modprobe zfs
+lvcreate -L1t -n servers-zfs vg1
+zpool create backup /dev/vg1/servers-zfs
+
+# Note: dedup needs a large amount of memory.
+zfs create -o dedup=on -o compression=gzip backup/servers-zfs
+
+# Disable atime
+
+zfs set atime=off backup/servers-zfs
+
+# List and check settings
+
+zfs list
+zpool list
+zfs get dedup
+zfs get compression
+zfs get atime
+</code></pre>
+    <p>Install the obdi worker:</p>
+    <pre><code># Enable EPEL YUM repository
+rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+# Enable Obdi COPR YUM repository
+curl -o /etc/yum.repos.d/obdi.repo \
+  https://copr.fedorainfracloud.org/coprs/mclarkson/Obdi/repo/epel-6/mclarkson-Obdi-epel-6.repo
+
+# Install Obdi Worker
+yum -y install obdi-worker
+</code></pre>
+    <p>In the admin interface -&gt; Environments, edit the environment, switch to the Capabilities tab, add the
+    RSYNCBACKUP_WORKER_1 capability and click Apply, then add the URL of the new Obdi worker to the
+    RSYNCBACKUP_WORKER_1 capability.</p>
+    <p>Obdi can now use this server as a backup server.</p>
+    <h4><a id="setting-up-the-servers-to-be-backed-up-from" class="anchor" href=
+    "#setting-up-the-servers-to-be-backed-up-from" aria-hidden="true"></a>Setting up the Servers to be Backed Up
+    From</h4>
+    <p>On every server enable rsyncd by ensuring xinetd has disable set to no for `/etc/xinetd.d/rsync'. For
+    example:</p>
+    <pre><code>service rsync
+{
+        disable = no
+        flags           = IPv6
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/bin/rsync
+        server_args     = --daemon
+        log_on_failure  += USERID
+}
+</code></pre>
+    <p>Supply an rsyncd configuration. For example, use the following configuration in `/etc/rsyncd.conf' to do be able
+    to do a full system backup:</p>
+    <pre><code>[backup]
+    path = /
+    comment = Full system backup
+    read only = true
+    uid = 0
+    gid = 0
+    exclude = dev/** proc/** media/** mnt/** selinux/** sys/** tmp/**
+</code></pre>
+    <p>With the above set-up the following settings will work:</p>
+    <ul>
+      <li>PROTOCOL = rsyncd</li>
+      <li>PRE = 'create_zfs_snapshot'.</li>
+      <li>RSYNC_OPTS = your options, e.g. "--sparse", "-z".</li>
+      <li>BASEDIR = '/backup/servers-zfs/'.</li>
+      <li>KNOWNHOSTS = empty.</li>
+      <li>NUMPERIODS = 1 or more.</li>
+      <li>TIMEOUT = 0 (disabled) or more seconds.</li>
+      <li>Verbose = on or off. Will make the database grow if set to 'on'.</li>
+    </ul>
+    <p>Lock down access using hosts.allow, hosts.deny and/or iptables.</p>
+    <h2><a id="example-cron-jobs" class="anchor" href="#example-cron-jobs" aria-hidden="true"></a>Example cron
+    jobs</h2>
+    <h3><a id="full-system-backup" class="anchor" href="#full-system-backup" aria-hidden="true"></a>Full system
+    backup</h3>
+    <p>This example cron job will start a backup at 06.15 every day:</p>
+    <pre><code>15 06 * * * /home/a_user/cron/dobackup.sh
+</code></pre>
+    <p>The preceeding cron job will run the dobackup.sh script:</p>
+    <pre><code>#!/bin/bash
+
+ENVID=1
+TASKID=1
+
+# Log in
+
+ipport="127.0.0.1:443"
+
+guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Back-up
+
+curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=$ENVID&amp;task_id=$TASKID"
+</code></pre>
+    <p>Ensure dobackup.sh is executable with 'chmod +x dobackup.sh'.</p>
+    <h3><a id="delete-snapshots-more-than-30-days-old" class="anchor" href="#delete-snapshots-more-than-30-days-old"
+    aria-hidden="true"></a>Delete snapshots more than 30 days old</h3>
+    <p>This example cron job will delete old snapshots at 03.00 every day:</p>
+    <pre><code>00 03 * * * /home/a_user/cron/prunesnapshots.sh
+</code></pre>
+    <p>The preceeding cron job will run the prunesnapshots.sh script:</p>
+    <pre><code># Log in
+
+ipport="127.0.0.1:443"
+
+guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Get list
+
+job=$(curl -sk \
+    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&amp;task_id=1" | \
+    sed 's/.*"JobId":\([0-9]\+\).*/\1/' )
+
+# Wait for job to finish
+
+while true; do
+    r=$(curl -sk "https://$ipport/api/nomen.nescio/$guid/jobs?job_id=$job")
+    if echo "$r" | grep -qs '"Status": 5'; then
+        break
+    else
+        echo "running"
+    fi
+done
+
+# Get list
+
+snaps=$(curl -sk "https://$ipport/api/nomen.nescio/$guid/outputlines?job_id=$job" |
+    grep "Text" |
+    tr -d '\\' |
+    grep -o '\[.*\]' |
+    python -mjson.tool |
+    grep -Eo "[0-9]{8,8}\.[0-9]")
+
+amonthago=$(date -d "30 days ago" +%Y%m%d)
+
+for i in $snaps; do [[ ${i%.[0-9]} &lt; $amonthago ]] &amp;& delete="$delete $i"; done
+
+# Delete snaps more than 30 days old
+
+for SNAP in $delete ; do
+    curl -k -X POST \
+        "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&amp;task_id=1&amp;snapshot=$SNAP"
+done
+
+exit 0
+</code></pre>
+    <p>Ensure prunesnapshots.sh is executable with 'chmod +x prunesnapshots.sh'.</p>
+    <h2><a id="dev" class="anchor" href="#dev" aria-hidden="true"></a>Dev</h2>
+    <p>rsyncbackup.db schema:</p>
+    <p><img src="doc/DB_Schema.png?raw=true" alt=""></p>
+    <p><strong>Backup tasks:</strong></p>
+    <pre><code># Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{"TaskDesc":"Backup task #1","CapTag":"RSYNCBACKUP_WORKER_1"}' \
+  https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks?env_id=1
+
+# Read
+
+$ curl -k https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks?env_id=1
+
+# Update
+
+$ curl -k -d '{"Id":1,"Text":"Hello there"}' -X PUT \
+  https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks?env_id=1
+
+# Delete
+
+$ curl -k -X DELETE \
+  https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks/1?env_id=1
+</code></pre>
+    <p><strong>Includes:</strong></p>
+    <pre><code># Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{"Host":"host1.local","Base":"backup"}' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes?env_id=1&amp;task_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes?env_id=1&amp;task_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"Host":"host2.local"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes?env_id=1&amp;task_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes/1?env_id=1"
+</code></pre>
+    <p><strong>Excludes:</strong></p>
+    <pre><code># Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{"Path":"/var/log/**"}' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&amp;include_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&amp;include_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"Host":"host2.local"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes?env_id=1&amp;include_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes/1?env_id=1"
+</code></pre>
+    <p><strong>Settings:</strong></p>
+    <pre><code># Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{
+    "Id":0,
+    "Protocol":"rsyncd",
+    "Pre":"create_zfs_snapshot",
+    "RsyncOpts":"--sparse",
+    "BaseDir":"/backup/servers-zfs/",
+    "KnownHosts":"",
+    "NumPeriods":1,
+    "Timeout":0,
+    "Verbose":true
+  }' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&amp;task_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&amp;task_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"RsyncOpts":"--sparse -z"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&amp;task_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings/1?env_id=1&amp;task_id=1"
+</code></pre>
+    <p><strong>Initiate a backup:</strong></p>
+    <pre><code># Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Back-up
+
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=1&amp;task_id=1"
+
+# Verbose back-up (verbose paramater can be set to any value)
+
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/backup?env_id=1&amp;task_id=1&amp;verbose=t"
+
+</code></pre>
+    <p><strong>List zfs snapshots and files contents:</strong></p>
+    <pre>
+    <code>$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&amp;task_id=1"
+</code></pre>
+    <p><strong>List directory contents:</strong></p>
+    <pre>
+    <code>$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/ls?env_id=1&amp;task_id=1&amp;path=nosnap/server001"
+</code></pre>
+    <p><strong>Delete snapshot:</strong></p>
+    <pre><code>$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&amp;task_id=1&amp;snapshot=20160804.1"
+</code></pre>
+    <p><strong>Calculate unpacked, undeduped directory size:</strong></p>
+    <pre>
+    <code>$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/dirsize?env_id=1&amp;task_id=1&amp;path=nosnap/server001"
+</code></pre>
+    <p><strong>Copy backup directory to another server:</strong></p>
+    <pre><code>Required URL parameters:
+
+    env_id    - Environment id.
+    task_id   - Backup task id.
+    path      - Backup path to copy from relative to BASEDIR.
+
+Optional URL parameters:
+    mountdev  - Device to mount, e.g /dev/sdb.
+    mountdir  - Directory to mount /dev/sdb on.
+    umountdir - "true" - will unmount at the end, otherwise it's left mounted.
+</code></pre>
+    <p>Example:</p>
+    <pre>
+    <code>$ curl -ks -X POST "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/remotecopy?env_id=1&amp;task_id=1&amp;path=/nosnap/linuxserver001&amp;mountdev=/dev/sdb&amp;mountdir=/incoming/linuxserver001"
+</code></pre>
+    <p>See <a href="https://github.com/mclarkson/obdi-nettools-repository">obdi-nettools-repository</a> for more
+    information about Net plugins.</p>
+
+    <footer class="site-footer">
+      <span class="site-footer-owner"><a href="https://github.com/mclarkson/obdi-rsyncbackup">Obdi-rsyncbackup</a> is
+      maintained by <a href="https://github.com/mclarkson">mclarkson</a>.</span> <span class="site-footer-credits">This
+      page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href=
+      "https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason
+      Long</a>.</span>
+    </footer>
+  </section>
+
+</body>
+</html>
