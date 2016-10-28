@@ -35,6 +35,7 @@
 
     <p>The main features:</p>
     <ul>
+        <li>Linux ONLY solution.</li>
         <li>Efficient back up:
             <ul>
                 <li>Rsync is used to efficiently back up servers.</li>
@@ -51,6 +52,15 @@
                     </ul>
                 </li>
             </ul>
+        </li>
+        <li>Consistent Backups:
+            <ol>
+                <li>An initial rsync is run.</li>
+                <li>Most processes on the target server are paused.</li>
+                <li>Another rsync is run.</li>
+                <li>Another rsync is run - just for fun.</li>
+                <li>The processes are unpaused.</li>
+            </ol>
         </li>
         <li>Amazon EC2 AMI or Instance creation:
             <ul>
