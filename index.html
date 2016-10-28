@@ -96,6 +96,9 @@
     <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>
         Screenshots</h1>
 
+    <h2><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>
+        Backing Up</h2>
+
     <p><strong>Choose Environment</strong></p>
     <p>The first step is to choose the environment. There can be many each with
     their own backup servers, or sharing the same backup servers.</p>
@@ -160,6 +163,37 @@
     paused, then more rsyncing done, then processes unpaused.</p>
 
     <p><img src="doc/rsyncbackup_log_small.png?raw=true" alt="screenshot"></p>
+
+    <h2><a id="aws-instance" class="anchor" href="#aws-instance" aria-hidden="true"></a>
+        Amazon AWS EC2 Instance Creation</h2>
+
+    <p>After pressing the green 'Create Amazon EC2 Instance' button the user will
+    be taken to the instance creation pages of
+    <a href="https://github.com/mclarkson/obdi-aws-p2ec2">obdi-aws-p2ec2</a>
+    described next.</p>
+
+    <p><strong>Choose AWS Region</strong></p>
+    <p>Choose the AWS region - this is where the Volume, AMI or Instance will end up.</p>
+
+    <p><img src="doc/rsyncbackup_aws_region_small.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>List Instances</strong></p>
+    <p>A filtered list of instances will be shown when the 'List Instances' button
+    is pressed. The filter is set by the Obdi Administrator and might be the user
+    or groups key name. The list of instances is shown just for the user to verify
+    that this is where they want the Volume, AMI or Instance to be put. A yellow
+    background in the list means the instance is stopped and a red background means
+    that the instance was terminated.</p>
+
+    <p><img src="doc/rsyncbackup_aws_list_small.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Create Instance Page</strong></p>
+    <p>Once the user is happy that the end location is correct then instance
+    creation can start.</p>
+
+    <p><img src="doc/rsyncbackup_aws_create1_small.png?raw=true" alt="screenshot"></p>
+
+    <!-- FOOTER -->
 
     <p>&nbsp;</p>
     <footer class="site-footer">
