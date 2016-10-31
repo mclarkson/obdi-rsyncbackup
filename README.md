@@ -4,7 +4,7 @@ Back up servers using rsync. Achieves compression and deduplication when using z
 
 # About
 
-[http://www.rsyncbackup.obdi.smorg.co.uk/](http://www.rsyncbackup.obdi.smorg.co.uk/)
+[http://rsyncbackup.obdi.io/](http://rsyncbackup.obdi.io/)
 
 # Todo
 
