@@ -202,11 +202,28 @@
 
     <p><img src="doc/rsyncbackup_aws_create1.png?raw=true" alt="screenshot"></p>
 
-    <p><strong>Create Instance</strong></p>
+    <p><strong>Create Instance - Lift and Shift</strong></p>
     <p>The instance is created. In this case the AMI is saved and the Instance
     created, but the Volume is deleted to save space and to avoid extra costs.</p>
 
     <p><img src="doc/rsyncbackup_aws_create2.png?raw=true" alt="screenshot"></p>
+    <p>Best case: A small machine, under 5GB in size, can be created in under 10 minutes.
+    Worst case: A larger machine, over 100GB in size - and in a different region to the
+    Obdi worker (requiring an extra copy) can take more than 2 hours to create.</p>
+
+    <!-- INSTALLATION -->
+
+    <h1><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>
+        Installation</h1>
+
+    <!--
+    <h2><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>
+        Backing Up</h2>
+    -->
+
+    <!--<p><strong>Choose Environment</strong></p>-->
+    <p>The first step is to choose the environment. There can be many each with
+    their own backup servers, or sharing the same backup servers.</p>
 
     <!-- FOOTER -->
 
