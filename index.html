@@ -63,7 +63,11 @@
 
     <p>The main features:</p>
     <ul>
-        <li>Linux ONLY solution.</li>
+        <li>Linux only solution - currently ONLY Centos 6 is supported.
+            <ul>
+                <li>! Help Required ! - Centos 7 should be fairly straight-forward to add.</li>
+            </ul>
+        </li>
         <li>By using Obdi, everything is scriptable.</li>
         <li>Efficient back up:
             <ul>
@@ -236,21 +240,24 @@
     <ul>
         <li>A backup server - A machine that holds the backup files.
             <ul>
-                <li>This machine will have an <samp>obdi-worker</samp> installed on it.</li>
-                <li>It can be a virtual machine in Amazon, or a physical/virtual
-                machine on the local network. This machine might need to have alot of
-                memory to work optimally with deduplication.</li>
+                <li>This machine will have an <samp>obdi-worker</samp>
+                    installed on it.</li> <li>It can be a virtual machine in
+                    Amazon, or a physical/virtual machine on the local network.
+                    This machine might need to have alot of memory to work
+                    optimally with deduplication.</li>
             </ul>
         </li>
         <li>An Obdi Master server
             <ul>
-                <li>This could be an existing Obdi machine, or a new one.</li>
-                <li>The Obdi Master could be installed on the backup server.</li>
-                <li>It can be a virtual machine in Amazon, or a physical/virtual
-                machine on the local network.</li>
+                <li>This could be an existing machine with Obdi installed on
+                    it, or a new one.</li>
+                <li>The Obdi Master could be installed on the backup
+                    server.</li> <li>It can be a virtual machine in Amazon, or
+                    a physical/virtual machine on the local network.</li>
             </ul>
         </li>
-        <li>Extra configuration on <em>every</em> machine that needs to be backed up.
+        <li>Extra configuration on <em>every</em> machine that needs to be
+            backed up.
             <ul>
                 <li>Every existing machine needs
                     <ul>
