@@ -250,7 +250,8 @@
         Backing Up</h2>
     -->
 
-    <p><strong>Overview</strong></p>
+    <!-- OVERVIEW -->
+
     <p>To make all of this work requires a few components:</p>
     <ul>
         <li>A backup server - A machine that holds the backup files.
@@ -259,7 +260,7 @@
                     installed on it.</li> <li>It can be a virtual machine in
                     Amazon, or a physical/virtual machine on the local network.
                     This machine might need to have alot of memory to work
-                    optimally with deduplication.</li>
+                    optimally when deduplication is enabled.</li>
             </ul>
         </li>
         <li>An Obdi Master server
@@ -273,21 +274,32 @@
             </ul>
         </li>
         <li>Extra configuration on <em>every</em> machine that needs to be
-            backed up.
-            <ul>
-                <li>Every existing machine needs
-                    <ul>
-                        <li><code>rsyncd</code> and <code>xinetd</code>
-                            installed and configured.</li>
-                    </ul>
-                </li>
-            </ul>
+            backed up. They must have <code>rsyncd</code> and
+            <code>xinetd</code> installed and configured. (This is not
+            strictly true. Rsync + ssh could be used instead but setting
+            that up is not covered here.)
         </li>
     </ul>
 
+    <!-- INSTALLATION TUTORIAL -->
+
     <p><strong>Installation Tutorial</strong></p>
     <p>This tutorial will take you through the steps required to set up a
-    <strong>single server backup solution</strong>.</p>
+    <strong>single server backup solution</strong>. There are many different
+    ways that this could be set up but this method is a good starting point
+    and the configuration can be changed later on.</p>
+
+    <p><strong>Overview</strong></p>
+    <p>Installation consists of the following broad steps:</p>
+    <ol>
+      <li>Create a server and install Obdi:
+        <ul>
+          <li>Install OS.</li>
+          <li></li>
+        </ul>
+      </li>
+      <li></li>
+    </ol>
 
     <video src="doc/test1.webm" style="width: 100%" controls preload></video>
 
