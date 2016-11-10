@@ -354,7 +354,40 @@
     everything. Anything that can be done using the Obdi User Interface can
     always be done using REST.</p>
 
+    <strong>Log in to Obdi</strong>
+    <p>Using the default user name and password log into Obdi. By default logins
+    timeout after 10 minutes of inactivity so if that happens just log in
+    again and get a new token.</p>
+
+<pre>
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+echo "token=$token"
+</pre>
+
     <strong>Create users</strong>
+
+<pre>
+curl $opts -d '{
+    "login":"worker",
+    "passHash":"worker",
+    "forename":"Worker",
+    "surname":"Daemon",
+    "email":"worker@invalid",
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+
+curl $opts -d '{
+    "login":"nomen.nesco",
+    "passHash":"p4ssw0rd",
+    "forename":"Nomen",
+    "surname":"Nescio",
+    "email":"nomen@invalid",
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+</pre>
 
     <strong>Create a datacentre and environment</strong>
 
