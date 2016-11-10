@@ -389,6 +389,11 @@ curl $opts -d '{
     "enabled":true}' "$proto://$ipport/api/admin/$token/users"
 </pre>
 
+    <p>You might wonder why the passHash property is a plain text password
+    and not a hashed password. Well, the password is sent in plain text, over
+    ssh so it is secure, and the server hashes it. You won't see the password
+    in the clear when you query Obdi or look in the database.</p>
+
     <p><strong>Create a datacentre and environment</strong></p>
 
     <p><strong>Assign permisssions</strong></p>
