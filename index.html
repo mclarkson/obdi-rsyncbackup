@@ -293,7 +293,7 @@
     instance in EC2 terminology.</p>
 
     <p><strong>Overview</strong></p>
-    <p>Installation consists of the following broad steps:</p>
+    <p>Installation consists of the following steps:</p>
     <ol>
       <li>Create a server and install Obdi:
         <ul>
@@ -303,7 +303,21 @@
           <li>Install that RPM.</li>
         </ul>
       </li>
-      <li></li>
+      <li>Configure the system:
+        <ul>
+          <li>Create users.</li>
+          <li>Create a datacentre and environment.</li>
+          <li>Assign permisssions.</li>
+          <li>Assign capabilities.</li>
+        </ul>
+      </li>
+      <li>Install Obdi plugins:
+        <ul>
+          <li>Add the <code>nettools</code> repository.</li>
+          <li>Install the <code>nettools</code> plugin.</li>
+          <li>Install the <code>rsyncbackup</code> plugin.</li>
+        </ul>
+      </li>
     </ol>
 
     <video src="doc/test1.webm" style="width: 100%" controls preload></video>
