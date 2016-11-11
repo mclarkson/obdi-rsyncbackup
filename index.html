@@ -354,9 +354,12 @@
     everything. Anything that can be done using the Obdi User Interface can
     always be done using REST.</p>
 
+    <p>The following graphic shows how this scenario looks:</p>
+    <p><img src="doc/scenario1.jpeg?raw=true" alt="screenshot"></p>
+
     <p><strong>Log in to Obdi</strong></p>
-    <p>Using the default user name and password log into Obdi. By default logins
-    timeout after 10 minutes of inactivity so if that happens just log in
+    <p>Using the default user name and password log into Obdi. By default, logins
+    timeout after 10 minutes of inactivity, so if that happens just log in
     again and get a new token.</p>
 
 <pre>
@@ -371,6 +374,9 @@ echo "token=$token"
 
     <p><strong>Create users</strong></p>
 
+    <p>We will create a user to login with, nomen.nescio, and a user that is
+    used by the worker daemon.</p>
+
 <pre>
 curl $opts -d '{
     "login":"worker",
@@ -381,7 +387,7 @@ curl $opts -d '{
     "enabled":true}' "$proto://$ipport/api/admin/$token/users"
 
 curl $opts -d '{
-    "login":"nomen.nesco",
+    "login":"nomen.nescio",
     "passHash":"p4ssw0rd",
     "forename":"Nomen",
     "surname":"Nescio",
@@ -390,8 +396,8 @@ curl $opts -d '{
 </pre>
 
     <p>You might wonder why the passHash property is a plain text password
-    and not a hashed password. Well, the password is sent in plain text, over
-    ssh so it is secure, and the server hashes it. You won't see the password
+    and not a hashed password. Well, the password is sent in plain text (over
+    ssh, so it is secure) and the server hashes it. You won't see the password
     in the clear when you query Obdi or look in the database.</p>
 
     <p><strong>Create a datacentre and environment</strong></p>
