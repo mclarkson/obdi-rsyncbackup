@@ -289,34 +289,42 @@
 
     <p><strong>Installation Tutorial</strong></p>
     <p>As mentioned above, this tutorial will show you how to set up a
-    backup system in Amazon AWS EC2 in a single virtual machine, or
-    instance, to use Amazon's terminology.</p>
+    <strong>single server backup solution</strong>. The backup server
+    can be placed in the corporate network or in Amazon EC2.</p>
 
     <p><strong>Overview</strong></p>
+    <p>We will do the installation in two stages. First we will set up
+    the rsync backup server and make sure it works. Then we will modify
+    the configuration for lift-and-shift - creating Amazon instances
+    from backup files.</p>
+
     <p>Installation consists of the following steps:</p>
     <ol>
-      <li>Create a server and install Obdi:
-        <ul>
-          <li>Install OS.</li>
-          <li>Download Obdi source using Git.</li>
-          <li>Run a script to create an RPM.</li>
-          <li>Install that RPM.</li>
-        </ul>
+      <li>Create the rsync backup server.
+        <ol>
+          <li>Create a server and install Obdi:</li>
+          <li>Configure the system:
+            <ul>
+              <li>Create users etc.</li>
+              <!--
+              <li>Create a datacentre and environment.</li>
+              <li>Assign permisssions.</li>
+              <li>Assign capabilities.</li>
+              -->
+            </ul>
+          </li>
+          <li>Install Obdi plugins.
+            <!--
+            <ul>
+              <li>Add the <code>nettools</code> repository.</li>
+              <li>Install the <code>nettools</code> plugin.</li>
+              <li>Install the <code>rsyncbackup</code> plugin.</li>
+            </ul>
+            -->
+          </li>
+        </ol>
       </li>
-      <li>Configure the system:
-        <ul>
-          <li>Create users.</li>
-          <li>Create a datacentre and environment.</li>
-          <li>Assign permisssions.</li>
-          <li>Assign capabilities.</li>
-        </ul>
-      </li>
-      <li>Install Obdi plugins:
-        <ul>
-          <li>Add the <code>nettools</code> repository.</li>
-          <li>Install the <code>nettools</code> plugin.</li>
-          <li>Install the <code>rsyncbackup</code> plugin.</li>
-        </ul>
+      <li>Enable Lift and Shift.
       </li>
     </ol>
 
