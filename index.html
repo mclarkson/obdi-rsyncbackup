@@ -295,11 +295,10 @@
     <p><strong>Overview</strong></p>
     <p>We will do the installation in two stages. First we will set up
     the rsync backup server and make sure it works. Then we will modify
-    the configuration for lift-and-shift - creating Amazon instances
-    from backup files.</p>
+    the configuration for lift-and-shift.</p>
 
-    <p>Installation consists of the following steps:</p>
-    <ol>
+    <p>Installation consists of the following broad steps:</p>
+    <ul>
       <li>Create the rsync backup server.
         <ol>
           <li>Create a server and install Obdi:</li>
@@ -325,6 +324,15 @@
         </ol>
       </li>
       <li>Enable Lift and Shift.
+        <ol>
+          <li>Configure the system:
+            <ul>
+              <li>Modify capabilities etc.</li>
+            </ul>
+          </li>
+          <li>Install extra Obdi plugins.
+          </li>
+        </ol>
       </li>
     </ol>
 
