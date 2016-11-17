@@ -321,24 +321,13 @@
       <li>Create the rsync backup server.
         <ol>
           <li>Create a server and install Obdi:</li>
+          <li>Set up zfs etc.</li>
           <li>Configure the system:
             <ul>
               <li>Create users etc.</li>
-              <!--
-              <li>Create a datacentre and environment.</li>
-              <li>Assign permisssions.</li>
-              <li>Assign capabilities.</li>
-              -->
             </ul>
           </li>
           <li>Install Obdi plugins.
-            <!--
-            <ul>
-              <li>Add the <code>nettools</code> repository.</li>
-              <li>Install the <code>nettools</code> plugin.</li>
-              <li>Install the <code>rsyncbackup</code> plugin.</li>
-            </ul>
-            -->
           </li>
         </ol>
       </li>
@@ -357,7 +346,7 @@
 
     <p>We'll start the installation next...</p>
 
-    <!-- Create a server and install Obdi -->
+    <!-- Create the rsync backup server -->
 
     <h2><a id="creatersync" class="anchor" href="#creatersync" aria-hidden="true"></a>
         Create the rsync backup server
@@ -366,6 +355,8 @@
 
     <p>In this section we will cover the first bullet point, creating the
     rsync backup server.</p>
+
+    <!-- Create a server and install Obdi -->
 
     <h3><a id="createsrv" class="anchor" href="#createsrv" aria-hidden="true"></a>
         Create a server and install Obdi
@@ -377,6 +368,56 @@
       href="http://obdi.io/#installation">Obdi Installation</a> section,
     complete the instructions there, then continue from here. The link
     should open in a new window so that you don't lose your place.</p>
+
+    <!-- Create a server and install Obdi -->
+
+    <h3><a id="createsrv" class="anchor" href="#createsrv" aria-hidden="true"></a>
+        Set up zfs etc.
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p><strong>NOTE</strong>: A new volume should be created that will be mounted on
+    <code>/backup</code>.  This volume will probably be quite large and will be
+    set up with the zfs filesystem.</p>
+
+    <p>Steps for Centos 6/7:</p>
+
+    <p>Install zfs from <a href="https://github.com/zfsonlinux/zfs/wiki/RHEL-%26-CentOS">The Official ZFS pages</a></p>
+
+    <p>Create a zfs pool.</p>
+
+    <p>This example creates a partition table on <code>/dev/xvdb</code> - a 3TB
+    volume created and attached by th administrator.</p>
+
+<pre>
+sudo su
+
+# Load the module that was built earlier
+modprobe zfs
+
+# Make the root of the backup tree
+mkdir /backup
+
+# Create a partition on /dev/xvdb1
+echo -e "mktable gpt\nmkpart\n\n\n0%\n100%\nprint\nq" | parted /dev/xvdb
+
+# Create a zpool
+zpool create backup /dev/xvdb1
+
+# Switch on deduplication and compression.
+# Note: dedup needs a large amount of memory.
+zfs create -o dedup=on -o compression=gzip backup/servers-zfs
+
+# Disable atime
+zfs set atime=off backup/servers-zfs
+
+# List and check settings
+zfs list
+zpool list
+zfs get dedup
+zfs get compression
+zfs get atime
+</pre>
 
     <!-- Configure the system -->
 
