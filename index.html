@@ -449,7 +449,7 @@ curl $opts -d '{
 
     <p><strong>Create a datacentre and environment</strong></p>
 
-    Create a datacentre named 'AWS':
+    <p>Create a datacentre named 'AWS':</p>
 
 <pre>
 curl $opts -d '{
@@ -458,7 +458,7 @@ curl $opts -d '{
     }' "$proto://$ipport/api/admin/$token/dcs"
 </pre>
 
-    Create an environment named 'perf' in the AWS datacentre:
+    <p>Create an environment named 'perf' in the AWS datacentre:</p>
 
 <pre>
 # Get the datacentre ID
@@ -475,9 +475,9 @@ curl $opts -d '{
 }' "$proto://$ipport/api/admin/$guid/envs"
 </pre>
 
-    Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
-    to whatever you set for the WorkerKey property above. Use an editor or
-    use sed. For example, to change the key to 'changeme':
+    <p>Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
+    to whatever you set for the WorkerKey property above. Use an editor or use
+    sed. For example, to change the key to 'changeme':</p>
 
 <pre>
 sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
