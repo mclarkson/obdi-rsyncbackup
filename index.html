@@ -487,16 +487,20 @@ sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
     <p><strong>Assign permisssions</strong></p>
 
 <pre>
-dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws"
+dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws" \
       | grep Id | grep -o "[0-9]"`
 
-curl $opts -d '{
-    "SysName":"build",
-    "DispName":"Build Servers",
-    "DcId":'"$dcid"',
-    "WorkerUrl":"https://127.0.0.1:4443/",
-    "WorkerKey":"abcdef"
-}' "$proto://$ipport/api/admin/$guid/envs"
+if [[ -z $dcid ]]; then
+    echo "dcid is empty!"
+else
+  curl $opts -d '{
+      "SysName":"build",
+      "DispName":"Build Servers",
+      "DcId":'"$dcid"',
+      "WorkerUrl":"https://127.0.0.1:4443/",
+      "WorkerKey":"abcdef"
+  }' "$proto://$ipport/api/admin/$guid/envs"
+fi
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
