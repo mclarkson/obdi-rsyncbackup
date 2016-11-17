@@ -477,7 +477,8 @@ curl $opts -d '{
 
     <p>Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
     to whatever you set for the WorkerKey property above. Use an editor or use
-    sed. For example, to change the key to 'changeme':</p>
+    <em>sed</em>. For example, to change the key to 'changeme' using
+    <em>sed</em>:</p>
 
 <pre>
 sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
