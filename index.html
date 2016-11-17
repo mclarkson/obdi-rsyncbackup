@@ -449,17 +449,53 @@ curl $opts -d '{
 
     <p><strong>Create a datacentre and environment</strong></p>
 
+    Create a datacentre named 'AWS':
+
 <pre>
 curl $opts -d '{
     "SysName":"aws",
     "DispName":"AWS"
     }' "$proto://$ipport/api/admin/$token/dcs"
+</pre>
 
+    Create an environment named 'perf' in the AWS datacentre:
+
+<pre>
+# Get the datacentre ID
+dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws"
+      | grep Id | grep -o "[0-9]"`
+
+# Create the env
+curl $opts -d '{
+    "SysName":"perf",
+    "DispName":"Performance Servers",
+    "DcId":'"$dcid"',
+    "WorkerUrl":"https://127.0.0.1:4443/",
+    "WorkerKey":"changeme"
+}' "$proto://$ipport/api/admin/$guid/envs"
+</pre>
+
+    Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
+    to whatever you set for the WorkerKey property above. Use an editor or
+    use sed. For example, to change the key to 'changeme':
+
+<pre>
+sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
 </pre>
 
     <p><strong>Assign permisssions</strong></p>
 
 <pre>
+dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws"
+      | grep Id | grep -o "[0-9]"`
+
+curl $opts -d '{
+    "SysName":"build",
+    "DispName":"Build Servers",
+    "DcId":'"$dcid"',
+    "WorkerUrl":"https://127.0.0.1:4443/",
+    "WorkerKey":"abcdef"
+}' "$proto://$ipport/api/admin/$guid/envs"
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
