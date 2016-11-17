@@ -471,10 +471,10 @@ if [[ -z $dcid ]]; then
 else
   curl $opts -d '{
       "SysName":"build",
-      "DispName":"Build Servers",
+      "DispName":"Performance Servers",
       "DcId":'"$dcid"',
       "WorkerUrl":"https://127.0.0.1:4443/",
-      "WorkerKey":"abcdef"
+      "WorkerKey":"changeme"
   }' "$proto://$ipport/api/admin/$token/envs"
 fi
 </pre>
