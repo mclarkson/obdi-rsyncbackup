@@ -470,7 +470,7 @@ if [[ -z $dcid ]]; then
     echo "dcid should not be empty"
 else
   curl $opts -d '{
-      "SysName":"build",
+      "SysName":"perf",
       "DispName":"Performance Servers",
       "DcId":'"$dcid"',
       "WorkerUrl":"https://127.0.0.1:4443/",
