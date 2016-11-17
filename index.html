@@ -462,7 +462,7 @@ curl $opts -d '{
 
 <pre>
 # Get the datacentre ID
-dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws"
+dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=aws" \
       | grep Id | grep -o "[0-9]"`
 
 # Create the env
@@ -472,7 +472,7 @@ curl $opts -d '{
     "DcId":'"$dcid"',
     "WorkerUrl":"https://127.0.0.1:4443/",
     "WorkerKey":"changeme"
-}' "$proto://$ipport/api/admin/$guid/envs"
+}' "$proto://$ipport/api/admin/$token/envs"
 </pre>
 
     <p>Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
@@ -487,20 +487,6 @@ sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
     <p><strong>Assign permisssions</strong></p>
 
 <pre>
-dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=aws" \
-      | grep Id | grep -o "[0-9]"`
-
-if [[ -z $dcid ]]; then
-    echo "dcid should not be empty"
-else
-  curl $opts -d '{
-      "SysName":"build",
-      "DispName":"Build Servers",
-      "DcId":'"$dcid"',
-      "WorkerUrl":"https://127.0.0.1:4443/",
-      "WorkerKey":"abcdef"
-  }' "$proto://$ipport/api/admin/$token/envs"
-fi
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
