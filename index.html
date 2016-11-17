@@ -344,12 +344,12 @@
       </li>
       <li>Enable Lift and Shift.
         <ol>
+          <li>Install extra Obdi plugins.
+          </li>
           <li>Configure the system:
             <ul>
               <li>Modify capabilities etc.</li>
             </ul>
-          </li>
-          <li>Install extra Obdi plugins.
           </li>
         </ol>
       </li>
@@ -419,6 +419,7 @@ ipport="127.0.0.1:443"
 token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
     $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
 
+# View the token (should not be empty!)
 echo "token=$token"
 </pre>
 
@@ -434,6 +435,7 @@ curl $opts -d '{
     "forename":"Worker",
     "surname":"Daemon",
     "email":"worker@invalid",
+    "MultiLogin":true,
     "enabled":true}' "$proto://$ipport/api/admin/$token/users"
 
 curl $opts -d '{
