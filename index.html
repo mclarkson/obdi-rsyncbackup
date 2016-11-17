@@ -491,7 +491,7 @@ dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=aws" \
       | grep Id | grep -o "[0-9]"`
 
 if [[ -z $dcid ]]; then
-    echo "dcid is empty!"
+    echo "dcid should not be empty"
 else
   curl $opts -d '{
       "SysName":"build",
