@@ -382,14 +382,13 @@
     will probably be quite large and will be set up with the zfs
     filesystem.</p>
 
-    <p>Steps for Centos 6/7:</p>
+    <p><strong>Steps for Centos 6/7:</strong></p>
 
     <p>Install zfs from <a href="https://github.com/zfsonlinux/zfs/wiki/RHEL-%26-CentOS">The Official ZFS pages</a></p>
 
-    <p>Create a zfs pool.</p>
-
-    <p>This example creates a partition table on <code>/dev/xvdb</code> - a 3TB
-    volume created and attached by th administrator.</p>
+    <p>The following example creates a partition table on <code>/dev/xvdb</code> - a 3TB
+    Amazon volume created and attached by the administrator - then creates the zfs
+    filesystem:</p>
 
 <pre>
 # Become root
