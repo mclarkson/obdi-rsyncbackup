@@ -466,13 +466,17 @@ dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=aws" \
       | grep Id | grep -o "[0-9]"`
 
 # Create the env
-curl $opts -d '{
-    "SysName":"perf",
-    "DispName":"Performance Servers",
-    "DcId":'"$dcid"',
-    "WorkerUrl":"https://127.0.0.1:4443/",
-    "WorkerKey":"changeme"
-}' "$proto://$ipport/api/admin/$token/envs"
+if [[ -z $dcid ]]; then
+    echo "dcid should not be empty"
+else
+  curl $opts -d '{
+      "SysName":"build",
+      "DispName":"Build Servers",
+      "DcId":'"$dcid"',
+      "WorkerUrl":"https://127.0.0.1:4443/",
+      "WorkerKey":"abcdef"
+  }' "$proto://$ipport/api/admin/$token/envs"
+fi
 </pre>
 
     <p>Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
