@@ -400,7 +400,7 @@ modprobe zfs
 # Make the root of the backup tree
 mkdir /backup
 
-# Create a partition on /dev/xvdb1
+# Create a partition on /dev/xvdb1 using parted
 echo -e "mktable gpt\nmkpart\n\n\n0%\n100%\nprint\nq" | parted /dev/xvdb
 
 # Create a zpool
