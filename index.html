@@ -630,20 +630,27 @@ curl $opts -d '{
 
     <p><img src="doc/rsyncbackup_errormsg1.png?raw=true" alt="smallscreenshot"></p>
 
-<pre>
+    <p>The error message is: "Server said: Plugin endpoint 'rsyncbackup/tasks'
+    does not exist. Compile failed for
+    '/usr/lib/obdi/plugins/rsyncbackup/tasks'. System said 'exit status 2'.
+    STDOUT: STDERR: go: cannot find GOROOT directory: /usr/local/go".</p>
 
+    <p>The Go (golang) plugins are compiled when they are needed and the
+    error message is due to a misconfiguration. To fix it, the 'go_root'
+    variable needs correcting. The following command will fix this:</p>
+
+<pre>
+sed -ri 's#(^go_root\s*=\s*).*#\1'"`go env GOROOT`"'#' /etc/obdi/obdi.conf
 </pre>
 
     <h2><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>
-        Configure the system
+        Enable Lift and Shift
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
     </h2>
 
-    <p><strong>Add the nettools repository</strong></p>
+    <p><strong>Install extra Obdi plugins</strong></p>
 
-    <p><strong>Install the nettools plugin</strong></p>
-
-    <p><strong>Install the rsyncbackup plugin</strong></p>
+    <p><strong>Configure the system</strong></p>
 
     <!--
     <video src="doc/test1.webm" style="width: 100%" controls preload></video>
