@@ -589,31 +589,31 @@ edit_perm nomen.nescio aws perf true true
 
 curl $opts -d '{
     "Url":"https://github.com/mclarkson/obdi-core-repository.git"
-}' "$proto://$ipport/api/admin/$guid/repos"
+}' "$proto://$ipport/api/admin/$token/repos"
 
 # systemjobs plugin
 
 curl $opts -d '{
     "Name":"systemjobs"
-}' "$proto://$ipport/api/admin/$guid/repoplugins"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
 
 # nettools repo
 
 curl $opts -d '{
     "Url":"https://github.com/mclarkson/obdi-nettools-repository.git"
-}' "$proto://$ipport/api/admin/$guid/repos"
+}' "$proto://$ipport/api/admin/$token/repos"
 
 # nettools plugin
 
 curl $opts -d '{
     "Name":"nettools"
-}' "$proto://$ipport/api/admin/$guid/repoplugins"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
 
 # rsyncbackup plugin
 
 curl $opts -d '{
     "Name":"rsyncbackup"
-}' "$proto://$ipport/api/admin/$guid/repoplugins"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
