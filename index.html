@@ -532,7 +532,7 @@ fi
     <em>sed</em>:</p>
 
 <pre>
-sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
+sed -ri 's/(^key\s*=\s*).*/\1"changeme"/' /etc/obdi-worker/obdi-worker.conf
 </pre>
 
     <p><strong>Assign permissions</strong></p>
@@ -640,8 +640,22 @@ curl $opts -d '{
     variable needs correcting. The following command will fix this:</p>
 
 <pre>
-sed -ri 's#(^go_root\s*=\s*).*#\1'"`go env GOROOT`"'#' /etc/obdi/obdi.conf
+# Modify /etc/obdi/obdi.conf
+
+sed -ri 's#(^go_root\s*=\s*).*#\1"'"`go env GOROOT`"'"#' /etc/obdi/obdi.conf
+
+# Restart obdi
+
+service obdi restart 
+service obdi-worker restart
 </pre>
+
+    <p>Now the plugin compiles but you are forcibly logged out. Looking at the
+    log shows:</p>
+
+    <p><img src="doc/rsyncbackup_errormsg2.png?raw=true" alt="smallscreenshot"></p>
+
+    <p>So we need the user, 'sduser'. Lets add it.</p>
 
     <h2><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>
         Enable Lift and Shift
