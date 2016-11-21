@@ -427,10 +427,11 @@ zfs get atime
 
     <!-- Configure the system -->
 
-    <h2><a id="configsys" class="anchor" href="#configsys" aria-hidden="true"></a>
+    <h3><a id="configsys" class="anchor" href="#configsys" aria-hidden="true"></a>
         Configure the system
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
-    </h2>
+    </h3>
+
     <p>This section <em>could</em> contain lots of screen shots with instructions
     telling you what to click on and what fields to type in using the Obdi
     Admin interface but we won't do that! Instead we'll go straight to using
@@ -579,7 +580,11 @@ edit_perm()
 edit_perm nomen.nescio aws perf true true
 </pre>
 
-    <p><strong>Install plugins:</strong></p>
+    <h3><a id="installplugins" class="anchor" href="#installplugins" aria-hidden="true"></a>
+        Install Obdi plugins:
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
 
     <p>Add the plugin repositories and install the plugins. We'll install
     the Job Viewer, <em>nettools</em>, and <em>rsyncbackup</em>.</p>
@@ -616,15 +621,13 @@ curl $opts -d '{
 }' "$proto://$ipport/api/admin/$token/repoplugins"
 </pre>
 
-    <p><strong>Assign capabilities</strong></p>
-
     <p><strong>Test the User Interface</strong></p>
 
     <p>Connect to the Obdi Admin inteface using a Web Browser at
     'https://OBDI_IP/manager/admin' and take a look around.</p>
 
     <p>Connect to the Obdi Run interface next using,
-    'https://OBDI_IP/manager/run', and you willl see the plugins
+    'https://OBDI_IP/manager/run', and you will see the plugins
     that have been installed, great! You will also encounter an
     error message as shown below:</p>
 
