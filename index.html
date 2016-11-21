@@ -553,9 +553,9 @@ edit_perm()
 # $4 - Enabled (true|false)
 # $5 - Writeable (true|false)
 {
-    userid=`curl $opts "$proto://$ipport/api/admin/$guid/users?login=$1" | grep Id | grep -o "[0-9]"`
-    dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=$2" | grep Id | grep -o "[0-9]"`
-    envid=`curl $opts "$proto://$ipport/api/admin/$guid/envs?sys_name=$3&dc_id=$dcid" | grep -w Id | grep -o "[0-9]"`
+    userid=`curl $opts "$proto://$ipport/api/admin/$token/users?login=$1" | grep Id | grep -o "[0-9]"`
+    dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=$2" | grep Id | grep -o "[0-9]"`
+    envid=`curl $opts "$proto://$ipport/api/admin/$token/envs?sys_name=$3&dc_id=$dcid" | grep -w Id | grep -o "[0-9]"`
 
     echo
     echo "$1 $2 $3 $4 $5"
@@ -564,14 +564,14 @@ edit_perm()
         "EnvId":'"$envid"',
         "Enabled":true,
         "Writeable":true
-    }' "$proto://$ipport/api/admin/$guid/perms"
+    }' "$proto://$ipport/api/admin/$token/perms"
 
     curl $opts -d '{
         "UserId":'"$userid"',
         "EnvId":'"$envid"',
         "Enabled":'"$4"',
         "Writeable":'"$5"'
-    }' "$proto://$ipport/api/admin/$guid/perms"
+    }' "$proto://$ipport/api/admin/$token/perms"
 }
 
 # Use edit_perm to change permissions
