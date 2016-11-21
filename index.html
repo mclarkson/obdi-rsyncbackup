@@ -333,6 +333,8 @@
           </li>
           <li>Install Obdi plugins.
           </li>
+          <li>Test the User Interface
+          </li>
         </ol>
       </li>
       <li>Enable Lift and Shift.
@@ -585,7 +587,6 @@ edit_perm nomen.nescio aws perf true true
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
     </h3>
 
-
     <p>Add the plugin repositories and install the plugins. We'll install
     the Job Viewer, <em>nettools</em>, and <em>rsyncbackup</em>.</p>
 
@@ -621,7 +622,10 @@ curl $opts -d '{
 }' "$proto://$ipport/api/admin/$token/repoplugins"
 </pre>
 
-    <p><strong>Test the User Interface</strong></p>
+    <h3><a id="testui" class="anchor" href="#testui" aria-hidden="true"></a>
+        Test the User Interface
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
 
     <p>Connect to the Obdi Admin inteface using a Web Browser at
     'https://OBDI_IP/manager/admin' and take a look around.</p>
