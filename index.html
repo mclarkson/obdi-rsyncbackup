@@ -655,7 +655,18 @@ service obdi-worker restart
 
     <p><img src="doc/rsyncbackup_errormsg2.png?raw=true" alt="smallscreenshot"></p>
 
-    <p>So we need the user, 'sduser'. Lets add it.</p>
+    <p>So we need the user, 'sduser' (the secret data user). Lets add it.</p>
+
+<pre>
+curl $opts -d '{
+    "login":"sduser",
+    "passHash":"webfkaalwiugfasf",
+    "forename":"Secret Data",
+    "surname":"User",
+    "email":"sduser@invalid",
+    "MultiLogin":false,
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+</pre>
 
     <h2><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>
         Enable Lift and Shift
