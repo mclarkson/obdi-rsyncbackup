@@ -535,14 +535,54 @@ fi
 sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
 </pre>
 
-    <p><strong>Assign permisssions</strong></p>
+    <p><strong>Assign permissions</strong></p>
+
+    <p>Give the 'Enabled' and 'Writeable' permissions to the user, nomen.nescio.</p>
+
+    <p>A <em>bash</em> function, 'add_perm', is defined then used to edit the
+    permission:</p>
 
 <pre>
+# Add the bash function, add_perm:
+
+edit_perm()
+# Parameters:
+# $1 - login (text)
+# $2 - data centre (text)
+# $3 - environment (text)
+# $4 - Enabled (true|false)
+# $5 - Writeable (true|false)
+{
+    userid=`curl $opts "$proto://$ipport/api/admin/$guid/users?login=$1" | grep Id | grep -o "[0-9]"`
+    dcid=`curl $opts "$proto://$ipport/api/admin/$guid/dcs?sys_name=$2" | grep Id | grep -o "[0-9]"`
+    envid=`curl $opts "$proto://$ipport/api/admin/$guid/envs?sys_name=$3&dc_id=$dcid" | grep -w Id | grep -o "[0-9]"`
+
+    echo
+    echo "$1 $2 $3 $4 $5"
+    echo curl $opts -d '{
+        "UserId":'"$userid"',
+        "EnvId":'"$envid"',
+        "Enabled":true,
+        "Writeable":true
+    }' "$proto://$ipport/api/admin/$guid/perms"
+
+    curl $opts -d '{
+        "UserId":'"$userid"',
+        "EnvId":'"$envid"',
+        "Enabled":'"$4"',
+        "Writeable":'"$5"'
+    }' "$proto://$ipport/api/admin/$guid/perms"
+}
+
+# Use edit_perm to change permissions
+
+edit_perm nomen.nescio aws perf true true
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
 
 <pre>
+
 </pre>
 
     <h2><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>
