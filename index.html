@@ -82,6 +82,9 @@
     EC2 AMI or Instance from the backup files so that we can 'lift and
     shift' servers into AWS.</strong></p>
 
+    <p>So, if you have 2 servers, 20 servers or 100 servers, and they are all
+    running Centos 6, then this might be a decent backup solution for you.</p>
+
     <p>The main features:</p>
     <ul>
         <li>Linux only solution - currently ONLY Centos 6 is supported.
@@ -131,10 +134,11 @@
         </li>
     </ul>
 
-    <p>Obdi-rsyncbackup, a plugin for <a href="https://github.com/mclarkson/obdi">Obdi</a>, was
-    the answer to this problem. It allowed us to back up 80 physical servers with a calendar
-    month's worth of daily snapshots in under 2 TB of storage. Backups generally complete
-    within 2-3 hours.</p>
+    <p>Obdi-rsyncbackup, a plugin for the free and Open Source <a
+    href="https://github.com/mclarkson/obdi">Obdi</a>, was the answer to
+    this problem. It allowed us to back up 80 physical servers with a calendar
+    month's worth of daily snapshots in under 2 TB of storage. Backups
+    generally complete within 2-3 hours.</p>
 
     <!-- SCREENSHOTS -->
 
@@ -552,7 +556,9 @@ sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
 
     <p><strong>Install the rsyncbackup plugin</strong></p>
 
+    <!--
     <video src="doc/test1.webm" style="width: 100%" controls preload></video>
+    -->
 
     <!-- FOOTER -->
 
