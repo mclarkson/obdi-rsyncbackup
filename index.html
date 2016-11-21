@@ -539,11 +539,11 @@ sed -ri 's/(^key\s*=\s*).*/\1changeme/' /etc/obdi-worker/obdi-worker.conf
 
     <p>Give the 'Enabled' and 'Writeable' permissions to the user, nomen.nescio.</p>
 
-    <p>A <em>bash</em> function, 'add_perm', is defined then used to edit the
+    <p>A <em>bash</em> function, 'edit_perm', is defined then used to edit the
     permission:</p>
 
 <pre>
-# Add the bash function, add_perm:
+# Add the bash function, edit_perm:
 
 edit_perm()
 # Parameters:
@@ -577,6 +577,43 @@ edit_perm()
 # Use edit_perm to change permissions
 
 edit_perm nomen.nescio aws perf true true
+</pre>
+
+    <p><strong>Install plugins:</strong></p>
+
+    <p>Add the plugin repositories and install the plugins. We'll install
+    the Job Viewer, <em>nettools</em>, and <em>rsyncbackup</em>.</p>
+
+<pre>
+# Obdi core repo
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-core-repository.git"
+}' "$proto://$ipport/api/admin/$guid/repos"
+
+# systemjobs plugin
+
+curl $opts -d '{
+    "Name":"systemjobs"
+}' "$proto://$ipport/api/admin/$guid/repoplugins"
+
+# nettools repo
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-nettools-repository.git"
+}' "$proto://$ipport/api/admin/$guid/repos"
+
+# nettools plugin
+
+curl $opts -d '{
+    "Name":"nettools"
+}' "$proto://$ipport/api/admin/$guid/repoplugins"
+
+# rsyncbackup plugin
+
+curl $opts -d '{
+    "Name":"rsyncbackup"
+}' "$proto://$ipport/api/admin/$guid/repoplugins"
 </pre>
 
     <p><strong>Assign capabilities</strong></p>
