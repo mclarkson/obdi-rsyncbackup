@@ -218,3 +218,11 @@ fi
 rm -f -- "$t"
 trap - EXIT
 
+# Now force all the golang plugins to compile...
+
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/settings"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/tasks"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/includes"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/excludes"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/backup"
+
