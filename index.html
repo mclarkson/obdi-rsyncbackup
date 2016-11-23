@@ -626,7 +626,7 @@ curl $opts -d '{
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
     </h3>
 
-    <p>Connect to the Obdi Admin inteface using a Web Browser at
+    <p>Connect to the Obdi Admin inteface using a Web Browser to
     'https://OBDI_IP/manager/admin' and take a look around, but don't
     change anything just yet!</p>
 
@@ -665,9 +665,96 @@ service obdi-worker restart
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
     </h3>
 
-    <p></p>
+    <p><strong>Setting up the Servers to be Backed Up From</strong></p>
 
-    <p></p>
+    <p>On every server enable rsyncd by ensuring xinetd has disable set to no
+    in <code>/etc/xinetd.d/rsync</code>. For example:</p>
+
+<pre>
+service rsync
+{
+        disable = no
+        flags           = IPv6
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/bin/rsync
+        server_args     = --daemon
+        log_on_failure  += USERID
+}
+</pre>
+
+    <p>Also Supply an rsyncd configuration. For example, use the following
+    configuration in <code>/etc/rsyncd.conf</code> to do be able to do a full
+    system backup:</p>
+
+<pre>
+[backup]
+    path = /
+    comment = Full system backup
+    read only = true
+    uid = 0
+    gid = 0
+    exclude = dev/** proc/** media/** mnt/** selinux/** sys/** tmp/**
+</pre>
+
+    <p>Then we can use the following Backup Task settings:</p>
+
+    <ul>
+      <li>PROTOCOL = rsyncd</li>
+      <li>PRE = 'create_zfs_snapshot'.</li>
+      <li>RSYNC_OPTS = your options, e.g. "--sparse", "-z".</li>
+      <li>BASEDIR = '/backup/servers-zfs/'.</li>
+      <li>KNOWNHOSTS = empty.</li>
+      <li>NUMPERIODS = 1 or more.</li>
+      <li>TIMEOUT = 0 (disabled) or more seconds.</li>
+      <li>Verbose = on or off. Will make the database grow if set to 'on'.</li>
+    </ul>
+
+    <p>Those settings can be entered using the Graphical User Interface (GUI) or
+    by using REST calls. Using REST is shown below, but it is absolutely fine
+    if you use the GUI.</p>
+
+<pre>
+# Login as a normal user, not admin!
+
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"nomen.nescio","Password":"p4ssw0rd"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+
+# Create a new backup task
+
+curl $opts -d '{
+ "Id":0,
+ "TaskDesc":"asdf",
+ "CapTag":"RSYNCBACKUP_WORKER_1"}' \
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=1"
+
+# Create a new set of settings
+
+curl $opts -d '{
+ "BaseDir":"",
+ "Id":0,
+ "KnownHosts":"",
+ "NumPeriods":1,
+ "Pre":"create_zfs_snapshot",
+ "Protocol":"rsyncd",
+ "Repeat":false,
+ "RepeatPost":"",
+ "RepeatPre":"",
+ "RsyncOpts":"",
+ "SshKeyFile":"",
+ "SshNotProcs":"",
+ "SshSudo":"",
+ "SshUid":"",
+ "TaskId":1,
+ "Timeout":0,
+ "Verbose":false}' \
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/settings?env_id=1&task_id=1"
+</pre>
 
     <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
         Enable Lift and Shift
