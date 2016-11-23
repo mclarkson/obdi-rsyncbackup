@@ -758,18 +758,26 @@ curl $opts "https://$ipport/api/nomen.nescio/$token/envs?sys_name=perf" | tee $t
 
 envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
 
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
 # Create a new backup task
 
 curl $opts -d '{
  "Id":0,
  "TaskDesc":"BACKUP TASK #1",
  "CapTag":"RSYNCBACKUP_WORKER_1"}' \
- "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=$envid"
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=$envid" | tee $t
+
+taskid=$(grep -Eo '\\"Id\\":[0-9]+' $t | grep -Eo "[0-9]+")
+
+# View the taskid (should not be empty!)
+echo "taskid=$taskid"
 
 # Create a new set of settings
 
 curl $opts -d '{
- "BaseDir":"",
+ "BaseDir":"/backup/servers-zfs/",
  "Id":0,
  "KnownHosts":"",
  "NumPeriods":1,
@@ -778,7 +786,7 @@ curl $opts -d '{
  "Repeat":false,
  "RepeatPost":"",
  "RepeatPre":"",
- "RsyncOpts":"",
+ "RsyncOpts":"--sparse",
  "SshKeyFile":"",
  "SshNotProcs":"",
  "SshSudo":"",
@@ -786,7 +794,7 @@ curl $opts -d '{
  "TaskId":1,
  "Timeout":0,
  "Verbose":false}' \
- "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/settings?env_id=1&task_id=1"
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/settings?env_id=$envid&task_id=$taskid"
 </pre>
 
     <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
