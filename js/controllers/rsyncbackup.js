@@ -717,8 +717,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.message = "Error: " + e;
       }
 
-      $scope.okmessage = "Settings were updated successfully.";
-
     }).error( function(data,status) {
       if (status>=500) {
         $scope.login.errtext = "Server error.";
