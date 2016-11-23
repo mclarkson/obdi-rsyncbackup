@@ -151,7 +151,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	Lock()
 	if err = db.First(&setting, "task_id = ?", task_id_str).Error; err != nil {
 		Unlock()
-		txt := ". Did you Apply the Settings for this backup task? Needs to be done first!"
+		txt := ". Did you Apply the Settings for this backup task? That needs to be done first!"
 		ReturnError("Query error. "+err.Error()+txt, response)
 		return nil
 	}

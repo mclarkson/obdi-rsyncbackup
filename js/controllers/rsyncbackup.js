@@ -26,7 +26,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.envcapmaps = [];
   $scope.includes = [];
   $scope.settings = {};
-  $scope.settings.Repeat = true;
+  $scope.settings.Repeat = false;
   $scope.excludes = [];
   $scope.env = {};
   $scope.zfslist = [];
@@ -608,7 +608,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editincludes = false;
     $scope.spacing = 0;
     $scope.settings = {};
-    $scope.settings.Repeat = true;
+    $scope.settings.Repeat = false;
 
     $http({
       method: 'GET',
@@ -1725,7 +1725,27 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       newitem.TaskDesc = result.TaskDesc;
       newitem.CapTag = result.CapTag;
 
-      return $scope.AddTaskRest(newitem);
+      // Create the task
+      $scope.AddTaskRest(newitem);
+
+      // Initialise the Settings
+      //$scope.settings.BaseDir = ;
+      $scope.settings.Id = 0;
+      //$scope.settings.KnownHosts = ;
+      $scope.settings.NumPeriods = 1;
+      //$scope.settings.Pre = ;
+      //$scope.settings.Protocol = ;
+      $scope.settings.Repeat = false;
+      //$scope.settings.RepeatPost = ;
+      //$scope.settings.RepeatPre = ;
+      ///$scope.settings.RsyncOpts = ;
+      //$scope.settings.SshKeyFile = ;
+      //$scope.settings.SshNotProcs = ;
+      //$scope.settings.SshSudo = ;
+      //$scope.settings.SshUid = ;
+      $scope.settings.Timeout = 0;
+
+      $scope.ApplySettingsRest();
     });
 
   };
