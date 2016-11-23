@@ -1674,6 +1674,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       // Initialise the Settings
+      $scope.settings = {};
       $scope.settings.Id = 0;
       $scope.settings.NumPeriods = 1;
       $scope.settings.Repeat = false;
