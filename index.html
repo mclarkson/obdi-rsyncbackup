@@ -750,13 +750,21 @@ token=`curl $opts -d '{"Login":"nomen.nescio","Password":"p4ssw0rd"}' \
 # View the token (should not be empty!)
 echo "token=$token"
 
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/nomen.nescio/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
 # Create a new backup task
 
 curl $opts -d '{
  "Id":0,
  "TaskDesc":"BACKUP TASK #1",
  "CapTag":"RSYNCBACKUP_WORKER_1"}' \
- "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=1"
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=$envid"
 
 # Create a new set of settings
 
