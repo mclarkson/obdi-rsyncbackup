@@ -1665,8 +1665,27 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       // Refresh the table
-       $scope.ShowTasks();
+      // Save the result
+      try {
+        $scope.AddTaskResult = $.parseJSON(data.Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+      }
+
+      // Initialise the Settings
+      $scope.settings.Id = 0;
+      $scope.settings.NumPeriods = 1;
+      $scope.settings.Repeat = false;
+      $scope.settings.Timeout = 0;
+
+      $scope.curtask = {};
+      $scope.curtask.Id = $scope.AddTaskResult.Id;
+
+      $scope.ApplySettingsRest();
+
+      // Refresh the table
+      $scope.ShowTasks();
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -1726,26 +1745,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       newitem.CapTag = result.CapTag;
 
       // Create the task
-      $scope.AddTaskRest(newitem);
-
-      // Initialise the Settings
-      //$scope.settings.BaseDir = ;
-      $scope.settings.Id = 0;
-      //$scope.settings.KnownHosts = ;
-      $scope.settings.NumPeriods = 1;
-      //$scope.settings.Pre = ;
-      //$scope.settings.Protocol = ;
-      $scope.settings.Repeat = false;
-      //$scope.settings.RepeatPost = ;
-      //$scope.settings.RepeatPre = ;
-      ///$scope.settings.RsyncOpts = ;
-      //$scope.settings.SshKeyFile = ;
-      //$scope.settings.SshNotProcs = ;
-      //$scope.settings.SshSudo = ;
-      //$scope.settings.SshUid = ;
-      $scope.settings.Timeout = 0;
-
-      $scope.ApplySettingsRest();
+      return $scope.AddTaskRest(newitem);
     });
 
   };
