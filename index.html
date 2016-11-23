@@ -616,6 +616,7 @@ curl $opts -d '{
 }' "$proto://$ipport/api/admin/$token/repoplugins"
 
 # rsyncbackup plugin
+# This could take quite some time since it compiles 10 Go source files.
 
 curl $opts -d '{
     "Name":"rsyncbackup"
