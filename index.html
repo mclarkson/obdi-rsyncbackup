@@ -674,11 +674,13 @@ service obdi-worker restart
 
     <p>To fix the error just shown we need to edit the
     <code>/etc/obdi-worker/obdi-worker.conf</code> configuration file.
-    Just the 'man_password' variable needs changing to 'w0rker'. The sed line
-    is:</p>
+    Just the 'man_password' variable needs changing to 'w0rker'. The commands
+    would be:</p>
 
 <pre>
 sed -ri 's/(^man_password\s*=\s*).*/\1"w0rker"/' /etc/obdi-worker/obdi-worker.conf
+
+service obdi-worker restart
 </pre>
 
     <h3><a id="conftarget" class="anchor" href="#conftarget" aria-hidden="true"></a>
