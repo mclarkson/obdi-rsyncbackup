@@ -688,6 +688,64 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
+  $scope.ApplyInitialSettingsRest = function() {
+  // ----------------------------------------------------------------------
+
+    clearMessages();
+    
+    var method = "PUT";
+    if( $scope.settings.Id == 0 ) {
+      method = "POST";
+    }
+
+    $scope.settings.NumPeriods = parseInt($scope.settings.NumPeriods);
+    $scope.settings.Timeout = parseInt($scope.settings.Timeout);
+
+    $http({
+      method: method,
+      data: $scope.settings,
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/settings?env_id=" + $scope.env.Id
+           + "&task_id=" + $scope.curtask.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      try {
+        $scope.settings = $.parseJSON(data.Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+      }
+
+      $scope.okmessage = "Settings were updated successfully.";
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  }
+
+  // ----------------------------------------------------------------------
   $scope.ApplySettingsRest = function() {
   // ----------------------------------------------------------------------
 
@@ -1683,7 +1741,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.curtask = {};
       $scope.curtask.Id = $scope.AddTaskResult.Id;
 
-      $scope.ApplySettingsRest();
+      $scope.ApplyInitialSettingsRest();
 
       // Refresh the table
       $scope.ShowTasks();
