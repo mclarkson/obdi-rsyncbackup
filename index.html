@@ -747,6 +747,9 @@ ipport="127.0.0.1:443"
 token=`curl $opts -d '{"Login":"nomen.nescio","Password":"p4ssw0rd"}' \
     $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
 
+# View the token (should not be empty!)
+echo "token=$token"
+
 # Create a new backup task
 
 curl $opts -d '{
