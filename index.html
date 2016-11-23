@@ -667,8 +667,8 @@ service obdi-worker restart
 
     <p><strong>Setting up the Servers that will be Backed Up From</strong></p>
 
-    <p>On every server enable rsyncd by ensuring xinetd has disable set to 'no'
-    in <code>/etc/xinetd.d/rsync</code>. For example:</p>
+    <p>On every server enable <code>rsyncd</code> by ensuring xinetd has
+    disable set to 'no' in <code>/etc/xinetd.d/rsync</code>. For example:</p>
 
 <pre>
 service rsync
@@ -684,9 +684,9 @@ service rsync
 }
 </pre>
 
-    <p>Also Supply an rsyncd configuration. For example, use the following
-    configuration in <code>/etc/rsyncd.conf</code> to do be able to do a full
-    system backup:</p>
+    <p>Also Supply an <code>rsyncd</code> configuration. For example, use the
+    following configuration in <code>/etc/rsyncd.conf</code> to do be able to
+    do a full system backup:</p>
 
 <pre>
 [backup]
