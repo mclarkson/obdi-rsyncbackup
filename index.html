@@ -834,7 +834,20 @@ curl $opts -d '{
     <p>We will use those scripts to backup a single server, then you will be able to
     add more lines to add more hosts.</p>
 
-    <p>First copy the scripts to the obdi server and get ready to edit them.</p>
+    <p>So long as the rsyncbackup plugin is installed (which it should be if
+    you followed the instructions thus far), then you can copy the files
+    with the following commands on the Obdi server:</p>
+
+<pre>
+# Go to your home directory:
+cd
+
+# Copy the file:
+cp -a /usr/share/obdi/static/plugins/rsyncbackup/doc/example_rest_scripts/ .
+
+# The files are now in the 'example_rest_scripts' directory in your home directory.
+# You can edit them and run them from there.
+</pre>
 
     <p>Starting with the script, <code>rsync_add_hosts.sh</code>, you will see a
     few variables defined near the top, they are:</p>
