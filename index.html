@@ -811,6 +811,8 @@ curl $opts -d '{
     <p>All that's left is to create the Includes and Excludes and then we can do a
     test backup.</p>
 
+    <!-- INCLUDES AND EXCLUDES -->
+
     <h3><a id="inclexcl" class="anchor" href="#inclexcl" aria-hidden="true"></a>
         Includes and Excludes
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
@@ -831,6 +833,28 @@ curl $opts -d '{
 
     <p>We will use those scripts to backup a single server, then you will be able to
     add more lines to add more hosts.</p>
+
+    <p>First copy the scripts to the obdi server and get ready to edit them.</p>
+
+    <p>Starting with the script, <code>rsync_add_hosts.sh</code>, you will see a
+    few variables defined near the top, they are:</p>
+
+    <ul>
+      <li>TASKID
+        <ul>
+          <li>This is shown next to the backup task, as shown:<br/>
+            <img src="doc/rsyncbackup_taskid.png?raw=true" alt="smallscreenshot"></li>
+        </ul>
+      </li>
+      <li>ENVID
+        <ul>
+          <li></li>
+        </ul>
+      </li>
+      <li></li>
+      <li></li>
+    </ul>
+    <!-- LIFT AND SHIFT -->
 
     <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
         Enable Lift and Shift
