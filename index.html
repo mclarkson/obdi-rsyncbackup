@@ -816,7 +816,21 @@ curl $opts -d '{
         <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
     </h3>
 
-    <p>blah blah</p>
+    <p>So, you've got this far - well done! Now it's time to start adding hosts,
+    each with their own includes and excludes (because this is how rsync works).</p>
+
+    <p>In this section you'll see how using the REST API will probably save you
+    loads of time, especially if you have a bunch of identically configured servers.</p>
+
+    <p>You will find two example scripts in the GitHub repository:</p>
+
+    <ul>
+      <li><a href="https://github.com/mclarkson/obdi-rsyncbackup/blob/master/doc/example_rest_scripts/rsync_add_hosts.sh">rsync_add_hosts.sh</a>, and</li>
+      <li><a href="https://github.com/mclarkson/obdi-rsyncbackup/blob/master/doc/example_rest_scripts/add_exclude_to_all_includes.sh">add_exclude_to_all_includes.sh</a>.</li>
+    </ul>
+
+    <p>We will use those scripts to backup a single server, then you will be able to
+    add more lines to add more hosts.</p>
 
     <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
         Enable Lift and Shift
