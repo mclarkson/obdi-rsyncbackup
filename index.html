@@ -852,7 +852,24 @@ curl $opts -d '{
             <img src="doc/rsyncbackup_envid.png?raw=true" alt="smallscreenshot"></li>
         </ul>
       </li>
-      <li></li>
+      <li>INCL<br/>
+        This contains the host name and configuration on each line:
+        <ul>
+          <li>First column: The host name or IP address.</li>
+          <li>Second column: The include. This is the name in square brackets
+            that is set up in <code>/etc/rsyncd.conf</code> on each target
+            server, in our case this is 'backup'.</li>
+          <li>Third and subsequent colulmns: One or more Excludes. These are the
+          directories to exclude. Refer to 'Include/Exclude Pattern Rules' in
+          the <a href="https://linux.die.net/man/1/rsync">Include/Exclude
+            Pattern Rules</a> in the <em>rsync</em> man page.</li>
+          <li>ipport<br/>
+          The ip address and port of the obdi master server.</li>
+          <li>guid<br/>
+          The token returned when loggin in. The password will need to be
+          changed here.</li>
+        </ul>
+      </li>
       <li></li>
     </ul>
     <!-- LIFT AND SHIFT -->
