@@ -887,7 +887,7 @@ cp -a /usr/share/obdi/static/plugins/rsyncbackup/doc/example_rest_scripts/ .
     </ul>
 
     <p>Armed with this information, edit the file, <code>rsync_add_hosts.sh</code>, 
-    and set the viriables <code>TASKID=</code> and <code>ENVID=</code>. Make sure the
+    and set the variables <code>TASKID=</code> and <code>ENVID=</code>. Make sure the
     user name and password are set correctly for <code>guid=</code>. Finally set the
     <code>INCL=</code> variable to one or more hosts on your network.</p>
 
@@ -899,14 +899,16 @@ chmod +x rsync_add_hosts.sh
 ./rsync_add_hosts.sh
 </pre>
 
-    <p>Log into the Run interface GUI and view the Includes and Excludes to check.</p>
+    <p>To check the configuration log into the Run interface GUI and view the
+    Includes and Excludes.</p>
 
-    <p>To test, select one item then click the green 'Backup Selected Now' button.</p>
+    <p>To test, select one item then click the green 'Backup Selected Now'
+    button.</p>
 
-    <p>The job is started and you can view it's progress by clicking on the link
-    that will appear after clicking the button, or, at any other time you can click
-    on System Jobs in the left menu to see the job running, view it's output, or
-    kill the job and all child processes.</p>
+    <p>The job is started and you can view it's progress by clicking on the
+    link that will appear after clicking the button, or, at any other time you
+    can click on System Jobs in the left menu to see the job running, view it's
+    output, or kill the job and all child processes.</p>
 
     <!-- LIFT AND SHIFT -->
 
