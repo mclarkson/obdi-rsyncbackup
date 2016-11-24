@@ -910,6 +910,19 @@ chmod +x rsync_add_hosts.sh
     can click on System Jobs in the left menu to see the job running, view it's
     output, or kill the job and all child processes.</p>
 
+    <p>The initial rsync will take quite some time. I did mine in small groups
+    until all 80 servers were backed up, then I set up a cron job to run the
+    backup very early each day. Example cron jobs can be found on the main
+    GitHub page. I also set a cron job to only keep the last 30 days worth of
+    daily snapshots.</p>
+
+    <p>If you followed the installation using the command line only then you
+    will now be able to put all the commands into one file and set up another
+    server from scratch. This is great for configuration management tools
+    such as Salt Stack, Ansible or Puppet.</p>
+
+    <p>In the next section we will configure and set up Lift and Shift...</p>
+
     <!-- LIFT AND SHIFT -->
 
     <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
