@@ -939,6 +939,17 @@ chmod +x rsync_add_hosts.sh
     </p>
 
 <pre>
+# Log in as the admin user again
+
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# View the token (should not be empty!)
+echo "token=$token"
+
 # AWS Tools repository
 
 curl $opts -d '{
