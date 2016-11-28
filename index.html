@@ -136,9 +136,11 @@
 
     <p>Obdi-rsyncbackup, a plugin for the free and Open Source <a
     href="https://github.com/mclarkson/obdi">Obdi</a>, was the answer to
-    this problem. It allowed us to back up 80 physical servers with a calendar
-    month's worth of daily snapshots in under 2 TB of storage. Backups
-    generally complete within 2-3 hours.</p>
+    this problem. It allowed us to back up 80 physical servers with a total of
+    3.3 TiB of data in under 2 TiB of storage, including a calendar month's
+    worth of daily snapshots. Without the snapshots the 3 TiB of data backup
+    was stored in 1 TiB of disk space.  Backups generally complete within 2-3
+    hours.</p>
 
     <!-- SCREENSHOTS -->
 
@@ -931,6 +933,32 @@ chmod +x rsync_add_hosts.sh
     </h2>
 
     <p><strong>Install extra Obdi plugins</strong></p>
+
+    <p>We need the GUI plugin, <a href="http://aws-p2ec2.obdi.io/">aws-p2ec2</a>, and
+       the Amazon EC2 Obdi Library, <a href="http://aws-ec2lib.obdi.io/">aws-ec2lib</a>.
+    </p>
+
+<pre>
+# AWS Tools repository
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-awstools-repository.git"
+}' "$proto://$ipport/api/admin/$token/repos"
+
+# aws-ec2lib
+
+curl $opts -d '{
+    "Name":"aws-ec2lib"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+
+# aws-p2ec2
+
+curl $opts -d '{
+    "Name":"aws-p2ec2"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+
+
+</pre>
 
     <p><strong>Configure the system</strong></p>
 
