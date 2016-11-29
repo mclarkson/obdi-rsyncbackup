@@ -1112,10 +1112,16 @@ curl $opts "https://$ipport/api/admin/$token/envs?sys_name=perf" | tee $t
 
 envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
 
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
 # Get the environment capability id for AWS_ACCESS_KEY_ID_1
 
 envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=AWS_ACCESS_KEY_ID_1" \
       | grep Id | grep -o "[0-9]"`
+
+# View the envcapid (should not be empty!)
+echo "envcapid=$envcapid"
 
 curl -k -d '{
     "EnvId":'"$envid"',
