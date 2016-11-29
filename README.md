@@ -140,7 +140,7 @@ Lock down access using hosts.allow, hosts.deny and/or iptables.
 This example cron job will start a backup at 06.15 every day:
 
 ```
-15 06 * * * /home/a_user/cron/dobackup.sh
+15 06 * * * $HOME/cron/dobackup.sh
 ```
 
 The preceeding cron job will run the dobackup.sh script:
@@ -171,7 +171,7 @@ Ensure dobackup.sh is executable with 'chmod +x dobackup.sh'.
 This example cron job will delete old snapshots at 03.00 every day:
 
 ```
-00 03 * * * /home/a_user/cron/prunesnapshots.sh
+00 03 * * * $HOME/cron/prunesnapshots.sh
 ```
 
 The preceeding cron job will run the prunesnapshots.sh script:
