@@ -939,7 +939,7 @@ chmod +x rsync_add_hosts.sh
     </p>
 
 <pre>
-# Log in as the admin user again
+# Log in as the admin user for system changes
 
 proto="https"
 opts="-k -s" # don't check ssl cert, silent
@@ -950,28 +950,78 @@ token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
 # View the token (should not be empty!)
 echo "token=$token"
 
-# AWS Tools repository
+# Add the AWS Tools repository
 
 curl $opts -d '{
     "Url":"https://github.com/mclarkson/obdi-awstools-repository.git"
 }' "$proto://$ipport/api/admin/$token/repos"
 
-# aws-ec2lib
+# Install the aws-ec2lib plugin
 
 curl $opts -d '{
     "Name":"aws-ec2lib"
 }' "$proto://$ipport/api/admin/$token/repoplugins"
 
-# aws-p2ec2
+# Install the aws-p2ec2 plugin
 
 curl $opts -d '{
     "Name":"aws-p2ec2"
 }' "$proto://$ipport/api/admin/$token/repoplugins"
-
-
 </pre>
 
     <p><strong>Configure the system</strong></p>
+
+    <p>When the two extra plugins were added, they added to capabilities to the
+    system, HAS_AWS_EC2LIB and HAS_AWS_P2EC2. We need to assign those
+    capabilities to our environment so that other plugins know that the
+    they are now available.</p>
+
+<pre>
+# Add the capabilities to our environment
+
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/nomen.nescio/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
+# Get the environment capability id for HAS_AWS_EC2LIB
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=HAS_AWS_EC2LIB" \
+      | grep Id | grep -o "[0-9]"`
+
+# Create the environment capability mapping
+
+if [[ -z $dcid ]]; then
+    echo "envcapid should not be empty"
+else
+  curl $opts -d "{
+      "EnvId":$envid
+      "EnvCapId":$envcapid
+  }" "$proto://$ipport/api/admin/$token/envcapmaps"
+fi
+
+# Get the environment capability id for HAS_AWS_P2EC2
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=HAS_AWS_P2EC2" \
+      | grep Id | grep -o "[0-9]"`
+
+# Create the environment capability mapping
+
+if [[ -z $dcid ]]; then
+    echo "envcapid should not be empty"
+else
+  curl $opts -d "{
+      "EnvId":$envid
+      "EnvCapId":$envcapid
+  }" "$proto://$ipport/api/admin/$token/envcapmaps"
+fi
+</pre>
 
     <p>If you look at the logs you will see:</p>
 
@@ -988,12 +1038,6 @@ curl $opts -d '{
     "email":"sduser@invalid",
     "MultiLogin":false,
     "enabled":true}' "$proto://$ipport/api/admin/$token/users"
-</pre>
-
-    <p>We need to assign two capabilities, HAS_AWS_EC2LIB and HAS_AWS_P2EC2, so
-    that plugins know that the environment has these things available.</p>
-
-<pre>
 </pre>
 
     <!--
