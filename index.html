@@ -1001,7 +1001,7 @@ if [[ -z $envcapid ]]; then
     echo "envcapid should not be empty"
 else
   curl $opts -d "{
-      "EnvId":$envid
+      "EnvId":$envid,
       "EnvCapId":$envcapid
   }" "$proto://$ipport/api/admin/$token/envcapmaps"
 fi
