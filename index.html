@@ -1097,10 +1097,33 @@ curl $opts -d '{
     aws_shell_ssh_key_b64        <-- The ssh private key encoded as base 64 text
 </pre>
 
-    <p>Use summary, above, and the
+    <p>Use the summary, above, and the
     <a target="_blank" href="http://aws-p2ec2.obdi.io/#configuration">
     aws-p2ec2 plugin page</a> to work out what to put in the above json object.</p>
     
+    <p></p>
+
+<pre>
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/admin/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
+# Get the environment capability id for AWS_ACCESS_KEY_ID_1
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=AWS_ACCESS_KEY_ID_1" \
+      | grep Id | grep -o "[0-9]"`
+
+curl -k -d '{
+    "EnvId":'"$envid"',
+    "EnvCapId":'"$envcapid"',
+    "Json":"{ \"aws_access_key_id\":\"EMPTY\", \"aws_secret_access_key\":\"EMPTY\", \"aws_obdi_worker_instance_id\":\"EMPTY\", \"aws_obdi_worker_region\":\"EMPTY\", \"aws_obdi_worker_url\":\"https://127.0.0.1:4443/\", \"aws_obdi_worker_key\":\"changeme\", \"aws_obdi_worker_ip\":\"EMPTY\", \"aws_dnsserver_ip\":\"EMPTY\", \"aws_dnsdomain\":\"EMPTY\", \"aws_gateway\":\"EMPTY\", \"aws_shell_user_name\":\"EMPTY\", \"aws_filter\":\"key-name=EMPTY\", \"aws_shell_ssh_key_b64\":\"EMPTY\" }"
+}' "https://$ipport/api/admin/$token/jsonobjects"
+</pre>
+
     <!--
     <video src="doc/test1.webm" style="width: 100%" controls preload></video>
     -->
