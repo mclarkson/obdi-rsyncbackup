@@ -983,7 +983,7 @@ curl $opts -d '{
 
 t="/tmp/deleteme_$$"
 
-curl $opts "https://$ipport/api/nomen.nescio/$token/envs?sys_name=perf" | tee $t
+curl $opts "https://$ipport/api/admin/$token/envs?sys_name=perf" | tee $t
 
 envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
 
