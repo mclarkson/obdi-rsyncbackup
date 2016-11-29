@@ -997,7 +997,7 @@ envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=HAS_AWS_EC2L
 
 # Create the environment capability mapping
 
-if [[ -z $dcid ]]; then
+if [[ -z $envcapid ]]; then
     echo "envcapid should not be empty"
 else
   curl $opts -d "{
