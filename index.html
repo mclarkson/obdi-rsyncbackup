@@ -1101,7 +1101,7 @@ curl $opts -d '{
     <a target="_blank" href="http://aws-p2ec2.obdi.io/#configuration">
     aws-p2ec2 plugin page</a> to work out what to put in the above json object.</p>
     
-    <p></p>
+    <p>The following code will create the AWS_ACCESS_KEY_ID_1 capability:</p>
 
 <pre>
 # Get the environment ID for our 'perf' environment
@@ -1133,14 +1133,22 @@ else
       \"EnvCapId\":$envcapid
   }" "$proto://$ipport/api/admin/$token/envcapmaps"
 fi
+</pre>
 
+    <p>The capability has been created but the JSON Object has not.</p>
+
+    <p>Edit the json object text so that it is all on one line then create the
+    object. For example:</p>
+
+<pre>
 # Create the JSON Object
 
 curl -k -d '{
     "EnvId":'"$envid"',
     "EnvCapId":'"$envcapid"',
     "Json":"{ \"aws_access_key_id\":\"EMPTY\", \"aws_secret_access_key\":\"EMPTY\", \"aws_obdi_worker_instance_id\":\"EMPTY\", \"aws_obdi_worker_region\":\"EMPTY\", \"aws_obdi_worker_url\":\"https://127.0.0.1:4443/\", \"aws_obdi_worker_key\":\"changeme\", \"aws_obdi_worker_ip\":\"EMPTY\", \"aws_dnsserver_ip\":\"EMPTY\", \"aws_dnsdomain\":\"EMPTY\", \"aws_gateway\":\"EMPTY\", \"aws_shell_user_name\":\"EMPTY\", \"aws_filter\":\"key-name=EMPTY\", \"aws_shell_ssh_key_b64\":\"EMPTY\" }"
-}' "https://$ipport/api/admin/$token/jsonobjects"
+}' \
+    "https://$ipport/api/admin/$token/jsonobjects"
 </pre>
 
     <!--
