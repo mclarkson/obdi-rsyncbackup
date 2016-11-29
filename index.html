@@ -1041,7 +1041,9 @@ curl $opts -d '{
     "enabled":true}' "$proto://$ipport/api/admin/$token/users"
 </pre>
 
-    <p>And finally we need to set the JSON object capability, AWS_ACCESS_KEY_ID_1.</p>
+    <p>And finally we need to set the JSON object capability,
+    AWS_ACCESS_KEY_ID_1.  The secret data user is required for plugins to
+    access this object securely.</p>
 
     <p><strong>Setting AWS_ACCESS_KEY_ID_1</strong></p>
 
@@ -1051,25 +1053,24 @@ curl $opts -d '{
     parameters that need setting.</p>
 
     <p>Copy the following text into a text editor and get ready to enter the
-    correct details for the empty parameters. The items already entered should
-    be correct for a single server installation.</p>
+    correct details in plalce of 'EMPTY' for the parameters. The items already
+    entered should be correct for a single server installation.</p>
 
 <pre>
 {
-
-    "aws_access_key_id":"",
-    "aws_secret_access_key":"",
-    "aws_obdi_worker_instance_id":"",
-    "aws_obdi_worker_region":"",
-    "aws_obdi_worker_url":"https://127.0.0.1:4443/",
-    "aws_obdi_worker_key":"changeme",
-    "aws_obdi_worker_ip":"",
-    "aws_dnsserver_ip":"",
-    "aws_dnsdomain":"",
-    "aws_gateway":"",
-    "aws_shell_user_name":"",
-    "aws_filter":"key-name=ourkey",
-    "aws_shell_ssh_key_b64":""
+    \"aws_access_key_id\":\"EMPTY\",
+    \"aws_secret_access_key\":\"EMPTY\",
+    \"aws_obdi_worker_instance_id\":\"EMPTY\",
+    \"aws_obdi_worker_region\":\"EMPTY\",
+    \"aws_obdi_worker_url\":\"https://127.0.0.1:4443/\",
+    \"aws_obdi_worker_key\":\"changeme\",
+    \"aws_obdi_worker_ip\":\"EMPTY\",
+    \"aws_dnsserver_ip\":\"EMPTY\",
+    \"aws_dnsdomain\":\"EMPTY\",
+    \"aws_gateway\":\"EMPTY\",
+    \"aws_shell_user_name\":\"EMPTY\",
+    \"aws_filter\":\"key-name=EMPTY\",
+    \"aws_shell_ssh_key_b64\":\"EMPTY\"
 }
 </pre>
 
