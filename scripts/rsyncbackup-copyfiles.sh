@@ -103,7 +103,7 @@ ssh_cmd() {
     if [[ $2 == "savestdout" ]]; then
         trap : INT
         echo "> Running remotely: $3"
-        ( ssh -tti "$TMPKEYFILE" "$REMOTEUSER@$DESTSRV" "$3" \
+        ( ssh -i "$TMPKEYFILE" "$REMOTEUSER@$DESTSRV" "$3" \
           >$tmpout 2>$tmperr;
           echo $? >$tmpret) & waiton=$!;
         ( t=0;n=0
@@ -131,7 +131,7 @@ ssh_cmd() {
         LAST_STDOUT=
         trap : INT
         echo "> Running remotely: $3"
-        ( ssh -tti "$TMPKEYFILE" "$REMOTEUSER@$DESTSRV" "$3" \
+        ( ssh -i "$TMPKEYFILE" "$REMOTEUSER@$DESTSRV" "$3" \
           >$tmpout 2>$tmperr;
           echo $? >$tmpret) & waiton=$!;
         ( t=0;n=0
