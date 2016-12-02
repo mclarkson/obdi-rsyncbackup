@@ -237,10 +237,10 @@ chmod 0600 $TMPKEYFILE
     MOUNTPART=${MOUNTDEV}1
 
     ssh_cmd $DESTSRV savestdout \
-        "$SUDO mkfs.ext4 -m1 $MOUNTPART || echo notok"
+        "$SUDO mkfs.ext3 -m1 $MOUNTPART || echo notok"
 
     [[ $LAST_STDOUT == "notok" ]] && {
-        echo "ERROR: Could not create ext4 filesystem. Cannot continue."
+        echo "ERROR: Could not create ext3 filesystem. Cannot continue."
         exit 1
     }
 
