@@ -45,6 +45,7 @@
         Contents</h1>
 
     <ul>
+      <li><a href="#whentouse">What is it?</a></li>
       <li><a href="#whentouse">When to Use?</a></li>
       <li><a href="#screenshots">Screenshots</a>
         <ul>
@@ -66,6 +67,27 @@
         </ul>
       </li>
     </ul>
+
+    <h1><a id="whatisit" class="anchor" href="#whatisit" aria-hidden="true"></a>
+        What is it?
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h1>
+
+    <p>Obdi rsyncbackup is a free and open source backup solution for Centos
+    servers. It uses the Unix command, rsync, to do the actual backup and
+    requires the open source and free Obdi to work since it is an Obdi plugin.</p>
+    
+    <p>The Obdi server can be set up on Centos 6 or Centos 7, and the backups
+    can be saved on that server or a different one - in that latter case an obdi
+    worker is required on the backup server.</p>
+
+    <p>When the backup server is set up with the zfs filesystem, highly performant file
+    deduplication and compression can be achieved, potentially saving a huge amount
+    of disk space.</p>
+
+    <p>Furthermore, backups can be used to create Amazon AWS volumes, snapshots,
+    AMI's or instances, but only Centos 6 is supported for AWS integration. It should
+    not be too much work to support Centos 7 however.</p>
 
     <h1><a id="whentouse" class="anchor" href="#whentouse" aria-hidden="true"></a>
         When to Use?
