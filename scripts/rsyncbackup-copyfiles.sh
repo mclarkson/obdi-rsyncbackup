@@ -273,19 +273,17 @@ cd $LOCALDIR
 
 echo "> Starting to copy files"
 
-find . | \
-    cpio -o -H crc | gzip -c | \
+tar cz . | \
     ssh -ti $TMPKEYFILE -c arcfour $REMOTEUSER@$DESTSRV \
-      "gunzip - | (cd $REMOTEDIR; $SUDO cpio -vidum) &>/dev/stdout"
+      "(cd $REMOTEDIR; $SUDO tar xz) &>/dev/stdout"
 
 [[ $? -ne 0 ]] && {
     echo "ERROR: CPIO exited with non-zero exit status. The command run was:"
     echo
     cat <<EnD
-$SUDO find . | \
-    cpio -o -H crc | gzip -c | \
+tar cz . | \
     ssh -i $TMPKEYFILE -c arcfour $REMOTEUSER@$DESTSRV \
-      "gunzip - | (cd $REMOTEDIR; $SUDO cpio -vidum)"
+      "(cd $REMOTEDIR; $SUDO tar xz)"
 EnD
     echo
     echo "Check Obdi System Jobs logs for more information."
