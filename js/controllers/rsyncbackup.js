@@ -2181,7 +2181,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     }).success( function(data, status, headers, config) {
 
        // Refresh the row
-       $scope.GetExclude( index );
+       $scope.GetExcludeById( newitem.Id );
 
     }).error( function(data,status) {
       if (status>=500) {
