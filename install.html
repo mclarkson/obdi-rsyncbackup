@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 for Linux version 5.1.25">
+  <meta charset="UTF-8">
+  <title>Obdi-rsyncbackup by mclarkson</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <script src="http://api.html5media.info/1.1.8/html5media.min.js"></script>
+</head>
+<body>
+
+  <section class="page-header">
+    <h1 class="project-name">Obdi-rsyncbackup</h1>
+    <h2 class="project-tagline">Obdi plugin to do rsync backups with compression, deduplication and snapshotting using
+    zfs.</h2>
+    <a href="https://github.com/mclarkson/obdi-rsyncbackup" class="btn">View on GitHub</a>
+    <a href="http://nettools.obdi.io" class="btn">Parent Repository</a>
+    <a href="http://obdi.io" class="btn">Obdi Home Page</a>
+  </section>
+
+  <section class="main-content">
+
+    <style>
+    img[alt=screenshot] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+    }
+    img[alt=smallscreenshot] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 500px;
+    }
+    </style>
+
+    <p><img src="doc/rsyncbackup_files_small.png?raw=true" alt="smallscreenshot"></p>
+
+    <h1><a id="contents" class="anchor" href="#contents" aria-hidden="true"></a>
+        Contents</h1>
+
+    <ul>
+      <li><a href="#installation">Installation</a>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#creatersync">Create the rsync backup server</a>
+            <ul>
+              <li><a href="#createsrv">Create a server and install Obdi</a>
+            </ul>
+          </li>
+          <li><a href="#configsys">Configure the system</a></li>
+          <li><a href="#liftnshift">Enable Lift and Shift</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- INSTALLATION -->
+
+    <h1><a id="installation" class="anchor" href="#installation" aria-hidden="true"></a>
+        Installation
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h1>
+
+    <!--
+    <h2><a id="obdi-rsyncbackup" class="anchor" href="#obdi-rsyncbackup" aria-hidden="true"></a>
+        Backing Up</h2>
+    -->
+
+    <!-- OVERVIEW -->
+
+    <p>To make all of this work requires a few components:</p>
+    <ul>
+        <li>A backup server - A machine that holds the backup files.
+            <ul>
+                <li>This machine will have an <samp>obdi-worker</samp>
+                    installed on it.</li> <li>It can be a virtual machine in
+                    Amazon, or a physical/virtual machine on the local network.
+                    This machine might need to have alot of memory to work
+                    optimally when deduplication is enabled.</li>
+            </ul>
+        </li>
+        <li>An Obdi Master server
+            <ul>
+                <li>This could be an existing machine with Obdi installed on
+                    it, or a new one.</li>
+                <li>The Obdi Master could be installed on the backup
+                    server.</li>
+                <li>It could be a virtual machine in Amazon, or
+                    a physical or virtual machine on the local network.</li>
+            </ul>
+        </li>
+        <li>Extra configuration on <em>every</em> machine that needs to be
+            backed up. They must have <code>rsyncd</code> and
+            <code>xinetd</code> installed and configured. (This is not
+            strictly true. Rsync + ssh could be used instead but setting
+            that up is not covered here.)
+        </li>
+    </ul>
+
+    <p>The installation tutorial, up next, will take you through the steps
+    required to set up a single server backup solution.  This is the easiest to
+    set up.</p>
+
+    <!-- INSTALLATION TUTORIAL -->
+
+    <h2><a id="overview" class="anchor" href="#overview" aria-hidden="true"></a>
+        Overview
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p>As mentioned above, this tutorial will show you how to set up a
+    single server backup solution. The backup server can be placed in the
+    corporate network or in Amazon EC2.</p>
+
+    <p>We will do the installation in two stages. First we will set up
+    the rsync backup server and make sure it works. Then we will modify
+    the configuration for lift-and-shift.</p>
+
+    <p>Installation consists of the following broad steps:</p>
+    <ul>
+      <li><a href="#creatersync">Create the rsync backup server.</a>
+        <ol>
+          <li><a href="#createsrv">Create a server and install Obdi:</a></li>
+          <li><a href="#setupzfs">Set up zfs etc.</a></li>
+          <li><a href="#configsys">Configure the system:</a>
+            <ul>
+              <li>Create users etc.</li>
+            </ul>
+          </li>
+          <li><a href="#installplugins">Install Obdi plugins.</a></li>
+          <li><a href="#testui">Test the User Interface.</a></li>
+          <li><a href="#conftarget">Configure the target host and backup task</a></li>
+          <li><a href="#inclexcl">Includes and Excludes</a></li>
+        </ol>
+      </li>
+      <li><a href="#liftnshift">Enable Lift and Shift.</a>
+        <ol>
+          <li><a href="">Install extra Obdi plugins.</a></li>
+          <li><a href="">Configure the system:</a>
+            <ul>
+              <li><a href="">Modify capabilities etc.</a></li>
+            </ul>
+          </li>
+        </ol>
+      </li>
+    </ul>
+
+    <p>We'll start the installation next...</p>
+
+    <!-- Create the rsync backup server -->
+
+    <h2><a id="creatersync" class="anchor" href="#creatersync" aria-hidden="true"></a>
+        Create the rsync backup server
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p>In this section we will cover the first bullet point, creating the
+    rsync backup server.</p>
+
+    <!-- Create a server and install Obdi -->
+
+    <h3><a id="createsrv" class="anchor" href="#createsrv" aria-hidden="true"></a>
+        Create a server and install Obdi
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+    <p>Creating a server and installing Obdi is already documented on
+    on the obdi.io main page.</p>
+    <p>So, head over to the <a target="_blank"
+      href="http://obdi.io/#installation">Obdi Installation</a> section,
+    complete the instructions there, then continue from here. The link
+    should open in a new window so that you won't lose your place.</p>
+
+    <!-- Create a server and install Obdi -->
+
+    <h3><a id="setupzfs" class="anchor" href="#setupzfs" aria-hidden="true"></a>
+        Set up zfs etc.
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p><strong>NOTE</strong>: A new volume should be created that will be
+    mounted on <code>/backup</code>. It could be an LVM Volume, a physical disk
+    or an Amazon Volume depending on the platform it is running on. This volume
+    will probably be quite large and will be set up with the zfs
+    filesystem.</p>
+
+    <p><strong>Steps for Centos 6/7:</strong></p>
+
+    <p>Install zfs from <a href="https://github.com/zfsonlinux/zfs/wiki/RHEL-%26-CentOS">The Official ZFS pages</a>.</p>
+
+    <p>The following example creates a partition table on <code>/dev/xvdb</code> - a 3TB
+    Amazon volume created and attached by the administrator - then creates the zfs
+    filesystem:</p>
+
+<pre>
+# Become root
+sudo su
+
+# Load the module that was built earlier
+modprobe zfs
+
+# Make the root of the backup tree
+mkdir /backup
+
+# Create a partition on /dev/xvdb1 using parted
+echo -e "mktable gpt\nmkpart\n\n\n0%\n100%\nprint\nq" | parted /dev/xvdb
+
+# Create a zpool
+zpool create backup /dev/xvdb1
+
+# Switch on deduplication and compression.
+# Note: dedup needs a large amount of memory.
+zfs create -o dedup=on -o compression=gzip backup/servers-zfs
+
+# Disable atime
+zfs set atime=off backup/servers-zfs
+
+# List and check settings
+zfs list
+zpool list
+zfs get dedup
+zfs get compression
+zfs get atime
+</pre>
+
+    <!-- Configure the system -->
+
+    <h3><a id="configsys" class="anchor" href="#configsys" aria-hidden="true"></a>
+        Configure the system
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p>This section <em>could</em> contain lots of screen shots with instructions
+    telling you what to click on and what fields to type in using the Obdi
+    Admin interface but we won't do that! Instead we'll go straight to using
+    the REST api to demonstrate the versatility gained by using REST for
+    everything. Anything that can be done using the Obdi User Interface can
+    always be done using REST.</p>
+
+    <p>The following graphic shows the scenario that we will implement:</p>
+    <p><img src="doc/scenario1.jpeg?raw=true" alt="screenshot"></p>
+    <p>With this scenario:</p>
+    <ul>
+      <li>a VPN is required,</li>
+      <li>the VPN will be used periodically (probably daily), and</li>
+      <li>copying backup data to Amazon EC2 Volumes should be fast.</li>
+    </ul>
+
+    <p><strong>Note</strong>: You may have installed Obdi in a machine
+    on the corporate network instead. This is fine, and will not affect the
+    configuration, but it will have different performance characteristics
+    (and you might not need the VPN).</p>
+
+    <p>Ssh into the machine you made and configuration starts next...</p>
+
+    <p><strong>Log in to Obdi</strong></p>
+    <p>Using the default user name and password log into Obdi. By default, logins
+    timeout after 10 minutes of inactivity, so if that happens just log in
+    again and get a new token.</p>
+
+<pre>
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# View the token (should not be empty!)
+echo "token=$token"
+</pre>
+
+    <p><strong>Create users</strong></p>
+
+    <p>We will create a user to login with, nomen.nescio, and a user that will
+    be used by the worker daemon.</p>
+
+<pre>
+curl $opts -d '{
+    "login":"worker",
+    "passHash":"w0rker",
+    "forename":"Worker",
+    "surname":"Daemon",
+    "email":"worker@invalid",
+    "MultiLogin":true,
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+
+curl $opts -d '{
+    "login":"nomen.nescio",
+    "passHash":"p4ssw0rd",
+    "forename":"Nomen",
+    "surname":"Nescio",
+    "email":"nomen@invalid",
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+</pre>
+
+    <p><strong>Create a datacentre and environment</strong></p>
+
+    <p>Create a datacentre named 'AWS':</p>
+
+<pre>
+curl $opts -d '{
+    "SysName":"aws",
+    "DispName":"AWS"
+    }' "$proto://$ipport/api/admin/$token/dcs"
+</pre>
+
+    <p>Create an environment named 'perf' in the AWS datacentre:</p>
+
+<pre>
+# Get the datacentre ID
+dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=aws" \
+      | grep Id | grep -o "[0-9]"`
+
+# Create the env
+if [[ -z $dcid ]]; then
+    echo "dcid should not be empty"
+else
+  curl $opts -d '{
+      "SysName":"perf",
+      "DispName":"Performance Servers",
+      "DcId":'"$dcid"',
+      "WorkerUrl":"https://127.0.0.1:4443/",
+      "WorkerKey":"changeme"
+  }' "$proto://$ipport/api/admin/$token/envs"
+fi
+</pre>
+
+    <p>Change the key setting in <code>/etc/obdi-worker/obdi-worker.conf</code>
+    to whatever you set for the WorkerKey property above. Use an editor or use
+    <em>sed</em>. For example, to change the key to 'changeme' using
+    <em>sed</em>:</p>
+
+<pre>
+sed -ri 's/(^key\s*=\s*).*/\1"changeme"/' /etc/obdi-worker/obdi-worker.conf
+</pre>
+
+    <p><strong>Assign permissions</strong></p>
+
+    <p>Give the 'Enabled' and 'Writeable' permissions to the user, nomen.nescio.</p>
+
+    <p>A <em>bash</em> function, 'edit_perm', is defined then used to edit the
+    permission:</p>
+
+<pre>
+# Add the bash function, edit_perm:
+
+edit_perm()
+# Parameters:
+# $1 - login (text)
+# $2 - data centre (text)
+# $3 - environment (text)
+# $4 - Enabled (true|false)
+# $5 - Writeable (true|false)
+{
+    userid=`curl $opts "$proto://$ipport/api/admin/$token/users?login=$1" | grep Id | grep -o "[0-9]"`
+    dcid=`curl $opts "$proto://$ipport/api/admin/$token/dcs?sys_name=$2" | grep Id | grep -o "[0-9]"`
+    envid=`curl $opts "$proto://$ipport/api/admin/$token/envs?sys_name=$3&dc_id=$dcid" | grep -w Id | grep -o "[0-9]"`
+
+    echo
+    echo "$1 $2 $3 $4 $5"
+    echo curl $opts -d '{
+        "UserId":'"$userid"',
+        "EnvId":'"$envid"',
+        "Enabled":true,
+        "Writeable":true
+    }' "$proto://$ipport/api/admin/$token/perms"
+
+    curl $opts -d '{
+        "UserId":'"$userid"',
+        "EnvId":'"$envid"',
+        "Enabled":'"$4"',
+        "Writeable":'"$5"'
+    }' "$proto://$ipport/api/admin/$token/perms"
+}
+
+# Use edit_perm to change permissions
+
+edit_perm nomen.nescio aws perf true true
+</pre>
+
+    <h3><a id="installplugins" class="anchor" href="#installplugins" aria-hidden="true"></a>
+        Install Obdi plugins:
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p>Add the plugin repositories and install the plugins. We'll install
+    the Job Viewer, <em>nettools</em>, and <em>rsyncbackup</em>.</p>
+
+<pre>
+# Obdi core repo
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-core-repository.git"
+}' "$proto://$ipport/api/admin/$token/repos"
+
+# systemjobs plugin
+
+curl $opts -d '{
+    "Name":"systemjobs"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+
+# nettools repo
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-nettools-repository.git"
+}' "$proto://$ipport/api/admin/$token/repos"
+
+# nettools plugin
+
+curl $opts -d '{
+    "Name":"nettools"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+
+# rsyncbackup plugin
+# This could take quite some time since it compiles 10 Go source files.
+
+curl $opts -d '{
+    "Name":"rsyncbackup"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+</pre>
+
+    <h3><a id="testui" class="anchor" href="#testui" aria-hidden="true"></a>
+        Test the User Interface
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p>Connect to the Obdi Admin inteface using a Web Browser to
+    'https://OBDI_IP/manager/admin' and take a look around, but don't
+    change anything just yet!</p>
+
+    <p>Connect to the Obdi Run interface next using,
+    'https://OBDI_IP/manager/run', and you will see the plugins
+    that have been installed, great! You will also encounter an
+    error message as shown below:</p>
+
+    <p><img src="doc/rsyncbackup_errormsg1.png?raw=true" alt="smallscreenshot"></p>
+
+    <p>The error message is: "Server said: Plugin endpoint 'rsyncbackup/tasks'
+    does not exist. Compile failed for
+    '/usr/lib/obdi/plugins/rsyncbackup/tasks'. System said 'exit status 2'.
+    STDOUT: STDERR: go: cannot find GOROOT directory: /usr/local/go".</p>
+
+    <p>The Go (golang) plugins are compiled when they are needed and the
+    error message is due to a misconfiguration. To fix it, the 'go_root'
+    variable needs correcting. The following command will fix this:</p>
+
+<pre>
+# Modify /etc/obdi/obdi.conf
+
+sed -ri 's#(^go_root\s*=\s*).*#\1"'"`go env GOROOT`"'"#' /etc/obdi/obdi.conf
+
+# Restart obdi
+
+service obdi restart 
+service obdi-worker restart
+</pre>
+
+    <p>Now you will be able to click the 'Add Backup Task' button and start
+    configuring the backup tasks, but first, there is just one more problem
+    to fix, which shows itself when the 'View Files and Snapshots' is
+    clicked, shown next.</p>
+
+    <p><img src="doc/rsyncbackup_errormsg3.png?raw=true" alt="smallscreenshot"></p>
+
+    <p>The error message is: "Server said: Could no send job to worker. ('Login
+    from worker to Manager failed ('User or password error.').')".</p>
+
+    <p>We set up a user named 'worker' earlier with a password, 'w0rker'.
+    <strong>Naturally all passwords on this page should be changed!</strong> This
+    user has no permissions to access any environment and is used to accept
+    status information from one or more workers.</p>
+
+    <p>To fix the error just shown we need to edit the
+    <code>/etc/obdi-worker/obdi-worker.conf</code> configuration file.
+    Just the 'man_password' variable needs changing to 'w0rker'. The commands
+    would be:</p>
+
+<pre>
+sed -ri 's/(^man_password\s*=\s*).*/\1"w0rker"/' /etc/obdi-worker/obdi-worker.conf
+
+service obdi-worker restart
+</pre>
+
+    <h3><a id="conftarget" class="anchor" href="#conftarget" aria-hidden="true"></a>
+        Configure the target host and backup task
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p><strong>Setting up the Servers that will be Backed Up From</strong></p>
+
+    <p>On every server enable <em>rsyncd</em> by ensuring <em>xinetd</em> has
+    disable set to 'no' in <code>/etc/xinetd.d/rsync</code>. For example:</p>
+
+<pre>
+service rsync
+{
+        disable = no
+        flags           = IPv6
+        socket_type     = stream
+        wait            = no
+        user            = root
+        server          = /usr/bin/rsync
+        server_args     = --daemon
+        log_on_failure  += USERID
+}
+</pre>
+
+    <p>Also supply an <em>rsyncd</em> configuration. For example, use the
+    following configuration in <code>/etc/rsyncd.conf</code> to be able to
+    do a full system backup:</p>
+
+<pre>
+[backup]
+    path = /
+    comment = Full system backup
+    read only = true
+    uid = 0
+    gid = 0
+    exclude = dev/** proc/** media/** mnt/** selinux/** sys/** tmp/**
+</pre>
+
+    <p>That's all that is required on each target server to make sure they're
+    ready for being backed up. Just ensure that the <em>xinetd</em> daemon is
+    installed and running and <em>rsync</em> is installed.</p>
+
+    <p><strong>Setting up Obdi Rsyncbackup</strong></p>
+
+    <p>From the configuration so far we can use the following settings
+    for a new Backup Task:</p>
+
+    <ul>
+      <li>PROTOCOL = rsyncd</li>
+      <li>PRE = 'create_zfs_snapshot'.</li>
+      <li>RSYNC_OPTS = your options, e.g. "--sparse", "-z".</li>
+      <li>BASEDIR = '/backup/servers-zfs/'.</li>
+      <li>KNOWNHOSTS = empty.</li>
+      <li>NUMPERIODS = 1 or more.</li>
+      <li>TIMEOUT = 0 (disabled) or more seconds.</li>
+      <li>Verbose = on or off. Will make the database grow if set to 'on'.</li>
+    </ul>
+
+    <p>Those settings can be entered using the Graphical User Interface (GUI) or
+    by using REST calls. Using REST is shown below, but it is absolutely fine
+    if you use the GUI.</p>
+
+    <p>The following commands will create a new Backup Task, 'BACKUP TASK #1',
+    and some settings for that task:</p>
+
+<pre>
+# Login as a normal user, not admin!
+
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"nomen.nescio","Password":"p4ssw0rd"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# View the token (should not be empty!)
+echo "token=$token"
+
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/nomen.nescio/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
+# Create a new backup task
+
+curl $opts -d '{
+ "Id":0,
+ "TaskDesc":"BACKUP TASK #1",
+ "CapTag":"RSYNCBACKUP_WORKER_1"}' \
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/tasks?env_id=$envid" | tee $t
+
+taskid=$(grep -Eo '\\"Id\\":[0-9]+' $t | grep -Eo "[0-9]+")
+
+# View the taskid (should not be empty!)
+echo "taskid=$taskid"
+
+# Create a new set of settings
+
+curl $opts -d '{
+ "BaseDir":"/backup/servers-zfs/",
+ "Id":0,
+ "KnownHosts":"",
+ "NumPeriods":1,
+ "Pre":"create_zfs_snapshot",
+ "Protocol":"rsyncd",
+ "Repeat":false,
+ "RepeatPost":"",
+ "RepeatPre":"",
+ "RsyncOpts":"--sparse",
+ "SshKeyFile":"",
+ "SshNotProcs":"",
+ "SshSudo":"",
+ "SshUid":"",
+ "TaskId":1,
+ "Timeout":0,
+ "Verbose":false}' \
+ "$proto://$ipport/api/nomen.nescio/$token/rsyncbackup/settings?env_id=$envid&task_id=$taskid"
+</pre>
+
+    <p>All that's left is to create the Includes and Excludes and then we can do a
+    test backup.</p>
+
+    <!-- INCLUDES AND EXCLUDES -->
+
+    <h3><a id="inclexcl" class="anchor" href="#inclexcl" aria-hidden="true"></a>
+        Includes and Excludes
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h3>
+
+    <p>So, you've got this far - well done! Now it's time to start adding hosts,
+    each with their own includes and excludes (because this is how rsync works).</p>
+
+    <p>In this section you'll see how using the REST API will probably save you
+    loads of time, especially if you have a bunch of identically configured servers.</p>
+
+    <p>You will find two example scripts in the GitHub repository:</p>
+
+    <ul>
+      <li><a href="https://github.com/mclarkson/obdi-rsyncbackup/blob/master/doc/example_rest_scripts/rsync_add_hosts.sh">rsync_add_hosts.sh</a>, and</li>
+      <li><a href="https://github.com/mclarkson/obdi-rsyncbackup/blob/master/doc/example_rest_scripts/add_exclude_to_all_includes.sh">add_exclude_to_all_includes.sh</a>.</li>
+    </ul>
+
+    <p>We will use those scripts to backup a single server, then you will be able to
+    add more lines to add more hosts.</p>
+
+    <p>So long as the rsyncbackup plugin is installed (which it should be if
+    you followed the instructions thus far), then you can copy the files
+    with the following commands on the Obdi server:</p>
+
+<pre>
+# Go to your home directory:
+cd
+
+# Copy the file:
+cp -a /usr/share/obdi/static/plugins/rsyncbackup/doc/example_rest_scripts/ .
+
+# The files are now in the 'example_rest_scripts' directory in your home directory.
+# You can edit them and run them from there.
+</pre>
+
+    <p>Starting with the script, <code>rsync_add_hosts.sh</code>, you will see a
+    few variables defined near the top, they are:</p>
+
+    <ul>
+      <li><strong>TASKID</strong>
+        <ul>
+          <li>This is shown next to the Backup Task in the Run interface, as shown:<br/>
+            <img src="doc/rsyncbackup_taskid.png?raw=true" alt="smallscreenshot"></li>
+        </ul>
+      </li>
+      <li><strong>ENVID</strong>
+        <ul>
+          <li>This is shown next to the Environment in the Admin interface, as shown:<br/>
+            <img src="doc/rsyncbackup_envid.png?raw=true" alt="smallscreenshot"></li>
+        </ul>
+      </li>
+      <li><strong>INCL</strong><br/>
+        This contains the host name and configuration on each line:
+        <ul>
+          <li>First column: The host name or IP address.</li>
+          <li>Second column: The include. This is the name in square brackets
+            that is set up in <code>/etc/rsyncd.conf</code> on each target
+            server, in our case this is 'backup'.</li>
+          <li>Third and subsequent columns: One or more Excludes. These are the
+          directories to exclude. Refer to 'Include/Exclude Pattern Rules' in
+          the <a target="_blank"
+            href="http://linuxcommand.org/man_pages/rsync1.html"><em>rsync</em> man page</a>.</li>
+        </ul>
+      </li>
+      <li><strong>ipport</strong><br/>
+        The ip address and port of the Obdi master server.</li>
+      <li><strong>guid</strong><br/>
+        The token returned when loggin in. The password will need to be
+        changed here.</li>
+    </ul>
+
+    <p>Armed with this information, edit the file, <code>rsync_add_hosts.sh</code>, 
+    and set the variables <code>TASKID=</code> and <code>ENVID=</code>. Make sure the
+    user name and password are set correctly for <code>guid=</code>. Finally set the
+    <code>INCL=</code> variable to one or more hosts on your network.</p>
+
+    <p>Make the file executable and run it:</p>
+
+<pre>
+chmod +x rsync_add_hosts.sh
+
+./rsync_add_hosts.sh
+</pre>
+
+    <p>To check the configuration, log into the Run interface GUI and view the
+    Includes and Excludes.</p>
+
+    <p>To test, select one item then click the green 'Backup Selected Now'
+    button.</p>
+
+    <p>The job is started and you can view it's progress by clicking on the
+    link that will appear after clicking the button, or, at any other time you
+    can click on System Jobs in the left menu to see the job running, view it's
+    output, or kill the job and all child processes.</p>
+
+    <p>The initial rsync will take quite some time. I did mine in small groups
+    until all 80 servers were backed up, then I set up a cron job to run the
+    backup very early each day. Example cron jobs can be found on the
+    <a href="https://github.com/mclarkson/obdi-rsyncbackup">main GitHub page</a>
+    . I also set a cron job to only keep the last 30 days worth of
+    daily snapshots.</p>
+
+    <p>If you followed the installation using the command line only then you
+    will now be able to put all the commands into one file and set up another
+    server from scratch. This is great for configuration management tools
+    such as Salt Stack, Ansible or Puppet.</p>
+
+    <p>In the next section we will configure and set up Lift and Shift...</p>
+
+    <!-- LIFT AND SHIFT -->
+
+    <h2><a id="liftnshift" class="anchor" href="#liftnshift" aria-hidden="true"></a>
+        Enable Lift and Shift
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p><strong>Install extra Obdi plugins</strong></p>
+
+    <p>We need the GUI plugin, <a href="http://aws-p2ec2.obdi.io/">aws-p2ec2</a>, and
+       the Amazon EC2 Obdi Library, <a href="http://aws-ec2lib.obdi.io/">aws-ec2lib</a>.
+    </p>
+
+<pre>
+# Log in as the admin user for system changes
+
+proto="https"
+opts="-k -s" # don't check ssl cert, silent
+ipport="127.0.0.1:443"
+token=`curl $opts -d '{"Login":"admin","Password":"admin"}' \
+    $proto://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# View the token (should not be empty!)
+echo "token=$token"
+
+# Add the AWS Tools repository
+
+curl $opts -d '{
+    "Url":"https://github.com/mclarkson/obdi-awstools-repository.git"
+}' "$proto://$ipport/api/admin/$token/repos"
+
+# Install the aws-ec2lib plugin
+
+curl $opts -d '{
+    "Name":"aws-ec2lib"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+
+# Install the aws-p2ec2 plugin
+
+curl $opts -d '{
+    "Name":"aws-p2ec2"
+}' "$proto://$ipport/api/admin/$token/repoplugins"
+</pre>
+
+    <p><strong>Configure the system</strong></p>
+
+    <p>When the two extra plugins were installed, they added two capabilities
+    to the system, HAS_AWS_EC2LIB and HAS_AWS_P2EC2. We need to assign those
+    capabilities to our environment so that other plugins know that they
+    are now available.</p>
+
+    <p>Once the capabilities have been added, the green button, 'Create Amazon
+    EC2 Instance', will appear in the Directory Browser when the directory
+    looks like a root filesystem.</p>
+
+<pre>
+# Add the capabilities to our environment
+
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/admin/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
+# Get the environment capability id for HAS_AWS_EC2LIB
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=HAS_AWS_EC2LIB" \
+      | grep Id | grep -o "[0-9]"`
+
+# Create the environment capability mapping
+
+if [[ -z $envcapid ]]; then
+    echo "envcapid should not be empty"
+else
+  curl $opts -d "{
+      \"EnvId\":$envid,
+      \"EnvCapId\":$envcapid
+  }" "$proto://$ipport/api/admin/$token/envcapmaps"
+fi
+
+# Get the environment capability id for HAS_AWS_P2EC2
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=HAS_AWS_P2EC2" \
+      | grep Id | grep -o "[0-9]"`
+
+# Create the environment capability mapping
+
+if [[ -z $envcapid ]]; then
+    echo "envcapid should not be empty"
+else
+  curl $opts -d "{
+      \"EnvId\":$envid,
+      \"EnvCapId\":$envcapid
+  }" "$proto://$ipport/api/admin/$token/envcapmaps"
+fi
+</pre>
+
+    <p>If you look at the logs you will see:</p>
+
+    <p><img src="doc/rsyncbackup_errormsg2.png?raw=true" alt="smallscreenshot"></p>
+
+    <p>So we need the user, 'sduser' (the secret data user). Lets add it:</p>
+
+<pre>
+curl $opts -d '{
+    "login":"sduser",
+    "passHash":"webfkaalwiugfasf",
+    "forename":"Secret Data",
+    "surname":"User",
+    "email":"sduser@invalid",
+    "MultiLogin":false,
+    "enabled":true}' "$proto://$ipport/api/admin/$token/users"
+</pre>
+
+    <p>And finally we need to set the JSON object capability,
+    AWS_ACCESS_KEY_ID_1.  The secret data user is required for plugins to
+    access this object securely.</p>
+
+    <p><strong>Setting AWS_ACCESS_KEY_ID_1</strong></p>
+
+    <p>The JSON object, AWS_ACCESS_KEY_ID_1, has quite a few fields to complete.
+    See the <a target="_blank" href="http://aws-p2ec2.obdi.io/#configuration">
+    aws-p2ec2 plugin page</a> for a full list and description of all the
+    parameters that need setting.</p>
+
+    <p>Copy the following text into a text editor and get ready to enter the
+    correct details in plalce of 'EMPTY' for the parameters. The items already
+    entered should be correct for a single server installation.</p>
+
+<pre>
+{
+    \"aws_access_key_id\":\"EMPTY\",
+    \"aws_secret_access_key\":\"EMPTY\",
+    \"aws_keyname\":\"EMPTY\",
+    \"aws_obdi_worker_instance_id\":\"EMPTY\",
+    \"aws_obdi_worker_region\":\"EMPTY\",
+    \"aws_obdi_worker_url\":\"https://127.0.0.1:4443/\",
+    \"aws_obdi_worker_key\":\"changeme\",
+    \"aws_obdi_worker_ip\":\"EMPTY\",
+    \"aws_dnsserver_ip\":\"EMPTY\",
+    \"aws_dnsdomain\":\"EMPTY\",
+    \"aws_gateway\":\"EMPTY\",
+    \"aws_shell_user_name\":\"EMPTY\",
+    \"aws_filter\":\"key-name=EMPTY\",
+    \"aws_shell_ssh_key_b64\":\"EMPTY\",
+    \"aws_securitygroups\":[\"EMPTY\"]
+}
+</pre>
+
+    <p>The prior json object text has the speech marks escaped with a
+    backslash for inserting at the command line. If the object is going
+    to be pasted into the Obdi Admin Web interface then the speech marks
+    should not be escaped (omit all of the backslashes).</p>
+
+    <p>Quick summary of where to get parameter details:</p>
+
+<pre>
+    aws_access_key_id            <-- from Amazon
+    aws_secret_access_key        <-- from Amazon
+    aws_keyname                  <-- from Amazon (you made the key probably)
+    aws_obdi_worker_instance_id  <-- From Amazon Management Console
+    aws_obdi_worker_region       <-- From Amazon Management Console
+    aws_obdi_worker_url          <-- From obdi-worker.conf 'listen_address'
+    aws_obdi_worker_key          <-- From obdi-worker.conf 'key'
+    aws_obdi_worker_ip           <-- From Amazon Management Console
+    aws_dnsserver_ip             <-- From the network admin
+    aws_dnsdomain                <-- From the network admin
+    aws_gateway                  <-- From the network admin
+    aws_shell_user_name          <-- Username used to log into the shell
+    aws_filter                   <-- You choose
+    aws_shell_ssh_key_b64        <-- The ssh private key encoded as base 64 text
+    aws_securitygroups           <-- The security groups to apply to instances
+</pre>
+
+    <p>Use the summary, above, and the
+    <a target="_blank" href="http://aws-p2ec2.obdi.io/#configuration">
+    aws-p2ec2 plugin page</a> to work out what to put in the above json object.</p>
+    
+    <p>The following code will create the AWS_ACCESS_KEY_ID_1 capability:</p>
+
+<pre>
+# Get the environment ID for our 'perf' environment
+
+t="/tmp/deleteme_$$"
+
+curl $opts "https://$ipport/api/admin/$token/envs?sys_name=perf" | tee $t
+
+envid=`grep \"Id\" $t | grep -Eo "[0-9]+"`
+
+# View the envid (should not be empty!)
+echo "envid=$envid"
+
+# Get the environment capability id for AWS_ACCESS_KEY_ID_1
+
+envcapid=`curl $opts "https://$ipport/api/admin/$token/envcaps?code=AWS_ACCESS_KEY_ID_1" \
+      | grep Id | grep -o "[0-9]"`
+
+# View the envcapid (should not be empty!)
+echo "envcapid=$envcapid"
+
+# Create the environment capability mapping
+
+if [[ -z $envcapid ]]; then
+    echo "envcapid should not be empty"
+else
+  curl $opts -d "{
+      \"EnvId\":$envid,
+      \"EnvCapId\":$envcapid
+  }" "$proto://$ipport/api/admin/$token/envcapmaps"
+fi
+</pre>
+
+    <p>The capability has been created but the JSON Object has not.</p>
+
+    <p>Edit the json object text so that it is all on one line then create the
+    object. For example:</p>
+
+<pre>
+# Create the JSON Object
+
+curl -k -d '{
+    "EnvId":'"$envid"',
+    "EnvCapId":'"$envcapid"',
+    "Json":"{ \"aws_access_key_id\":\"EMPTY\", \"aws_secret_access_key\":\"EMPTY\", \"aws_obdi_worker_instance_id\":\"EMPTY\", \"aws_obdi_worker_region\":\"EMPTY\", \"aws_obdi_worker_url\":\"https://127.0.0.1:4443/\", \"aws_obdi_worker_key\":\"changeme\", \"aws_obdi_worker_ip\":\"EMPTY\", \"aws_dnsserver_ip\":\"EMPTY\", \"aws_dnsdomain\":\"EMPTY\", \"aws_gateway\":\"EMPTY\", \"aws_shell_user_name\":\"EMPTY\", \"aws_filter\":\"key-name=EMPTY\", \"aws_shell_ssh_key_b64\":\"EMPTY\", \"aws_securitygroups\":[\"EMPTY\"] }"
+}' "https://$ipport/api/admin/$token/jsonobjects"
+</pre>
+
+    <p>Now you can test creating Amazon Volumes, Snapshots and Instances.</p>
+
+    <p>The installation is complete.</p>
+
+    <h2><a id="troubleshooting" class="anchor" href="#troubleshooting" aria-hidden="true"></a>
+        Troubleshooting
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p><strong>Problem:</strong> sudo: sorry, you must have a tty to run sudo</p>
+
+    <p><img src="doc/rsyncbackup_errormsg4.png?raw=true" alt="smallscreenshot"></p>
+
+    <p>The Obdi server needs: 'Defaults !requiretty'. There's a
+    <a href="https://www.shell-tips.com/2014/09/08/sudo-sorry-you-must-have-a-tty-to-run-sudo/">
+        nice blog about it here</a>.</p>
+
+    <!--
+    <video src="doc/test1.webm" style="width: 100%" controls preload></video>
+    -->
+
+    <!-- FOOTER -->
+
+    <p>&nbsp;</p>
+    <footer class="site-footer">
+      <span class="site-footer-owner"><a href="https://github.com/mclarkson/obdi-rsyncbackup">Obdi-rsyncbackup</a> is
+      maintained by <a href="https://github.com/mclarkson">mclarkson</a>.</span> <span class="site-footer-credits">This
+      page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href=
+      "https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+    </footer>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 for Linux version 5.1.25">
+  <meta charset="UTF-8">
+  <title>Obdi-rsyncbackup by mclarkson</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <script src="http://api.html5media.info/1.1.8/html5media.min.js"></script>
+</head>
+<body>
+
+  <section class="page-header">
+    <h1 class="project-name">Obdi-rsyncbackup</h1>
+    <h2 class="project-tagline">Obdi plugin to do rsync backups with compression, deduplication and snapshotting using
+    zfs.</h2>
+    <a href="https://github.com/mclarkson/obdi-rsyncbackup" class="btn">View on GitHub</a>
+    <a href="http://nettools.obdi.io" class="btn">Parent Repository</a>
+    <a href="http://obdi.io" class="btn">Obdi Home Page</a>
+  </section>
+
+  <section class="main-content">
+
+    <style>
+    img[alt=screenshot] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+    }
+    img[alt=smallscreenshot] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 500px;
+    }
+    </style>
+
+    <p><img src="doc/rsyncbackup_files_small.png?raw=true" alt="smallscreenshot"></p>
+
+    <h1><a id="contents" class="anchor" href="#contents" aria-hidden="true"></a>
+        Contents</h1>
+
+    <ul>
+      <li><a href="#screenshots">Screenshots</a>
+        <ul>
+          <li><a href="#backingup">Backing Up</a></li>
+          <li><a href="#instancecreation">Amazon AWS EC2 Instance Creation</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- SCREENSHOTS -->
+
+    <h1><a id="screenshots" class="anchor" href="#screenshots" aria-hidden="true"></a>
+        Screenshots
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h1>
+
+    <h2><a id="backingup" class="anchor" href="#backingup" aria-hidden="true"></a>
+        Backing Up
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p><strong>Choose Environment</strong></p>
+    <p>The first step is to choose the environment. There can be many each with
+    their own backup servers, or sharing the same backup servers.</p>
+
+    <p><img src="doc/rsyncbackup_envchoice.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Backup Tasks</strong></p>
+    <p>When 'Show Backup Tasks' has been clicked on the Backup Tasks will be
+    shown. There can be zero or more tasks. The 'RSYNCBACKUP_WORKER_1' worker
+    definition is configured by the Obdi Administrator in the Admin interface.
+    Each environment will have a 'RSYNCBACKUP_WORKER_1' definition that can
+    be the same, or different, which points to a backup server.</p>
+
+    <p>The Action items, from left to right, are:</p>
+    <ul>
+        <li>Delete Backup Task</li>
+        <li>View Files and Snapshots</li>
+        <li>Edit Backup Task</li>
+        <li>Settings</li>
+        <li>Includes and Excludes</li>
+        <li>Run a full backup now</li>
+    </ul>
+
+    <p><img src="doc/rsyncbackup_main.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Settings</strong></p>
+    <p>All available settings are shown. Each underlined item in the
+    screenshot provides documentation of the setting when the user hovers
+    over that item.</p>
+
+    <p><img src="doc/rsyncbackup_settings.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Files and Snapshots</strong></p>
+    <p>The screenshot shows the output from 'zfs list'. This shows the space used
+    and available in the main read/write filesystem, and the space used for each
+    read-only snapshot. Each snapshot can be browsed just as the filesystem
+    can be.</p>
+
+    <p><img src="doc/rsyncbackup_snapshots.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Directory Browser</strong></p>
+    <p>Clicking the filesystem or snapshot takes the user to the Directory Browser.
+    This shows the files that were backed up, and when a directory 'looks like'
+    a root filesystem the green 'Create Amazon EC2 Instance' button will be
+    displayed (so long as the obdi-aws-p2ec2 plugin has been installed!).</p>
+
+    <p><img src="doc/rsyncbackup_files.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Includes and Excludes</strong></p>
+    <p>Rsync works on includes and excludes and those are shown here. The image
+    shows a filtered list where the user searched for '107'. It also shows a
+    single selected item, linuxserver107. The 'Backup Selected Now' button
+    was pressed and the Backup request was sent to back up only that server,
+    which was started as job number 5334. Clicking on the link will take the
+    user to the Log output. The log output can also be viewed by clicking
+    on the 'System Jobs' menu item.</p>
+
+    <p><img src="doc/rsyncbackup_includes.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Output Log</strong></p>
+    <p>The output from rsync is shown and it can be seen that rsync was run, processes
+    paused, then more rsyncing done, then processes unpaused.</p>
+
+    <p><img src="doc/rsyncbackup_log.png?raw=true" alt="screenshot"></p>
+
+    <h2><a id="instancecreation" class="anchor" href="#instancecreation" aria-hidden="true"></a>
+        Amazon AWS EC2 Instance Creation
+        <sup style="font-size:small"><a href="#contents">BACK TO TOP</a></sup>
+    </h2>
+
+    <p>After pressing the green 'Create Amazon EC2 Instance' button the user will
+    be taken to the instance creation pages of
+    <a href="https://github.com/mclarkson/obdi-aws-p2ec2">obdi-aws-p2ec2</a>
+    described next.</p>
+
+    <p><strong>Choose AWS Region</strong></p>
+    <p>Choose the AWS region - this is where the Volume, AMI or Instance will end up.</p>
+
+    <p><img src="doc/rsyncbackup_aws_region.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>List Instances</strong></p>
+    <p>A filtered list of instances will be shown when the 'List Instances' button
+    is pressed. The filter is set by the Obdi Administrator and might be the user
+    or group's key name. The list of instances is shown just for the user to verify
+    that this is where they want the Volume, AMI or Instance to be put. A yellow
+    background in the list means the instance is stopped and a red background means
+    that the instance was terminated.</p>
+
+    <p><img src="doc/rsyncbackup_aws_list.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Create Instance Page</strong></p>
+    <p>The user can modify some machine parameters and once the user is happy
+    that the end location is correct then instance creation can start.</p>
+
+    <p><img src="doc/rsyncbackup_aws_create1.png?raw=true" alt="screenshot"></p>
+
+    <p><strong>Create Instance - Lift and Shift</strong></p>
+    <p>The instance is created. In this case the AMI is saved and the Instance
+    created, but the Volume is deleted to save space and to avoid extra costs.</p>
+
+    <p><img src="doc/rsyncbackup_aws_create2.png?raw=true" alt="screenshot"></p>
+    <p>Best case: A small machine, under 5GB in size, can be created in under 10 minutes.
+    Worst case: A larger machine, over 100GB in size - and in a different region to the
+    Obdi worker (requiring an extra copy) can take more than 2 hours to create.</p>
+
+    <!-- FOOTER -->
+
+    <p>&nbsp;</p>
+    <footer class="site-footer">
+      <span class="site-footer-owner"><a href="https://github.com/mclarkson/obdi-rsyncbackup">Obdi-rsyncbackup</a> is
+      maintained by <a href="https://github.com/mclarkson">mclarkson</a>.</span> <span class="site-footer-credits">This
+      page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href=
+      "https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+    </footer>
+  </section>
+
+</body>
+</html>
