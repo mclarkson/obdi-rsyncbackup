@@ -19,16 +19,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/rpc"
 	"os"
+	//"sort"
+	"strconv"
+	"strings"
 )
-
-// The format of the json sent by the client in a POST request
-type PostedData struct {
-	Grain string
-	Text  string
-}
 
 // Name of the sqlite3 database file
 const DBFILE = "rsyncbackup.db"
@@ -93,7 +91,13 @@ func (gormInst *GormDB) InitDB(dbname string) error {
 
 func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
-	// GET requests don't change state, so, don't change state
+	ReturnError("Internal error: Unimplemented HTTP GET", response)
+	return nil
+}
+
+func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
+
+	// POST requests can change state.
 
 	// env_id is required, '?env_id=xxx'
 
@@ -113,12 +117,44 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	task_id_str := args.QueryString["task_id"][0]
 
+	// path is required, '?path=xxx'
+
+	if len(args.QueryString["path"]) == 0 {
+		ReturnError("'path' must be set.", response)
+		return nil
+	}
+
+	path_str := args.QueryString["path"][0]
+
+	// mountdev is optional, '?mountdev=xxx'
+
+	var mountdev_str string
+	if len(args.QueryString["mountdev"]) > 0 {
+		mountdev_str = args.QueryString["mountdev"][0]
+	}
+
+	// mountdir is optional, '?mountdir=xxx'
+
+	var mountdir_str string
+	if len(args.QueryString["mountdir"]) > 0 {
+		mountdir_str = args.QueryString["mountdir"][0]
+	}
+
+	// umountdir is optional, '?umountdir=xxx'
+
+	var umountdir_str string
+	if len(args.QueryString["umountdir"]) > 0 {
+		umountdir_str = args.QueryString["umountdir"][0]
+	}
+
 	// Check if the user is allowed to access the environment
 	var err error
 	if _, err = t.GetAllowedEnv(args, env_id_str, response); err != nil {
 		// GetAllowedEnv wrote the error
 		return nil
 	}
+
+	// We got this far so access is allowed.
 
 	// Setup/Open the local database
 
@@ -132,7 +168,126 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 
 	db := gormdb.DB() // for convenience
 
-	// We got this far so access is allowed.
+	// The string of environment variables
+	var env_vars_str string
+
+	// Get settings
+
+	var setting Setting
+
+	Lock()
+	if err = db.First(&setting, "task_id = ?", task_id_str).Error; err != nil {
+		Unlock()
+		ReturnError("Query error. "+err.Error(), response)
+		return nil
+	}
+	Unlock()
+
+	/* Need to set the following environment variables for the script:
+
+	LOCALDIR   - Directory to copy from.
+	REMOTEDIR  - Directory to copy to.
+	PRIVKEYB64 - Private key for accessing server over ssh.
+	REMOTEUSER - User to connect to remote server as.
+	MOUNTDEV   - Optional. Device to mount.
+	MOUNTDIR   - Optional. Directory to mount MOUNTDIR on.
+	UMOUNTDIR  - Optional. Unmount after copy.
+
+	*/
+
+	///////////need it?
+	var space string
+
+	// LOCALDIR
+	if len(setting.BaseDir) > 0 {
+		env_vars_str += space + "LOCALDIR=" + `"` + setting.BaseDir +
+			"/" + path_str + `"`
+		space = " "
+	} else {
+		ReturnError("BASEDIR setting is empty. ", response)
+		return nil
+	}
+
+	// REMOTEDIR
+	end := strings.Split(strings.TrimRight(path_str, "/"), "/")
+	env_vars_str += space + `REMOTEDIR="/incoming/` + end[len(end)-1] + `"`
+
+	// Get secret data from the AWS_ACCESS_KEY_ID_1 capability using sdtoken
+
+	envcaps := []EnvCap{}
+	{
+		resp, _ := GET("https://127.0.0.1/api/"+args.PathParams["login"]+
+			"/"+args.PathParams["GUID"], "/envcaps?code=AWS_ACCESS_KEY_ID_1")
+		if b, err := ioutil.ReadAll(resp.Body); err != nil {
+			txt := fmt.Sprintf("Error reading Body ('%s').", err.Error())
+			ReturnError(txt, response)
+			return nil
+		} else {
+			json.Unmarshal(b, &envcaps)
+		}
+	}
+
+	json_objects := []JsonObject{}
+	{
+		env_cap_id_str := strconv.FormatInt(envcaps[0].Id, 10)
+
+		resp, _ := GET("https://127.0.0.1/api/sduser/"+args.SDToken,
+			"/jsonobjects?env_id="+env_id_str+"&env_cap_id="+env_cap_id_str)
+		if b, err := ioutil.ReadAll(resp.Body); err != nil {
+			txt := fmt.Sprintf("Error reading Body ('%s').", err.Error())
+			ReturnError(txt, response)
+			return nil
+		} else {
+			json.Unmarshal(b, &json_objects)
+		}
+	}
+
+	type AWSData struct {
+		Aws_access_key_id     string // E.g. OKLAJX2KN6OXZEFV4B1Q
+		Aws_secret_access_key string // E.g. oiwjeg^laGDIUsg@jfa
+
+		// required by obdi-aws-p2ec2
+
+		Aws_obdi_worker_instance_id string // E.g. i-e19ec362
+		Aws_obdi_worker_region      string // E.g. us-east-1
+		Aws_obdi_worker_url         string // E.g. https://1.2.3.4:4443/
+		Aws_obdi_worker_key         string // E.g. secretkey
+		Aws_filter                  string // E.g. key-name=itsupkey
+
+		// required by obdi-rsyncbackup/remotecopy
+
+		Aws_shell_ssh_key_b64 string // Must be base64 encoded
+		Aws_shell_user_name   string // E.g. ec2-user
+		Aws_obdi_worker_ip    string // 52.2.0.138
+	}
+
+	awsdata := AWSData{}
+	if err := json.Unmarshal([]byte(json_objects[0].Json), &awsdata); err != nil {
+		txt := fmt.Sprintf("Error decoding JsonObject ('%s').", err.Error())
+		ReturnError(txt, response)
+		return nil
+	}
+
+	// PRIVKEYB64
+	env_vars_str += space + `PRIVKEYB64="` + awsdata.Aws_shell_ssh_key_b64 + `"`
+
+	// REMOTEUSER
+	env_vars_str += space + `REMOTEUSER="` + awsdata.Aws_shell_user_name + `"`
+
+	// MOUNTDEV
+	env_vars_str += space + `MOUNTDEV="` + mountdev_str + `"`
+
+	// MOUNTDIR
+	env_vars_str += space + `MOUNTDIR="` + mountdir_str + `"`
+
+	// UMOUNTDIR
+	env_vars_str += space + `UMOUNTDIR="` + umountdir_str + `"`
+
+	// Command arguments
+
+	cmdargs := awsdata.Aws_obdi_worker_ip
+
+	// Run the backup script.
 
 	// Get the task to get the CapabilityTag
 	task := Task{}
@@ -144,26 +299,13 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 	}
 	Unlock()
 
-	// Get settings to get the BaseDir
-
-	var setting Setting
-
-	Lock()
-	if err = db.First(&setting, "task_id = ?", task_id_str).Error; err != nil {
-		Unlock()
-		txt := ". Did you Apply the Settings for this backup task? That needs to be done first!"
-		ReturnError("Query error. "+err.Error()+txt, response)
-		return nil
-	}
-	Unlock()
-
 	sa := ScriptArgs{
 		// The name of the script to send an run
-		ScriptName: "rsyncbackup-zfslist.sh",
+		ScriptName: "rsyncbackup-copyfiles.sh",
 		// The arguments to use when running the script
-		CmdArgs: setting.BaseDir,
+		CmdArgs: cmdargs,
 		// Environment variables to pass to the script
-		EnvVars: "", //`A=1 B=2 C='a b c' D=44`,
+		EnvVars: env_vars_str,
 		// Name of an environment capability (where isworkerdef == true)
 		// that can point to a worker other than the default.
 		EnvCapDesc: task.CapTag,
@@ -172,80 +314,16 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		// Type 2 - System Job - All output
 		//     is saved in one single line.
 		//     Good for json etc.
-		Type: 2,
+		Type: 1,
 	}
 
 	var jobid int64
-	if jobid, err = t.RunScript(args, sa, response); err != nil {
-		// RunScript wrote the error so just return
-		return nil
-	}
-
-	reply := Reply{jobid, "", SUCCESS, ""}
-	jsondata, err := json.Marshal(reply)
-	if err != nil {
-		ReturnError("Marshal error: "+err.Error(), response)
-		return nil
-	}
-	*response = jsondata
-
-	return nil
-}
-
-func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
-
-	// POST requests can change state
-
-	ReturnError("Internal error: Unimplemented HTTP POST", response)
-	return nil
-
-	// Decode the post data into struct
-
-	var postedData PostedData
-
-	if err := json.Unmarshal(args.PostData, &postedData); err != nil {
-		txt := fmt.Sprintf("Error decoding JSON ('%s')"+".", err.Error())
-		ReturnError("Error decoding the POST data ("+
-			fmt.Sprintf("%s", args.PostData)+"). "+txt, response)
-		return nil
-	}
-
-	// Use salt to change the version, if it's changed
-
-	if len(args.QueryString["var_a"]) == 0 {
-		ReturnError("'var_a' must be set", response)
-		return nil
-	}
-
-	sa := ScriptArgs{
-		// The name of the script to send an run
-		ScriptName: "helloworldrunscript-sets.sh",
-		// The arguments to use when running the script
-		CmdArgs: args.QueryString["var_a"][0] + " " +
-			postedData.Grain + "," + postedData.Text,
-		// Environment variables to pass to the script
-		EnvVars: "",
-		// Name of an environment capability (where isworkerdef == true)
-		// that can point to a worker other than the default.
-		EnvCapDesc: "HELLOWORLD_RUNSCRIPT_WORKER",
-		// Type 1 - User Job - Output is
-		//     sent back as it's created
-		// Type 2 - System Job - All output
-		//     is saved in one single line.
-		//     Good for json etc.
-		Type: 2,
-	}
-
-	var jobid int64
-	if len(postedData.Grain) > 0 && len(postedData.Text) > 0 {
+	{
 		var err error
 		if jobid, err = t.RunScript(args, sa, response); err != nil {
 			// RunScript wrote the error so just return
 			return nil
 		}
-	} else {
-		ReturnError("No POST data received. Nothing to do.", response)
-		return nil
 	}
 
 	reply := Reply{jobid, "", SUCCESS, ""}

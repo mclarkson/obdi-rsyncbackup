@@ -111,22 +111,22 @@
       <!-- Host -->
 
       <div class="form-group">
-	<label for="host" class="control-label">Host Name</label>
-	<div>
-	  <input class="form-control" id="host" ng-model="Host"
-	  placeholder="Enter the host name." type="text" ng-trim='false' required>
-	</div>
+        <label for="host" class="control-label">Host Name</label>
+        <div>
+          <input class="form-control" id="host" ng-model="Host"
+          placeholder="Enter the host name." type="text" ng-trim='false' required>
+        </div>
       </div>
 
       <!-- Base -->
 
       <div class="form-group">
-	<label for="base" class="control-label">Include</label>
-	<div>
-	  <input class="form-control" id="base" ng-model="Base"
-	  placeholder="Enter the base path or rsyncd share name." type="text"
+        <label for="base" class="control-label">Include</label>
+        <div>
+          <input class="form-control" id="base" ng-model="Base"
+          placeholder="Enter the base path or rsyncd share name." type="text"
           ng-trim='false' required>
-	</div>
+        </div>
       </div>
 
     </div>
@@ -145,11 +145,11 @@
       <!-- Exclude -->
 
       <div class="form-group">
-	<label for="path" class="control-label">Path</label>
-	<div>
-	  <input class="form-control" id="path" ng-model="Path"
-	  placeholder="Enter the path to exclude." type="text" ng-trim='false' required>
-	</div>
+        <label for="path" class="control-label">Path</label>
+        <div>
+          <input class="form-control" id="path" ng-model="Path"
+          placeholder="Enter the path to exclude." type="text" ng-trim='false' required>
+        </div>
       </div>
 
     </div>
@@ -170,21 +170,21 @@
       <!-- TaskDesc -->
 
       <div class="form-group">
-	<label for="taskdesc" class="control-label">Task Description</label>
-	<div>
-	  <input class="form-control" id="taskdesc" ng-model="TaskDesc"
-	  placeholder="Type a description for this task" type="text" ng-trim='false' required>
-	</div>
+        <label for="taskdesc" class="control-label">Task Description</label>
+        <div>
+          <input class="form-control" id="taskdesc" ng-model="TaskDesc"
+          placeholder="Type a description for this task" type="text" ng-trim='false' required>
+        </div>
       </div>
 
       <!-- CapTag -->
 
       <div class="form-group">
-	<label for="captag" class="control-label">Capability Tag</label>
-	<div>
-	  <input class="form-control" id="captag" ng-model="CapTag"
-	  placeholder="" type="text" ng-trim='false' required>
-	</div>
+        <label for="captag" class="control-label">Capability Tag</label>
+        <div>
+          <input class="form-control" id="captag" ng-model="CapTag"
+          placeholder="" type="text" ng-trim='false' required>
+        </div>
       </div>
 
     </div>
@@ -301,9 +301,9 @@
         <i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
       <div ng-if="task_result">
 
-	<button class="btn btn-sm btn-default" type="button"
-	  ng-click="AddTask()">
-	  <i class="fa fa-plus-circle"> </i> Add Backup Task</button>
+        <button class="btn btn-sm btn-default" type="button"
+          ng-click="AddTask()">
+          <i class="fa fa-plus-circle"> </i> Add Backup Task</button>
 
         <div class="table-responsive" style="margin-top: 8px;">
           <table class="table table-striped table-bordered"
@@ -322,20 +322,21 @@
               <td style="width: 100%">{{item.TaskDesc}}</td>
               <td>{{item.CapTag}}</td>
               <td style="white-space: nowrap">
-		<a href="#" ng-click="DeleteBackupTask(item.TaskDesc,item.Id)">
-		  <i class="fa fa-trash-o red" title="Delete Backup Task"></i></a>
-		<a href="#" ng-click="ShowFilesystemsAndSnapshots($index)">
-		  <i class="fa fa-files-o" title="View Files and Snapshots"></i></a>
-		<a href="#" ng-click="EditBackupTask(item.TaskDesc,item.CapTag,item.Id)">
-		  <i class="fa fa-edit" title="Edit Backup Task"></i></a>
-		<a href="#" ng-click="ConfigureSettings($index)">
-		  <i class="fa fa-cog" title="Settings"></i></a>
-		<a href="#" ng-click="ConfigureIncludes($index)">
-		  <i class="fa fa-cogs" title="Includes and Excludes"></i></a>
-		<a href="#" ng-click="RunBackup(item.TaskDesc,$index)">
-		  <i class="fa fa-play green" title="Run a full backup now"></i></a>
+                <a href="#" ng-click="DeleteBackupTask(item.TaskDesc,item.Id)">
+                  <i class="fa fa-trash-o red" title="Delete Backup Task"></i></a>
+                <a href="#" ng-click="ShowFilesystemsAndSnapshots($index)">
+                  <i class="fa fa-files-o" title="View Files and Snapshots"></i></a>
+                <a href="#" ng-click="EditBackupTask(item.TaskDesc,item.CapTag,item.Id)">
+                  <i class="fa fa-edit" title="Edit Backup Task"></i></a>
+                <a href="#" ng-click="ConfigureSettings($index)">
+                  <i class="fa fa-cog" title="Settings"></i></a>
+                <a href="#" ng-click="ConfigureIncludes($index)">
+                  <i class="fa fa-cogs" title="Includes and Excludes"></i></a>
+                <a href="#" ng-click="RunBackup(item.TaskDesc,$index)">
+                  <i class="fa fa-play green" title="Run a full backup now"></i></a>
               </td>
-            </tr>
+              </tr>
+            </tbody>
           </table>
         </div> <!-- table-responsive -->
       </div>
@@ -349,130 +350,385 @@
         {{curtask.TaskDesc}}</h4>
 
       <div ng-if="gettingsettings">
-	<p ng-if="!pluginsAvailFinished">Getting settings
+        <p ng-if="!pluginsAvailFinished">Getting settings
           <i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
 
       </div>
       <div ng-if="gotsettings">
 
         <p>Settings for rsync backup can be edited below. Defaults will be used
-           for any fields left empty.</p>
+           for any fields left empty. The field labels represent the environment
+           variables that are loaded before the backup script is run, which is
+           why they are all in uppercase.
+        </p>
 
-	<div class="form-horizontal prepend-xs-1" role="form">
+        <div class="form-horizontal prepend-xs-1" role="form">
 
 <!--
-	  <div class="alert alert-danger" ng-show="message">
-	    {{message}}
-	  </div>
-	  <div class="alert alert-success" ng-show="okmessage">
-	    {{okmessage}}
-	  </div>
+          <div class="alert alert-danger" ng-show="message">
+            {{message}}
+          </div>
+          <div class="alert alert-success" ng-show="okmessage">
+            {{okmessage}}
+          </div>
 -->
 
-	  <!-- Protocol -->
+          <!-- Protocol -->
 
-	  <div class="form-group">
-	    <label class="col-sm-3 control-label">PROTOCOL</label>
-	    <div class="col-sm-7">
-	      <div class="dropdown-close">
-		<!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-		<select selectpicker required ng-model="settings.Protocol">
-		  <option value="">Choose a transport protocol</option>
-		  <option value="rsyncd">rsyncd</option>
-		</select>
-	      </div>
-	    </div>
-	  </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="PROTOCOL"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The backup script supports rsync over ssh but that
+                  isn't supported here, only connecting to a remote rsyncd
+                  server is supported.">
+                    PROTOCOL
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker required ng-model="settings.Protocol">
+                  <option value="">Choose a transport protocol</option>
+                  <option value="rsyncd">rsyncd</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-	  <!-- PRE -->
+          <!-- PRE -->
 
-	  <div class="form-group">
-	    <label class="col-sm-3 control-label">PRE</label>
-	    <div class="col-sm-7">
-	      <div class="dropdown-close">
-		<!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
-		<select selectpicker required ng-model="settings.Pre">
-		  <option value="">None</option>
-		  <option>create_zfs_snapshot</option>
-		</select>
-	      </div>
-	    </div>
-	  </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="PRE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Scripts that are run before the backup starts.">
+                  PRE
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker required ng-model="settings.Pre">
+                  <option value="">None</option>
+                  <option>create_zfs_snapshot</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-	  <!-- RSYNC_OPTS -->
+          <!-- VERBOSE -->
 
-	  <div class="form-group">
-	    <label for="rsync_opts" class="col-sm-3 control-label">RSYNC_OPTS</label>
-	    <div class="col-sm-7">
-	      <input class="form-control" id="rsync_opts" ng-model="settings.RsyncOpts"
-	      placeholder="Extra rsync options" type="text" ng-trim='false' required>
-	    </div>
-	  </div>
+          <!--
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-7">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" ng-model="settings.Verbose">
+                    <span class="mypopover"
+                      popover-trigger="mouseenter mouseleave"
+                      popover-title="Verbose"
+                      popover-placement="right"
+                      popover-append-to-body="true"
+                      uib-popover="Whether to set the rsync verbose option. This
+                        can produce large logs (possibly hundreds of megabytes of
+                        logs stored in the system database) if enabled but aids
+                        with debugging and verification.">
+                          Verbose
+                    </span>
+                </label>
+              </div>
+            </div>
+          </div>
+          -->
 
-	  <!-- BASEDIR -->
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEAT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Whether to set the rsync verbose option. This
+                  can produce large logs if enabled (possibly hundreds of
+                  megabytes of logs stored in the system database) but aids
+                  with debugging and verification.">
+                  Verbose
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input type="checkbox" ng-model="settings.Verbose" style="margin-top:8px;">
+            </div>
+          </div>
 
-	  <div class="form-group">
-	    <label for="base_dir" class="col-sm-3 control-label">
-		BASEDIR
-	    </label>
-	    <div class="col-sm-7">
-	      <input class="form-control" id="base_dir" ng-model="settings.BaseDir"
-	      placeholder="Path of directory containing backups." type="text">
-	    </div>
-	  </div>
+          <!-- RSYNC_OPTS -->
 
-	  <!-- KNOWNHOSTS -->
+          <div class="form-group">
+            <label for="rsync_opts" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="RSYNC_OPTS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify extra options for the rsync command.">
+                    RSYNC_OPTS
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="rsync_opts" ng-model="settings.RsyncOpts"
+              placeholder="Extra rsync options" type="text" ng-trim='false' required>
+            </div>
+          </div>
 
-	  <div class="form-group">
-	    <label for="known_hosts" class="col-sm-3 control-label">
-		KNOWNHOSTS
-	    </label>
-	    <div class="col-sm-7">
-	      <input class="form-control" id="known_hosts" ng-model="settings.KnownHosts"
-	      placeholder="Location of the ssh known_hosts file."
-	      ng-trim='false' type="text">
-	    </div>
-	  </div>
+          <!-- BASEDIR -->
 
-	  <!-- NUMPERIODS -->
+          <div class="form-group">
+            <label for="base_dir" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="BASEDIR"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the root of the directory tree containing backup
+                  folders.">
+                    BASEDIR
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="base_dir" ng-model="settings.BaseDir"
+              placeholder="Path of directory containing backups." type="text">
+            </div>
+          </div>
 
-	  <div class="form-group">
-	    <label for="num_periods" class="col-sm-3 control-label">
-		NUMPERIODS
-	    </label>
-	    <div class="col-sm-7">
-	      <input class="form-control" id="num_periods" ng-model="settings.NumPeriods"
-	      placeholder="Number of periods in a day."
-	      ng-trim='false' type="text">
-	    </div>
-	  </div>
+          <!-- KNOWNHOSTS -->
 
-	  <!-- TIMEOUT -->
+          <div class="form-group">
+            <label for="known_hosts" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="KNOWNHOSTS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the location of the known_hosts file or leave blank
+                  to use the default location, '~/.ssh/known_hosts'.">
+                    KNOWNHOSTS
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="known_hosts" ng-model="settings.KnownHosts"
+              placeholder="Location of the ssh known_hosts file."
+              ng-trim='false' type="text">
+            </div>
+          </div>
 
-	  <div class="form-group">
-	    <label for="timeout" class="col-sm-3 control-label">
-		TIMEOUT
-	    </label>
-	    <div class="col-sm-7">
-	      <input class="form-control" id="timeout" ng-model="settings.Timeout"
-	      placeholder="Timeout in seconds. 0 or empty to disable timeout."
-	      ng-trim='false' type="text">
-	    </div>
-	  </div>
+          <!-- NUMPERIODS -->
 
-	  <!-- VERBOSE -->
+          <div class="form-group">
+            <label for="num_periods" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="NUMPERIODS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the number of periods to split a day into for
+                  storing multiple snapshots per day.">
+                    NUMPERIODS
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="num_periods" ng-model="settings.NumPeriods"
+              placeholder="Number of periods in a day."
+              ng-trim='false' type="text">
+            </div>
+          </div>
 
-	  <div class="form-group">
-	    <div class="col-sm-offset-3 col-sm-7">
-	      <div class="checkbox">
-		<label>
-		  <input type="checkbox" ng-model="settings.Verbose"> Verbose
-		</label>
-	      </div>
-	    </div>
-	  </div>
+          <!-- TIMEOUT -->
 
-	</div>
+          <div class="form-group">
+            <label for="timeout" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="TIMEOUT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Specify the rsync idle timeout value.">
+                  TIMEOUT
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="timeout" ng-model="settings.Timeout"
+              placeholder="Timeout in seconds. 0 or empty to disable timeout."
+              ng-trim='false' type="text">
+            </div>
+          </div>
+
+          <!-- REPEAT/PAUSE -->
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEAT"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Whether to repeat the rsync immediately after it finishes.
+                  When combined with REPEATPRE and REPEATPOST this setting can produce
+                  consistent backups (for Linux servers) when enabled.">
+                  REPEAT
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input type="checkbox" ng-model="settings.Repeat" style="margin-top:8px;">
+            </div>
+          </div>
+
+          <!-- REPEAT PRE -->
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPRE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run before the second repeat rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                  REPEATPRE
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker id="repeatpre"
+                    required ng-model="settings.RepeatPre">
+                  <option value="">None</option>
+                  <option>pause_processes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- REPEAT POST -->
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="REPEATPOST"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="The script to run after the final repeated rsync is run.
+                  This option does nothing if REPEAT is unchecked.">
+                    REPEATPOST
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <div class="dropdown-close">
+                <!-- must use 'track by' as env.dc_obj is a copy of a dcs array item -->
+                <select selectpicker id="repeatpost"
+                    required ng-model="settings.RepeatPost">
+                  <option value="">None</option>
+                  <option>unpause_processes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SSH_KEYFILE -->
+
+          <div class="form-group">
+            <label for="sshkeyfile" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_KEYFILE"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  location of the ssh private key file on the backup server to
+                  be used to connect to remote servers.">
+                    SSH_KEYFILE
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input ng-disabled="!settings.Repeat" class="form-control" id="sshkeyfile"
+               ng-model="settings.SshKeyFile" placeholder="E.g. /home/bob/.ssh/id_rsa"
+               type="text" ng-trim='false' required>
+            </div>
+          </div>
+
+          <!-- SSH_UID -->
+
+          <div class="form-group">
+            <label for="sshuid" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_UID"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  login name of the user used to connect to remote servers over ssh.">
+                  SSH_UID
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshuid" ng-model="settings.SshUid"
+              placeholder="E.g. bob" type="text" ng-trim='false' required
+              ng-disabled="!settings.Repeat">
+            </div>
+          </div>
+
+          <!-- SSH_SUDO -->
+
+          <div class="form-group">
+            <label for="sshsudo" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_SUDO"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                  name of the sudo binary, usually sudo, to run commands as the root
+                  user, or leave blank to disable.">
+                    SSH_SUDO
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshsudo" ng-model="settings.SshSudo"
+              placeholder="E.g. sudo" type="text" ng-trim='false' required
+              ng-disabled="!settings.Repeat">
+            </div>
+          </div>
+
+          <!-- SSH_NOTPROCS -->
+
+          <div class="form-group">
+            <label for="sshnotprocs" class="col-sm-3 control-label">
+              <span class="mypopover"
+                popover-trigger="mouseenter mouseleave"
+                popover-title="SSH_NOTPROCS"
+                popover-placement="right"
+                popover-append-to-body="true"
+                uib-popover="Used for REPEATPRE and REPEATPOST scripts. Specify the
+                names of processes that should not be paused.">
+                  SSH_NOTPROCS
+              </span>
+            </label>
+            <div class="col-sm-7">
+              <input class="form-control" id="sshnotprocs" ng-model="settings.SshNotProcs"
+              placeholder="E.g. getty ssh login syslog sssd audit xinetd" type="text"
+              ng-trim='false' required ng-disabled="!settings.Repeat">
+            </div>
+          </div>
+
+          <p>&nbsp;</p>
+
+        </div>
       </div>
     </div>
 
@@ -484,61 +740,64 @@
         {{curtask.TaskDesc}}</h4>
 
       <button class="btn btn-sm btn-default" type="button"
-	ng-click="AddInclude()">
-	<i class="fa fa-plus-circle"> </i> Add Host</button>
+        ng-click="AddInclude()">
+        <i class="fa fa-plus-circle"> </i> Add Host</button>
 
       <button class="btn btn-sm btn-success pull-right" type="button"
-	ng-click="RunBackupSelected()" ng-disabled="btnbackupdisabled">
-	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
+        ng-click="RunBackupSelected()" ng-disabled="btnbackupdisabled">
+        <i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
 
       <style>
       td p {
-	  white-space: nowrap;
-	  margin-bottom: 2px;
+          white-space: nowrap;
+          margin-bottom: 2px;
       }
       </style>
 
       <div class="table-responsive" style="margin-top: 8px;">
-	<table class="table table-striped table-bordered"
-	  style="margin-bottom:4px;">
-	  <thead>
-	  <tr>
-	    <th style="text-align: center;">
-	      <input type="checkbox" ng-click="SelectAllNone()"
-	      ng-model="checkbox_allnone">
-	    </th>
-	    <th>Host</th>
-	    <th>Include</th>
-	    <th>Excludes</th>
-	    <th>Action</th>
-	  </tr>
-	  </thead>
-	  <tbody>
-	    <tr ng-repeat="item in includes | filter:includesfilter">
-	    <td style="text-align: center;">
-	      <input type="checkbox"
-	      ng-model="item.Selected"
-	      ng-change="Selected($index)">
-	    </td>
-	    <td>{{item.Host}}</td>
-	    <td>{{item.Base}}</td>
-	    <td style="width: 100%">
-	      <div ng-repeat="exclitem in item.Excludes">
-		<p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
+        <table class="table table-striped table-bordered"
+          style="margin-bottom:4px;">
+          <thead>
+          <tr>
+            <th style="text-align: center;">
+              <input type="checkbox" ng-click="SelectAllNone()"
+              ng-model="checkbox_allnone">
+            </th>
+            <th>Host</th>
+            <th>Include</th>
+            <th>Excludes</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in filteredItems = (includes | filter:includesfilter)">
+            <td style="text-align: center;">
+              <input type="checkbox"
+              ng-model="item.Selected"
+              ng-change="Selected($index)">
+            </td>
+            <td>{{item.Host}}</td>
+            <td>{{item.Base}}</td>
+            <td style="width: 100%"
+                in-view="$inview&&GetExcludeItem($index)">
+              <div ng-repeat="exclitem in item.Excludes">
+                <p><a href="" ng-click="DeleteExclude(exclitem.Path,exclitem.Id,item.Id)">
                   <i title="Delete Exclude" class="fa fa-minus red"></i></a>
-		  {{exclitem.Path}}</p>
-	      </div>
-	      <p><a title="Add Exclude" href="" ng-click="NewExclude(item.Id,$index)">
+                  {{exclitem.Path}}</p>
+              </div>
+              <p><a title="Add Exclude" href="" ng-click="NewExclude(item.Id,$index)">
                  <i class="fa fa-plus green"></i> New</a></p>
-	    </td>
-	    <td style="white-space: nowrap">
-	      <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">
-		<i class="fa fa-trash-o red" title="Delete Include"></i></a>
-	      <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
-		<i class="fa fa-edit" title="Edit Include"></i></a>
-	    </td>
-	  </tr>
-	</table>
+            </td>
+            <td style="white-space: nowrap">
+              <a href="#" ng-click="DeleteInclude(item.Host,item.Base,item.Id)">
+                <i class="fa fa-trash-o red" title="Delete Include"></i></a>
+              <a href="#" ng-click="EditInclude(item.Host,item.Base,item.Id)">
+                <i class="fa fa-edit" title="Edit Include"></i></a>
+            </td>
+            </tr>
+            {{copyToController(filteredItems)}}
+          </tbody>
+        </table>
       </div> <!-- table-responsive -->
       &nbsp;<br/>&nbsp;<br/>
     </div>
@@ -552,22 +811,22 @@
 
       <!--
       <button class="btn btn-sm btn-default" type="button"
-	ng-click="AddInclude()">
-	<i class="fa fa-plus-circle"> </i> Add Host</button>
+        ng-click="AddInclude()">
+        <i class="fa fa-plus-circle"> </i> Add Host</button>
 
       <button class="btn btn-sm btn-success pull-right" type="button"
-	ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
-	<i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
+        ng-click="RunBackup()" ng-disabled="btnbackupdisabled">
+        <i class="fa fa-play"> </i> &nbsp;Backup Selected Now</button>
       -->
 
       <button class="btn btn-sm btn-success pull-right" type="button"
-	ng-click="RunP2EC2()" ng-if="show_p2ec2_button" style="margin-top: -8px">
-	<i class="fa fa-send"> </i> &nbsp;Create Amazon EC2 Instance</button>
+        ng-click="RunP2EC2()" ng-if="show_p2ec2_button" style="margin-top: -8px">
+        <i class="fa fa-send"> </i> &nbsp;Create Amazon EC2 Instance</button>
 
       <style>
       td p {
-	  white-space: nowrap;
-	  margin-bottom: 2px;
+          white-space: nowrap;
+          margin-bottom: 2px;
       }
       </style>
 
@@ -575,32 +834,33 @@
         This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
 
       <div ng-if="showfiles_result" class="table-responsive" style="margin-top: 8px;">
-	<table class="table table-striped table-bordered"
-	  style="margin-bottom:4px;">
-	  <thead>
-	  <tr>
-	    <th>File System Root</th>
-	    <th>Type</th>
-	    <th>Avail</th>
-	    <th>Used</th>
-	    <th>Action</th>
-	  </tr>
-	  </thead>
-	  <tbody>
-	    <tr ng-repeat="item in zfslist | filter:zfslistfilter">
-	    <td><a href="#" title="View Files" ng-click="ViewSnapDirectory(item.name)">{{item.name}}</a></td>
-	    <td>{{item.type}}</td>
-	    <td>{{item.avail}}</td>
-	    <td>{{item.used}}</td>
-	    <td style="white-space: nowrap">
-	      <a ng-if="item.type == 'snapshot'"
+        <table class="table table-striped table-bordered"
+          style="margin-bottom:4px;">
+          <thead>
+          <tr>
+            <th>File System Root</th>
+            <th>Type</th>
+            <th>Avail</th>
+            <th>Used</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in zfslist | filter:zfslistfilter">
+            <td><a href="#" title="View Files" ng-click="ViewSnapDirectory(item.name)">{{item.name}}</a></td>
+            <td>{{item.type}}</td>
+            <td>{{item.avail}}</td>
+            <td>{{item.used}}</td>
+            <td style="white-space: nowrap">
+              <a ng-if="item.type == 'snapshot'"
                 href="#" ng-click="DeleteSnapshot(item.name)">
-		    <i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
-	      <a href="#" ng-click="ViewSnapDirectory(item.name)">
-		    <i class="fa fa-eye" title="View Files"></i></a>
-	    </td>
-	  </tr>
-	</table>
+                    <i class="fa fa-trash-o red" title="Delete Snapshot"></i></a>
+              <a href="#" ng-click="ViewSnapDirectory(item.name)">
+                    <i class="fa fa-eye" title="View Files"></i></a>
+            </td>
+            </tr>
+          </tbody>
+        </table>
       </div> <!-- table-responsive -->
 
       <p ng-if="showfiles_files_start">Getting the list of files.
@@ -608,53 +868,54 @@
 
       <div ng-if="showfiles_files">
 
-	<p ng-if="showfiles_files_in_progress">Getting the list of files.
-	  This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
-	<div ng-if="!showfiles_files_in_progress">
-	  <p ng-if="path_arr.length == 0">Path: {{snapshotdir}} /</p>
-	  <p ng-if="path_arr.length > 0">Path: {{snapshotdir}}
-	    <span ng-repeat="p in path_arr track by $index">
-	    / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
-	</div>
+        <p ng-if="showfiles_files_in_progress">Getting the list of files.
+          This might take a while<i class="ellipsis"><i>.</i><i>.</i><i>.</i></i></p>
+        <div ng-if="!showfiles_files_in_progress">
+          <p ng-if="path_arr.length == 0">Path: {{snapshotdir}} /</p>
+          <p ng-if="path_arr.length > 0">Path: {{snapshotdir}}
+            <span ng-repeat="p in path_arr track by $index">
+            / <a href="#" ng-click="ViewDirectory($index)">{{p}}</a></span></p>
+        </div>
 
-	<div class="table-responsive" style="margin-top: 8px;">
+        <div class="table-responsive" style="margin-top: 8px;">
 
-	  <table class="table table-striped table-bordered"
-	    style="margin-bottom:4px;">
-	    <thead>
-	    <tr>
-	      <th>Type/Perms</th>
-	      <th>Links</th>
-	      <th>Group</th>
-	      <th>User</th>
-	      <th>Size</th>
-	      <th>Date</th>
-	      <th>Time</th>
-	      <th style="width: 100%">File Name</th>
-	      <th>Action</th>
-	    </tr>
-	    </thead>
-	    <tbody>
-	      <tr ng-repeat="item in filelist | filter:filelistfilter">
-	      <td>{{item.perm}}
-	      <td>{{item.links}}</td>
-	      <td>{{item.group}}</td>
-	      <td>{{item.user}}</td>
-	      <td>{{item.size}}</td>
-	      <td>{{item.date}}</td>
-	      <td>{{item.time}}</td>
-	      <td>
-		<a ng-if="item.type == 'd'" href="#" title="Display Directory"
-		  ng-click="ViewDirectory(item.name)">{{item.name}}</a>
-		<span ng-if="item.type != 'd'">{{item.name}}</span>
-	      </td>
-	      <td style="white-space: nowrap">
-		<a href="#" ng-click="ViewDirectory(item.name)" ng-if="item.type == 'd'">
-		  <i class="fa fa-folder-open-o" title="Display Directory"></i></a>
-	      </td>
-	    </tr>
-	  </table>
-	</div> <!-- table-responsive -->
+          <table class="table table-striped table-bordered"
+            style="margin-bottom:4px;">
+            <thead>
+            <tr>
+              <th>Type/Perms</th>
+              <th>Links</th>
+              <th>Group</th>
+              <th>User</th>
+              <th>Size</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th style="width: 100%">File Name</th>
+              <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="item in filelist | filter:filelistfilter">
+              <td>{{item.perm}}
+              <td>{{item.links}}</td>
+              <td>{{item.group}}</td>
+              <td>{{item.user}}</td>
+              <td>{{item.size}}</td>
+              <td>{{item.date}}</td>
+              <td>{{item.time}}</td>
+              <td>
+                <a ng-if="item.type == 'd'" href="#" title="Display Directory"
+                  ng-click="ViewDirectory(item.name)">{{item.name}}</a>
+                <span ng-if="item.type != 'd'">{{item.name}}</span>
+              </td>
+              <td style="white-space: nowrap">
+                <a href="#" ng-click="ViewDirectory(item.name)" ng-if="item.type == 'd'">
+                  <i class="fa fa-folder-open-o" title="Display Directory"></i></a>
+              </td>
+              </tr>
+            </tbody>
+          </table>
+        </div> <!-- table-responsive -->
       </div>
 
       &nbsp;<br/>&nbsp;<br/>

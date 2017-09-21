@@ -27,16 +27,23 @@ import (
 
 // The format of the json sent by the client in a POST request
 type PostedData struct {
-	Id         int64
-	TaskId     int64
-	Protocol   string
-	Pre        string
-	RsyncOpts  string
-	BaseDir    string
-	KnownHosts string
-	NumPeriods int64
-	Timeout    int64
-	Verbose    bool
+	Id          int64
+	TaskId      int64
+	Protocol    string
+	Pre         string
+	Repeat      bool
+	RepeatPre   string
+	RepeatPost  string
+	RsyncOpts   string
+	BaseDir     string
+	KnownHosts  string
+	NumPeriods  int64
+	Timeout     int64
+	Verbose     bool
+	SshKeyFile  string
+	SshUid      string
+	SshSudo     string
+	SshNotProcs string
 }
 
 // Name of the sqlite3 database file
@@ -48,16 +55,23 @@ const DBFILE = "rsyncbackup.db"
 
 // The 'settings' table
 type Setting struct {
-	Id         int64
-	TaskId     int64
-	Protocol   string
-	Pre        string
-	RsyncOpts  string
-	BaseDir    string
-	KnownHosts string
-	NumPeriods int64
-	Timeout    int64
-	Verbose    bool
+	Id          int64
+	TaskId      int64
+	Protocol    string
+	Pre         string
+	Repeat      bool
+	RepeatPre   string
+	RepeatPost  string
+	RsyncOpts   string
+	BaseDir     string
+	KnownHosts  string
+	NumPeriods  int64
+	Timeout     int64
+	Verbose     bool
+	SshKeyFile  string
+	SshUid      string
+	SshSudo     string
+	SshNotProcs string
 }
 
 // Create tables and indexes in InitDB
@@ -92,7 +106,7 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 
 	// env_id is required, '?env_id=xxx'
 
@@ -143,12 +157,19 @@ func (t *Plugin) GetRequest(args *Args, response *[]byte) error {
 		u[i]["TaskId"] = settings[i].TaskId
 		u[i]["Protocol"] = settings[i].Protocol
 		u[i]["Pre"] = settings[i].Pre
+		u[i]["Repeat"] = settings[i].Repeat
+		u[i]["RepeatPre"] = settings[i].RepeatPre
+		u[i]["RepeatPost"] = settings[i].RepeatPost
 		u[i]["RsyncOpts"] = settings[i].RsyncOpts
 		u[i]["BaseDir"] = settings[i].BaseDir
 		u[i]["KnownHosts"] = settings[i].KnownHosts
 		u[i]["NumPeriods"] = settings[i].NumPeriods
 		u[i]["Timeout"] = settings[i].Timeout
 		u[i]["Verbose"] = settings[i].Verbose
+		u[i]["SshKeyFile"] = settings[i].SshKeyFile
+		u[i]["SshUid"] = settings[i].SshUid
+		u[i]["SshSudo"] = settings[i].SshSudo
+		u[i]["SshNotProcs"] = settings[i].SshNotProcs
 	}
 
 	// JSONify the query result
@@ -192,7 +213,7 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
@@ -236,19 +257,36 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
+	// Delete any existing entries
+
+	Lock()
+	if err = db.Delete(Setting{}, "task_id = ?", task_id_str).Error; err != nil {
+		Unlock()
+		ReturnError("Query error. "+err.Error(), response)
+		return nil
+	}
+	Unlock()
+
 	// The following Setting will be written to the db
 
 	setting := Setting{
-		Id:         0,
-		TaskId:     task_id_i64,
-		Protocol:   postdata.Protocol,
-		Pre:        postdata.Pre,
-		RsyncOpts:  postdata.RsyncOpts,
-		BaseDir:    postdata.BaseDir,
-		KnownHosts: postdata.KnownHosts,
-		NumPeriods: postdata.NumPeriods,
-		Timeout:    postdata.Timeout,
-		Verbose:    postdata.Verbose,
+		Id:          0,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		Repeat:      postdata.Repeat,
+		RepeatPre:   postdata.RepeatPre,
+		RepeatPost:  postdata.RepeatPost,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
+		Verbose:     postdata.Verbose,
+		SshKeyFile:  postdata.SshKeyFile,
+		SshUid:      postdata.SshUid,
+		SshSudo:     postdata.SshSudo,
+		SshNotProcs: postdata.SshNotProcs,
 	}
 
 	// Add the Setting entry
@@ -302,7 +340,7 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
@@ -365,16 +403,23 @@ func (t *Plugin) PutRequest(args *Args, response *[]byte) error {
 
 	// The following Setting will be written to the db
 	setting := Setting{
-		Id:         postdata.Id,
-		TaskId:     task_id_i64,
-		Protocol:   postdata.Protocol,
-		Pre:        postdata.Pre,
-		RsyncOpts:  postdata.RsyncOpts,
-		BaseDir:    postdata.BaseDir,
-		KnownHosts: postdata.KnownHosts,
-		NumPeriods: postdata.NumPeriods,
-		Timeout:    postdata.Timeout,
-		Verbose:    postdata.Verbose,
+		Id:          postdata.Id,
+		TaskId:      task_id_i64,
+		Protocol:    postdata.Protocol,
+		Pre:         postdata.Pre,
+		Repeat:      postdata.Repeat,
+		RepeatPre:   postdata.RepeatPre,
+		RepeatPost:  postdata.RepeatPost,
+		RsyncOpts:   postdata.RsyncOpts,
+		BaseDir:     postdata.BaseDir,
+		KnownHosts:  postdata.KnownHosts,
+		NumPeriods:  postdata.NumPeriods,
+		Timeout:     postdata.Timeout,
+		Verbose:     postdata.Verbose,
+		SshKeyFile:  postdata.SshKeyFile,
+		SshUid:      postdata.SshUid,
+		SshSudo:     postdata.SshSudo,
+		SshNotProcs: postdata.SshNotProcs,
 	}
 
 	// Update the Setting entry
@@ -416,7 +461,7 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		return nil
 	}
 
-	task_id_str := args.QueryString["env_id"][0]
+	task_id_str := args.QueryString["task_id"][0]
 	task_id_i64, _ := strconv.ParseInt(task_id_str, 10, 64)
 
 	// env_id is required, '?env_id=xxx'
@@ -474,6 +519,9 @@ func (t *Plugin) DeleteRequest(args *Args, response *[]byte) error {
 		TaskId:     task_id_i64,
 		Protocol:   "",
 		Pre:        "",
+		Repeat:     false,
+		RepeatPre:  "",
+		RepeatPost: "",
 		RsyncOpts:  "",
 		BaseDir:    "",
 		KnownHosts: "",

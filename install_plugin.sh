@@ -181,7 +181,29 @@ id=`grep Id $t | grep -Eo "[0-9]+"`
 
 if [[ -z $id ]]; then
 	curl -k -d '{
-		"Desc": "Get the size of a directory. Arg1 - full path to the directory.",
+		"Desc": "Delete a ZFS snapshot. Arg1 - name of the snapshot.",
+		"Name": "'"$script"'",
+		"Source": "'"$source"'"
+	}' $proto://$ipport/api/admin/$guid/scripts
+else
+	curl -k -X PUT -d '{ "Source": "'"$source"'" }' \
+	$proto://$ipport/api/admin/$guid/scripts/$id
+fi
+
+# --
+
+script="rsyncbackup-copyfiles.sh"
+
+source=`sed '1n;/^\s*#/d;/^$/d;' scripts/$script | base64 -w 0`
+
+curl -k $proto://$ipport/api/admin/$guid/scripts?name=$script | tee $t
+
+# Grab the id of the last insert
+id=`grep Id $t | grep -Eo "[0-9]+"`
+
+if [[ -z $id ]]; then
+	curl -k -d '{
+		"Desc": "Copies a directory to another server. Arg1 - destination server.",
 		"Name": "'"$script"'",
 		"Source": "'"$source"'"
 	}' $proto://$ipport/api/admin/$guid/scripts
@@ -195,4 +217,17 @@ fi
 # Delete the temporary file and delete the trap
 rm -f -- "$t"
 trap - EXIT
+
+# Now force all the golang plugins to compile...
+
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/settings"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/tasks"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/includes"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/excludes"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/backup"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/zfslist"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/remotecopy"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/ls"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/deletesnapshot"
+curl -k "$proto://$ipport/api/admin/$guid/rsyncbackup/dirsize"
 

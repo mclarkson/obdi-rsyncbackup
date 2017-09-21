@@ -35,6 +35,21 @@ DEFAULT_TIMEOUT=0
 #MAXFILES=5000
 DEFAULT_MAXFILES=0
 
+# Whether to do the rsync twice
+DEFAULT_REPEAT=0
+
+# For pause/unpause processes.
+# The file to write pids to.
+DEFAULT_PAUSEPROCS="/tmp/rsyncbackup_pauseprocs.$$"
+# The ssh private key to connect with.
+DEFAULT_SSH_KEYFILE=""
+# The user id to connect as.
+DEFAULT_SSH_UID=""
+# The sudo binary, if not connecting as root.
+#DEFAULT_SSH_SUDO="sudo"
+# Processes that should not be paused.
+DEFAULT_SSH_NOTPROCS="getty ssh login syslog sssd audit xinetd"
+    
 # ===========================================================================
 # Globals - Don't touch anything below
 # ===========================================================================
@@ -45,7 +60,7 @@ SNAPSHOTS=0
 VERBOSE=0
 
 CMDLINE="$@"
-VERSION="0.1.0"
+VERSION="0.1.1"
 ME=$0
 
 # ===========================================================================
@@ -57,7 +72,7 @@ main() {
 # ---------------------------------------------------------------------------
 # It all starts here
 
-    local i j src excl server spc="" failed_servers="" path=
+    local i j src excl server spc="" failed_servers="" path= last_status=
     local -i errors=0 exitval=0
 
     set -f # Disable pathname expansion
@@ -174,14 +189,95 @@ main() {
         echo "    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path"
         rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \
             $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path
-        [[ $? -ne 0 ]] && {
+        last_status=$?
+        if [[ $last_status -ne 0 ]]; then
             echo
             echo "ERROR: 'rsync' exited with non-zero status."
             echo
             errors+=1
             failed_servers+="$spc$server"
             spc=" "
-        }
+        else
+            [[ $REPEAT -eq 1 ]] && {
+
+                # REPEATPRE
+
+                set +f # Enable pathname expansion
+
+                while read i; do
+                    [[ -z $i ]] && continue
+                    [[ $i == '#'* ]] && continue
+                    set -- $i
+                    option="$1"
+                    shift
+                    args="$@"
+                    case $option in
+                        pause_processes) pause_processes $server $args
+                        ;;
+                    esac
+                done <<<"$REPEATPRE"
+
+                set -f # Disable pathname expansion
+
+                # Rsync again
+
+                echo
+                echo ".. REPEATING RSYNC .."
+                echo
+                echo "rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \\"
+                echo "    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path"
+                rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \
+                    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path
+                last_status=$?
+                [[ $last_status -ne 0 ]] && {
+                    echo
+                    echo "ERROR: 'rsync' exited with non-zero status."
+                    echo
+                    errors+=1
+                    failed_servers+="$spc$server"
+                    spc=" "
+                }
+
+                # Rsync again
+
+                echo
+                echo ".. REPEATING RSYNC .. AGAIN! .."
+                echo
+                echo "rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \\"
+                echo "    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path"
+                rsync $RSYNC_OPTS --timeout=$TIMEOUT --delete -a${v} \
+                    $EXCLOPTS $src$slash $SNAPDIR/$server$dir/$path
+                last_status=$?
+                [[ $last_status -ne 0 ]] && {
+                    echo
+                    echo "ERROR: 'rsync' exited with non-zero status."
+                    echo
+                    errors+=1
+                    failed_servers+="$spc$server"
+                    spc=" "
+                }
+
+                # REPEATPOST
+
+                set +f # Enable pathname expansion
+
+                while read i; do
+                    [[ -z $i ]] && continue
+                    [[ $i == '#'* ]] && continue
+                    set -- $i
+                    option="$1"
+                    shift
+                    args="$@"
+                    case $option in
+                        unpause_processes) unpause_processes $server $args
+                        ;;
+                    esac
+                done <<<"$REPEATPOST"
+
+                set -f # Disable pathname expansion
+
+            }
+        fi
         date
         echo "Log for server $server ENDS"
         echo
@@ -322,6 +418,12 @@ init_vars() {
     NUMPERIODS=${NUMPERIODS:-$DEFAULT_NUMPERIODS}
     TIMEOUT=${TIMEOUT:-$DEFAULT_TIMEOUT}
     MAXFILES=${MAXFILES:-$MAXFILES}
+    REPEAT=${REPEAT:-$DEFAULT_REPEAT}
+    PAUSEPROCS=${PAUSEPROCS:-$DEFAULT_PAUSEPROCS}
+    SSH_KEYFILE=${SSH_KEYFILE:-$DEFAULT_SSH_KEYFILE}
+    SSH_UID=${SSH_UID:-$DEFAULT_SSH_UID}
+    #SSH_SUDO=${SSH_SUDO:-$DEFAULT_SSH_SUDO}
+    SSH_NOTPROCS=${SSH_NOTPROCS:-$DEFAULT_SSH_NOTPROCS}
 }
 
 # ---------------------------------------------------------------------------
@@ -368,6 +470,70 @@ leave() {
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
+pause_processes() {
+# ---------------------------------------------------------------------------
+# Pause as many non-critical processes as possible for a consistent backup.
+# Do two backups - 1 unpaused then the next paused to limit downtime.
+
+    local server=$1 i= s= notprocs=
+
+    echo
+    echo ".. PAUSING PROCESSES .."
+    echo
+
+    if ! grep -qs $server $KNOWNHOSTS; then
+        # Add the server to known_hosts
+        echo "ssh-keyscan $server >> $KNOWNHOSTS"
+        ssh-keyscan $server >> $KNOWNHOSTS
+    fi
+
+    ssh_cmd $server savestdout \
+        "ps ax -Ho ppid,pid,args >$PAUSEPROCS"
+
+    for i in $SSH_NOTPROCS; do
+        notprocs+="${s}-e $i"
+        s=" "
+    done
+
+    ssh_cmd $server savestdout \
+        "grep -v $notprocs $PAUSEPROCS |
+            awk '{ print \$2; }' |
+            while read a; do $SSH_SUDO kill -STOP \$a; done"
+}
+
+# ---------------------------------------------------------------------------
+unpause_processes() {
+# ---------------------------------------------------------------------------
+# Pause as many non-critical processes as possible for a consistent backup.
+# Do two backups - 1 unpaused then the next paused to limit downtime.
+
+    local server=$1 i= s= notprocs=
+
+    echo
+    echo ".. UNPAUSING PROCESSES .."
+    echo
+
+    if ! grep -qs $server $KNOWNHOSTS; then
+        # Add the server to known_hosts
+        echo "ssh-keyscan $server >> $KNOWNHOSTS"
+        ssh-keyscan $server >> $KNOWNHOSTS
+    fi
+
+    for i in $SSH_NOTPROCS; do
+        notprocs+="${s}-e $i"
+        s=" "
+    done
+
+    ssh_cmd $server savestdout \
+        "grep -v $notprocs $PAUSEPROCS |
+            awk '{ print \$2; }' |
+            while read a; do $SSH_SUDO kill -CONT \$a; done"
+
+    ssh_cmd $server savestdout \
+        "rm -f $PAUSEPROCS"
+}
+
+# ---------------------------------------------------------------------------
 create_zfs_snapshot() {
 # ---------------------------------------------------------------------------
 # Recursively hardlink with 'cp -al'
@@ -391,7 +557,10 @@ create_zfs_snapshot() {
         exit 1
     }
     datestr="`date +%Y%m%d`.$curperiod"
-    zfs snapshot backup/servers-zfs@$datestr
+    [[ -d "$BASEDIR/.zfs/snapshot/$datestr" ]] || {
+        # Create snapshot if it doesn't exist already
+        zfs snapshot backup/servers-zfs@$datestr
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -525,6 +694,96 @@ binds_delete()
     }
 }
 
+# ---------------------------------------------------------------------------
+ssh_cmd() {
+# ---------------------------------------------------------------------------
+# Run a remote command and exit 1 on failure.
+# Arguments: arg1 - server to connect to
+#            arg2 - "savestdout" then save output in LAST_STDOUT
+#            arg3 - Command and arguments to run
+# Returns: Nothing
+
+    [[ $DEBUG -eq 1 ]] && echo "In ssh_cmd()"
+
+    local -i retval=0 t=0 n=0
+    local tmpout="/tmp/tmprsyncbaout_$$.out"
+    local tmperr="/tmp/tmprsyncbaerr_$$.out"
+    local tmpret="/tmp/tmprsyncbaret_$$.out"
+    local tmpechod="/tmp/tmprsyncbaechod_$$.out"
+
+    if [[ $2 == "savestdout" ]]; then
+        #ssh -i "$SSH_KEYFILE" "$1" "$3"
+        #LAST_STDOUT=$(ssh -i "$SSH_KEYFILE" "$1" "$3" 2>/dev/null)
+        trap : INT
+        echo "> Running remotely: $3"
+        ( ssh -tti "$SSH_KEYFILE" "$SSH_UID@$1" "$3" >$tmpout 2>$tmperr;
+          echo $? >$tmpret) & waiton=$!;
+        ( t=0;n=0
+          while true; do
+            [[ $n -eq 2 ]] && {
+                echo -n "> Waiting ";
+                touch $tmpechod;
+            }
+            [[ $n -gt 2 ]] && echo -n ".";
+            sleep $t;
+            t=1; n+=1
+          done 2>/dev/null;
+        ) & killme=$!
+        wait $waiton &>/dev/null
+        kill $killme &>/dev/null
+        wait $killme 2>/dev/null
+        [[ -e $tmpechod ]] && {
+            rm -f $tmpechod &>/dev/null
+            echo
+        }
+        retval=`cat $tmpret`
+        LAST_STDOUT=`cat $tmpout`
+        trap - INT
+    else
+        LAST_STDOUT=
+        #ssh -i "$SSH_KEYFILE" "$1" "$3" &>/dev/null
+        #retval=$?
+        trap : INT
+        echo "> Running remotely: $3"
+        ( ssh -tti "$SSH_KEYFILE" "$SSH_UID@$1" "$3" >$tmpout 2>$tmperr;
+          echo $? >$tmpret) & waiton=$!;
+        ( t=0;n=0
+          while true; do
+            [[ $n -eq 2 ]] && {
+                echo -n "> Waiting ";
+                touch $tmpechod;
+            }
+            [[ $n -gt 2 ]] && echo -n ".";
+            sleep $t;
+            t=1; n+=1
+          done 2>/dev/null;
+        ) & killme=$!
+        wait $waiton &>/dev/null
+        kill $killme &>/dev/null
+        wait $killme 2>/dev/null
+        [[ -e $tmpechod ]] && {
+            rm -f $tmpechod &>/dev/null
+            echo
+        }
+        retval=`cat $tmpret`
+        trap - INT
+    fi
+
+    [[ $retval -ne 0 ]] && {
+        echo
+        echo -e "${R}ERROR$N: Command failed on '$1'. Command was:"
+        echo
+        echo "  $3"
+        echo
+        echo "OUTPUT WAS:"
+        echo "  $LAST_STDOUT"
+        echo "  $(tail -1 $tmperr)"
+        echo
+        echo "Cannot continue. Aborting."
+        echo
+        exit 1
+    }
+}
 
 main "$@"
 

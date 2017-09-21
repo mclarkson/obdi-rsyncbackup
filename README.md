@@ -1,14 +1,15 @@
 # obdi-rsyncbackup
 
-Backup using rsync. Achieves compression and deduplication when using zfs.
+Back up servers using rsync. Achieves compression and deduplication when using zfs.
 
-BIG NOTE: This plugin does the rsync and snapshotting. More work is required
-to create a consistent backup for databases etc.
+# About
+
+[http://rsyncbackup.obdi.io/](http://rsyncbackup.obdi.io/)
 
 # Todo
 
-* PRE/POST start/stop/pause/unpause workflow for consistent backups.
-* Scheduling (use cron and rest api for now).
+* ~~PRE/POST start/stop/pause/unpause workflow for consistent backups.~~
+* ~~Scheduling (use cron and rest api for now).~~
 * ~~Delete snapshots~~ done
 * ~~Viewing and files and snapshots.~~ done
 
@@ -134,10 +135,12 @@ Lock down access using hosts.allow, hosts.deny and/or iptables.
 
 ## Example cron jobs
 
-*This example cron job will start a backup at 06.15 every day:*
+### Full system backup
+
+This example cron job will start a backup at 06.15 every day:
 
 ```
-15 06 * * * /home/a_user/cron/dobackup.sh
+15 06 * * * $HOME/cron/dobackup.sh
 ```
 
 The preceeding cron job will run the dobackup.sh script:
@@ -163,10 +166,12 @@ curl -k -X POST \
 
 Ensure dobackup.sh is executable with 'chmod +x dobackup.sh'.
 
-*This example cron job will delete snapshots over 30 days old at 06.00 every day:*
+### Delete snapshots more than 30 days old
+
+This example cron job will delete old snapshots at 03.00 every day:
 
 ```
-00 06 * * * /home/a_user/cron/pruntsnapshots.sh
+00 03 * * * $HOME/cron/prunesnapshots.sh
 ```
 
 The preceeding cron job will run the prunesnapshots.sh script:
@@ -176,16 +181,13 @@ The preceeding cron job will run the prunesnapshots.sh script:
 
 ipport="127.0.0.1:443"
 
-ENVID=1
-TASKID=1
-
 guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
   https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
 
 # Get list
 
 job=$(curl -sk \
-    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=$ENVID&task_id=$TASKID1" | \
+    "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&task_id=1" | \
     sed 's/.*"JobId":\([0-9]\+\).*/\1/' )
 
 # Wait for job to finish
@@ -196,7 +198,6 @@ while true; do
         break
     else
         echo "running"
-        sleep 5
     fi
 done
 
@@ -217,11 +218,13 @@ for i in $snaps; do [[ ${i%.[0-9]} < $amonthago ]] && delete="$delete $i"; done
 
 for SNAP in $delete ; do
     curl -k -X POST \
-        "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=$ENVID&task_id=$TASKID&snapshot=$SNAP"
+        "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&task_id=1&snapshot=$SNAP"
 done
 
 exit 0
 ```
+
+Ensure prunesnapshots.sh is executable with 'chmod +x prunesnapshots.sh'.
 
 ## Dev
 
@@ -229,7 +232,7 @@ rsyncbackup.db schema:
 
 ![](doc/DB_Schema.png?raw=true)
 
-Backup tasks:
+**Backup tasks:**
 
 ```
 # Log in
@@ -259,7 +262,7 @@ $ curl -k -X DELETE \
   https://$ipport/api/nomen.nescio/$guid/rsyncbackup/tasks/1?env_id=1
 ```
 
-Includes:
+**Includes:**
 
 ```
 # Log in
@@ -289,7 +292,7 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/includes/1?env_id=1"
 ```
 
-Excludes:
+**Excludes:**
 
 ```
 # Log in
@@ -319,7 +322,47 @@ $ curl -k -X DELETE \
   "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/excludes/1?env_id=1"
 ```
 
-Initiate a backup:
+**Settings:**
+
+```
+# Log in
+
+$ ipport="127.0.0.1:443"
+
+$ guid=`curl -ks -d '{"Login":"nomen.nescio","Password":"password"}' \
+  https://$ipport/api/login | grep -o "[a-z0-9][^\"]*"`
+
+# Create
+
+$ curl -k -d '{
+    "Id":0,
+    "Protocol":"rsyncd",
+    "Pre":"create_zfs_snapshot",
+    "RsyncOpts":"--sparse",
+    "BaseDir":"/backup/servers-zfs/",
+    "KnownHosts":"",
+    "NumPeriods":1,
+    "Timeout":0,
+    "Verbose":true
+  }' \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Read
+
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Update
+
+$ curl -k -d '{"Id":1,"RsyncOpts":"--sparse -z"}' -X PUT \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings?env_id=1&task_id=1"
+
+# Delete
+
+$ curl -k -X DELETE \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/settings/1?env_id=1&task_id=1"
+```
+
+**Initiate a backup:**
 
 ```
 # Log in
@@ -341,16 +384,50 @@ $ curl -k -X POST \
 
 ```
 
-List directory contents:
+**List zfs snapshots and files contents:**
+
+```
+$ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/zfslist?env_id=1&task_id=1"
+```
+
+**List directory contents:**
 
 ```
 $ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/ls?env_id=1&task_id=1&path=nosnap/server001"
 ```
 
-Calculate unpacked, undeduped directory size:
+**Delete snapshot:**
+
+```
+$ curl -k -X POST \
+  "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/deletesnapshot?env_id=1&task_id=1&snapshot=20160804.1"
+```
+
+**Calculate unpacked, undeduped directory size:**
 
 ```
 $ curl -k "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/dirsize?env_id=1&task_id=1&path=nosnap/server001"
+```
+
+**Copy backup directory to another server:**
+
+```
+Required URL parameters:
+
+    env_id    - Environment id.
+    task_id   - Backup task id.
+    path      - Backup path to copy from relative to BASEDIR.
+
+Optional URL parameters:
+    mountdev  - Device to mount, e.g /dev/sdb.
+    mountdir  - Directory to mount /dev/sdb on.
+    umountdir - "true" - will unmount at the end, otherwise it's left mounted.
+```
+
+Example:
+
+```
+$ curl -ks -X POST "https://$ipport/api/nomen.nescio/$guid/rsyncbackup/remotecopy?env_id=1&task_id=1&path=/nosnap/linuxserver001&mountdev=/dev/sdb&mountdir=/incoming/linuxserver001"
 ```
 
 See [obdi-nettools-repository](https://github.com/mclarkson/obdi-nettools-repository)

@@ -26,6 +26,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.envcapmaps = [];
   $scope.includes = [];
   $scope.settings = {};
+  $scope.settings.Repeat = false;
   $scope.excludes = [];
   $scope.env = {};
   $scope.zfslist = [];
@@ -36,6 +37,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   $scope.newitem.Text = "";
   $scope.checkbox_allnone = false;
   $scope.snapshotdir = "";
+  $scope.filteredItems_saved = [];
 
   // Pages
   $scope.mainview = true;
@@ -137,7 +139,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     // Alerting
     $rootScope.rsyncbackup.message = $scope.message;
     $rootScope.rsyncbackup.okmessage = $scope.okmessage;
-    $rootScope.rsyncbackup.login = $scope.login;
+    //$rootScope.rsyncbackup.login = $scope.login;
     $rootScope.rsyncbackup.message_jobid = $scope.message_jobid;
 
     // Hiding/Showing
@@ -201,7 +203,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     // Alerting
     $scope.message = $rootScope.rsyncbackup.message;
     $scope.okmessage = $rootScope.rsyncbackup.okmessage;
-    $scope.login = $rootScope.rsyncbackup.login;
+    //$scope.login = $rootScope.rsyncbackup.login;
     $scope.message_jobid = $rootScope.rsyncbackup.message_jobid;
 
     // Hiding/Showing
@@ -243,7 +245,6 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // ----------------------------------------------------------------------
   $scope.$on( "search", function( event, args ) {
   // ----------------------------------------------------------------------
-  // Not used since search is disabled
 
     if( $scope.editincludes ) {
       $scope.includesfilter = args;
@@ -252,6 +253,12 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
         $scope.includes[i].Selected = false;
       }
       ShouldRunBackupButtonBeEnabled();
+      if( args != "" ) {
+          $timeout( function() {
+          for( var i=0; i<$scope.filteredItems_saved.length; ++i ) {
+            $scope.GetExcludeById( $scope.filteredItems_saved[i].Id );
+          }}, 1000 );
+      }
     } else if( $scope.showfiles_result ) {
       $scope.zfslistfilter = args;
     } else if( $scope.showfiles_files ) {
@@ -260,6 +267,14 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       $scope.tasksfilter = args;
     } 
   });
+
+  // ----------------------------------------------------------------------
+  $scope.copyToController = function (data) {
+  // ----------------------------------------------------------------------
+  // I can't get to filteredItems unless I copy the data out first.
+
+    $scope.filteredItems_saved = data;
+  }
 
   // ----------------------------------------------------------------------
   var clearMessages = function() {
@@ -509,6 +524,16 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   }
 
   // ----------------------------------------------------------------------
+  $scope.GetExcludeItem = function( index ) {
+  // ----------------------------------------------------------------------
+
+     // Refresh the row
+     if( $scope.includes[index].Excludes.length == 0 ) {
+         $scope.GetExclude( index );
+     }
+  }
+
+  // ----------------------------------------------------------------------
   $scope.GetExcludes = function() {
   // ----------------------------------------------------------------------
 
@@ -582,6 +607,8 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     $scope.editsettings = true;
     $scope.editincludes = false;
     $scope.spacing = 0;
+    $scope.settings = {};
+    $scope.settings.Repeat = false;
 
     $http({
       method: 'GET',
@@ -599,15 +626,38 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       if( typeof($scope.settings) == 'undefined' ) {
-	$scope.settings = { Id:0,
-			    Protocol:"",
-			    Pre:"",
-			    RsyncOpts:"",
-			    BaseDir:"",
-			    KnownHosts:"",
-			    NumPeriods:1,
-			    Timeout:0 };
+        $scope.settings = { Id:0,
+                            Protocol:"",
+                            Pre:"",
+                            Repeat:true,
+                            RepeatPre:"",
+                            RepeatPost:"",
+                            RsyncOpts:"",
+                            BaseDir:"",
+                            KnownHosts:"",
+                            NumPeriods:1,
+                            SshKeyFile:"",
+                            SshUid:"",
+                            SshSudo:"",
+                            SshNotProcs:"",
+                            Timeout:0 };
       }
+
+      $scope.$watch('settings.Repeat', function( newval, oldval ) {
+        $timeout( function() {
+          if( newval == false ) {
+              $('#repeatpre').prop('disabled',true);
+              $('#repeatpost').prop('disabled',true);
+              $('#repeatpre').selectpicker('refresh');
+              $('#repeatpost').selectpicker('refresh');
+          } else {
+              $('#repeatpre').prop('disabled',false);
+              $('#repeatpost').prop('disabled',false);
+              $('#repeatpre').selectpicker('refresh');
+              $('#repeatpost').selectpicker('refresh');
+          }
+        },200);
+      });
 
       $scope.gettingsettings = false;
       $scope.gotsettings = true;
@@ -624,6 +674,62 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       } else if (status>=400) {
         clearMessages();
         $scope.message = "Server said: " + data['Error'];
+      } else if (status==0) {
+        // This is a guess really
+        $scope.login.errtext = "Could not connect to server.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else {
+        $scope.login.errtext = "Logged out due to an unknown error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      }
+    });
+  }
+
+  // ----------------------------------------------------------------------
+  $scope.ApplyInitialSettingsRest = function() {
+  // ----------------------------------------------------------------------
+
+    clearMessages();
+    
+    var method = "PUT";
+    if( $scope.settings.Id == 0 ) {
+      method = "POST";
+    }
+
+    $scope.settings.NumPeriods = parseInt($scope.settings.NumPeriods);
+    $scope.settings.Timeout = parseInt($scope.settings.Timeout);
+
+    $http({
+      method: method,
+      data: $scope.settings,
+      url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
+           + "/rsyncbackup/settings?env_id=" + $scope.env.Id
+           + "&task_id=" + $scope.curtask.Id
+           + '&time='+new Date().getTime().toString()
+    }).success( function(data, status, headers, config) {
+
+      try {
+        $scope.settings = $.parseJSON(data.Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+      }
+
+    }).error( function(data,status) {
+      if (status>=500) {
+        $scope.login.errtext = "Server error.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status==401) {
+        $scope.login.errtext = "Session expired.";
+        $scope.login.error = true;
+        $scope.login.pageurl = "login.html";
+      } else if (status>=400) {
+        clearMessages();
+        $scope.message = "Server said: " + data['Error'];
+        $scope.error = true;
       } else if (status==0) {
         // This is a guess really
         $scope.login.errtext = "Could not connect to server.";
@@ -752,7 +858,11 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       }
 
       // Backfill the excludes
-      $scope.GetExcludes();
+      //$scope.GetExcludes();
+
+      for( var i=0; i<$scope.includes.length; i++ ) {
+          $scope.includes[i].Excludes = [];
+      }
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -934,7 +1044,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
           method: 'GET',
           url: baseUrl + "/" + $scope.login.userid + "/" + $scope.login.guid
                + "/jobs?job_id=" + id
-							 + '&time='+new Date().getTime().toString()
+                                                         + '&time='+new Date().getTime().toString()
         }).success( function(data, status, headers, config) {
           job = data[0];
           if(job.Status == 0 || job.Status == 1 || job.Status == 4) {
@@ -994,6 +1104,9 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
 
     $scope.save();
     $rootScope.awsp2ec2_plugin = {};
+    $rootScope.awsp2ec2_plugin.envId = $scope.env.Id;
+    $rootScope.awsp2ec2_plugin.taskId = $scope.curtask.Id;
+    $rootScope.awsp2ec2_plugin.path = $scope.path;
     $rootScope.awsp2ec2_plugin.back = "plugins/rsyncbackup/html/view.html";
     $scope.setView( "plugins/aws-p2ec2/html/view.html" );
   }
@@ -1608,8 +1721,28 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
            + '&time='+new Date().getTime().toString()
     }).success( function(data, status, headers, config) {
 
-       // Refresh the table
-       $scope.ShowTasks();
+      // Save the result
+      try {
+        $scope.AddTaskResult = $.parseJSON(data.Text);
+      } catch (e) {
+        clearMessages();
+        $scope.message = "Error: " + e;
+      }
+
+      // Initialise the Settings
+      $scope.settings = {};
+      $scope.settings.Id = 0;
+      $scope.settings.NumPeriods = 1;
+      $scope.settings.Repeat = false;
+      $scope.settings.Timeout = 0;
+
+      $scope.curtask = {};
+      $scope.curtask.Id = $scope.AddTaskResult.Id;
+
+      $scope.ApplyInitialSettingsRest();
+
+      // Refresh the table
+      $scope.ShowTasks();
 
     }).error( function(data,status) {
       if (status>=500) {
@@ -1668,6 +1801,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
       newitem.TaskDesc = result.TaskDesc;
       newitem.CapTag = result.CapTag;
 
+      // Create the task
       return $scope.AddTaskRest(newitem);
     });
 
@@ -1960,6 +2094,19 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
   // Excludes
 
   // ----------------------------------------------------------------------
+  $scope.GetExcludeById = function(id) {
+  // ----------------------------------------------------------------------
+
+      // Find the index in includes array
+      for( var i=0; i<$scope.includes.length; ++i ) {
+          if( $scope.includes[i].Id == id ) {
+              $scope.GetExclude( i );
+              break;
+          }
+      }
+  }
+
+  // ----------------------------------------------------------------------
   $scope.GetExclude = function(i) {
   // ----------------------------------------------------------------------
   // Just update one
@@ -2034,7 +2181,7 @@ mgrApp.controller("rsyncBackup", function ($scope,$http,$uibModal,$log,
     }).success( function(data, status, headers, config) {
 
        // Refresh the row
-       $scope.GetExclude( index );
+       $scope.GetExcludeById( newitem.Id );
 
     }).error( function(data,status) {
       if (status>=500) {

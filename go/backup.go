@@ -56,16 +56,23 @@ type Exclude struct {
 
 // The 'settings' table
 type Setting struct {
-	Id         int64
-	TaskId     int64
-	Protocol   string
-	Pre        string
-	RsyncOpts  string
-	BaseDir    string
-	KnownHosts string
-	NumPeriods int64
-	Timeout    int64
-	Verbose    bool
+	Id          int64
+	TaskId      int64
+	Protocol    string
+	Pre         string
+	Repeat      bool
+	RepeatPre   string
+	RepeatPost  string
+	RsyncOpts   string
+	BaseDir     string
+	KnownHosts  string
+	NumPeriods  int64
+	Timeout     int64
+	Verbose     bool
+	SshKeyFile  string
+	SshUid      string
+	SshSudo     string
+	SshNotProcs string
 }
 
 // Create tables and indexes in InitDB
@@ -192,6 +199,34 @@ func (t *Plugin) PostRequest(args *Args, response *[]byte) error {
 	}
 	if len(setting.KnownHosts) > 0 {
 		env_vars_str += space + "KNOWNHOSTS=" + `"` + setting.KnownHosts + `"`
+		space = " "
+	}
+	if setting.Repeat == true {
+		env_vars_str += space + "REPEAT=1"
+		space = " "
+	}
+	if len(setting.RepeatPre) > 0 {
+		env_vars_str += space + "REPEATPRE=" + setting.RepeatPre
+		space = " "
+	}
+	if len(setting.RepeatPost) > 0 {
+		env_vars_str += space + "REPEATPOST=" + setting.RepeatPost
+		space = " "
+	}
+	if len(setting.SshKeyFile) > 0 {
+		env_vars_str += space + "SSH_KEYFILE=" + setting.SshKeyFile
+		space = " "
+	}
+	if len(setting.SshUid) > 0 {
+		env_vars_str += space + "SSH_UID=" + setting.SshUid
+		space = " "
+	}
+	if len(setting.SshSudo) > 0 {
+		env_vars_str += space + "SSH_SUDO=" + setting.SshSudo
+		space = " "
+	}
+	if len(setting.SshNotProcs) > 0 {
+		env_vars_str += space + "SSH_NOTPROCS=" + `"` + setting.SshNotProcs + `"`
 		space = " "
 	}
 	env_vars_str += space + "NUMPERIODS=" + strconv.FormatInt(setting.NumPeriods, 10)
